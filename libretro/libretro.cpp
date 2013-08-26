@@ -270,6 +270,7 @@ std::string lynx_romfilename()
     environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &dir);
 
     std::string str(dir);
+    str += SLASH_STR;
     str += ROM_FILE;
 
     std::ifstream ifile(str.c_str(), std::ifstream::in);

@@ -6,3 +6,9 @@
 
 #define HANDYVER    "0.95"
 #define ROM_FILE    "lynxboot.img"
+
+#if defined(_WIN32)
+#define SLASH_STR  '\\'
+#else
+#define SLASH_STR  '/'
+#endif
