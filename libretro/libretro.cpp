@@ -34,6 +34,7 @@ static const map btn_map[] = {
 void lynx_input();
 void lynx_initialize_system(const char*);
 void lynx_initialize_sound();
+void gettempfilename(char *dest);
 
 unsigned retro_api_version()
 {
@@ -151,7 +152,9 @@ size_t retro_serialize_size(void)
         return 0;
     }
 
-	return lynx->MemoryContextSave(NULL);
+    char tempfilename[1024];
+    gettempfilename(tempfilename);
+	return lynx->MemoryContextSave(tempfilename, NULL);
 }
 
 bool retro_serialize(void *data, size_t size)
@@ -161,7 +164,9 @@ bool retro_serialize(void *data, size_t size)
         return false;
     }
 
-	return lynx->MemoryContextSave((char*)data) > 0;
+    char tempfilename[1024];
+    gettempfilename(tempfilename);
+	return lynx->MemoryContextSave(tempfilename, (char*)data) > 0;
 }
 
 bool retro_unserialize(const void *data, size_t size)
@@ -264,23 +269,22 @@ UBYTE* lynx_display_callback(ULONG objref)
     return (UBYTE*)framebuffer;
 }
 
-std::string lynx_romfilename()
+bool lynx_romfilename(char *dest)
 {
     const char *dir = 0;
     environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &dir);
 
-    std::string str(dir);
-    str += SLASH_STR;
-    str += ROM_FILE;
+    sprintf(dest, "%s%c%s", dir, SLASH_STR, ROM_FILE);
 
-    std::ifstream ifile(str.c_str(), std::ifstream::in);
+    std::ifstream ifile(dest, std::ifstream::in);
 
     if(!ifile)
     {
-        fprintf(stderr, "[handy]rom not found %s\n", str.c_str());
+        fprintf(stderr, "[handy]rom not found %s\n", dest);
+        return false;
     }
 
-    return str;
+    return true;
 }
 
 void lynx_initialize_sound()
@@ -296,9 +300,21 @@ void lynx_initialize_system(const char* gamepath)
         delete(lynx);
     }
 
-    lynx = new CSystem(gamepath, lynx_romfilename().c_str());
+    char romfilename[1024];
+
+    if(!lynx_romfilename(romfilename))
+    {
+        return;
+    }
+
+    lynx = new CSystem(gamepath, romfilename);
 
     lynx->DisplaySetAttributes(MIKIE_NO_ROTATE, MIKIE_PIXEL_FORMAT_16BPP_565, 320, lynx_display_callback, (ULONG)0);
 }
 
-
+void gettempfilename(char *dest)
+{
+    const char *dir = 0;
+    environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &dir);
+    sprintf(dest, "%s%chandy.tmp", dir, SLASH_STR);
+}

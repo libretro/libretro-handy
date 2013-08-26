@@ -369,7 +369,7 @@ void CSystem::Reset(void)
 	}
 }
 
-bool CSystem::ContextSave(char *context)
+bool CSystem::ContextSave(const char *context)
 {
 	FILE *fp;
 	bool status=1;
@@ -421,12 +421,9 @@ bool CSystem::ContextSave(char *context)
 	return status;
 }
 
-size_t	CSystem::MemoryContextSave(char *context)
+size_t	CSystem::MemoryContextSave(const char* tmpfilename, char *context)
 {
-    char tmpfilename[L_tmpnam];
     size_t ret = 0;
-
-    tmpnam(tmpfilename);
 
     if(!ContextSave(tmpfilename))
     {

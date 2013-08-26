@@ -189,9 +189,9 @@ class CSystem : public CSystemBase
 
 	public:
 		void	Reset(void);
-		size_t	MemoryContextSave(char *context);
+		size_t	MemoryContextSave(const char* tmpfilename, char *context);
 		bool	MemoryContextLoad(const char *context, size_t size);
-		bool	ContextSave(char *context);
+		bool	ContextSave(const char *context);
 		bool	ContextLoad(const char *context);
 		bool	IsZip(char *filename);
 
