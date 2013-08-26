@@ -1,67 +1,81 @@
+TARGET_NAME := handy
 
-ifeq ($(platform),osx)
+ifeq ($(platform),)
+platform = unix
+ifeq ($(shell uname -a),)
+   platform = win
+else ifneq ($(findstring MINGW,$(shell uname -a)),)
+   platform = win
+else ifneq ($(findstring Darwin,$(shell uname -a)),)
+   platform = osx
+else ifneq ($(findstring win,$(shell uname -a)),)
+   platform = win
+endif
+endif
+
+LIBRETRO_DIR := libretro
+CORE_DIR := src
+
+# system platform
+system_platform = unix
+ifeq ($(shell uname -a),)
+EXE_EXT = .exe
+   system_platform = win
+else ifneq ($(findstring Darwin,$(shell uname -a)),)
+   system_platform = osx
+else ifneq ($(findstring MINGW,$(shell uname -a)),)
+   system_platform = win
+endif
+
+
+ifeq ($(platform), unix)
    fpic := -fPIC
-   TARGET := libretro.dylib
-else ifeq ($(platform),win)
+   TARGET := $(TARGET_NAME)_libretro.so
+   SHARED := -shared -Wl,-version-script=$(LIBRETRO_DIR)/link.T -Wl,-no-undefined
+else ifeq ($(platform),osx)
+   fpic := -fPIC
+   TARGET := $(ARGET_NAME)_libretro.dylib
+	SHARED := -dynamiclib
+else
    fpic :=
-   TARGET := libretro.dll
+   TARGET := $(TARGET_NAME)_libretro.dll
    CC = gcc
    CXX = g++
-else
-   fpic := -fPIC
-   TARGET := libretro.so
+   SHARED := -shared -static-libgcc -static-libstdc++ -Wl,-no-undefined -Wl,-version-script=$(LIBRETRO_DIR)/link.T
 endif
 
-lynx = lynx
-retro = libretro
+CXXSRCS := lynx/Cart.cpp lynx/Memmap.cpp lynx/Mikie.cpp lynx/Ram.cpp lynx/Rom.cpp lynx/Susie.cpp lynx/System.cpp libretro/libretro.cpp
 
-handy_objs = Cart Memmap Mikie Ram Rom Susie System
-retro_objs = libretro
-libs = -lz
+CXXOBJ := $(CXXSRCS:.cpp=.o)
 
-objects += $(handy_objs) $(retro_objs)
+OBJS := $(CXXOBJ)
 
-liblynx_objects := $(patsubst %,obj/%.o,$(objects))
+LIBS = -lz
 
-includes = -I$(lynx)/ -I$(retro)/
+INCDIRS = -Ilynx/ -Ilibretro/
 
-c := $(CC) -std=gnu99
-cpp := $(CXX) -std=gnu++0x
-flags := -O3 -fomit-frame-pointer -fno-tree-vectorize -I. $(fpic) $(libs) $(includes)
+FLAGS := -O3 -fomit-frame-pointer -fno-tree-vectorize -I. $(fpic) $(libs) $(includes)
+CXXFLAGS += $(FLAGS)
+CFLAGS += $(FLAGS)
 
-compile = \
-  $(strip \
-    $(if $(filter %.c,$<), \
-      $(c) $(flags) $1 -c $< -o $@, \
-      $(if $(filter %.cpp,$<), \
-        $(cpp) $(flags) $1 -c $< -o $@ \
-      ) \
-    ) \
-  )
-
-obj/Cart.o: $(lynx)/Cart.cpp
-obj/Memmap.o: $(lynx)/Memmap.cpp
-obj/Mikie.o: $(lynx)/Mikie.cpp
-obj/Ram.o: $(lynx)/Ram.cpp
-obj/Rom.o: $(lynx)/Rom.cpp
-obj/Susie.o: $(lynx)/Susie.cpp
-obj/System.o: $(lynx)/System.cpp
-obj/libretro.o: $(retro)/libretro.cpp
-
-%.o: $<; $(call compile)
-
-$(TARGET): $(liblynx_objects)
-ifeq ($(platform),x)
-	$(cpp) -o $@ -shared $(liblynx_objects) -Wl,--no-undefined -Wl,--version-script=link.T $(libs)
-else ifeq ($(platform),win)
-	$(cpp) -o $@ -shared $(liblynx_objects) -Wl,--no-undefined -static-libgcc -static-libstdc++ -Wl,--version-script=link.T $(libs)
+$(TARGET): $(OBJS)
+ifeq ((STATIC_LINKING), 1)
+	$(AR) rcs $@ $(OBJS)
 else
-	$(cpp) -o $@ -shared $(liblynx_objects) -Wl,--no-undefined $(libs)
+	$(CXX) -o $@ $(SHARED) $(OBJS) $(LDFLAGS) $(LIBS)
 endif
 
-all: $(TARGET)
+%.o: %.cpp
+	$(CXX) -c -o $@ $< $(CXXFLAGS) $(INCDIRS)
 
-.PHONY: clean all
+%.o: %.c
+	$(CC) -c -o $@ $< $(CFLAGS) $(INCDIRS)
+
+clean-objs:
+	rm -f $(OBJS)
 
 clean:
-	rm -f $(liblynx_objects) $(TARGET)
+	rm -f $(OBJS)
+	rm -f $(TARGET)
+
+.PHONY: clean clean-objs all
