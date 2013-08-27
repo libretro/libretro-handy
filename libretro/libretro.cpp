@@ -13,6 +13,9 @@ static CSystem *lynx = NULL;
 static unsigned char *snd_buffer8;
 static unsigned short soundBuffer[4096 * 8];
 
+static uint8_t lynx_width = 160;
+static uint8_t lynx_height = 102;
+
 static uint16_t framebuffer[160*102*2];
 
 static bool newFrame = false;
@@ -20,7 +23,7 @@ static bool initialized = false;
 
 struct map { unsigned retro; unsigned lynx; };
 
-static const map btn_map[] = {
+static map btn_map_no_rot[] = {
   { RETRO_DEVICE_ID_JOYPAD_A, BUTTON_A },
   { RETRO_DEVICE_ID_JOYPAD_B, BUTTON_B },
   { RETRO_DEVICE_ID_JOYPAD_RIGHT, BUTTON_RIGHT },
@@ -30,6 +33,30 @@ static const map btn_map[] = {
   { RETRO_DEVICE_ID_JOYPAD_L, BUTTON_OPT1 },
   { RETRO_DEVICE_ID_JOYPAD_R, BUTTON_OPT2 },
 };
+
+static map btn_map_rot_240[] = {
+  { RETRO_DEVICE_ID_JOYPAD_A, BUTTON_A },
+  { RETRO_DEVICE_ID_JOYPAD_B, BUTTON_B },
+  { RETRO_DEVICE_ID_JOYPAD_RIGHT, BUTTON_UP },
+  { RETRO_DEVICE_ID_JOYPAD_LEFT, BUTTON_DOWN },
+  { RETRO_DEVICE_ID_JOYPAD_UP, BUTTON_LEFT },
+  { RETRO_DEVICE_ID_JOYPAD_DOWN, BUTTON_RIGHT },
+  { RETRO_DEVICE_ID_JOYPAD_L, BUTTON_OPT1 },
+  { RETRO_DEVICE_ID_JOYPAD_R, BUTTON_OPT2 },
+};
+
+static map btn_map_rot_90[] = {
+  { RETRO_DEVICE_ID_JOYPAD_A, BUTTON_A },
+  { RETRO_DEVICE_ID_JOYPAD_B, BUTTON_B },
+  { RETRO_DEVICE_ID_JOYPAD_RIGHT, BUTTON_DOWN },
+  { RETRO_DEVICE_ID_JOYPAD_LEFT, BUTTON_UP },
+  { RETRO_DEVICE_ID_JOYPAD_UP, BUTTON_RIGHT },
+  { RETRO_DEVICE_ID_JOYPAD_DOWN, BUTTON_LEFT },
+  { RETRO_DEVICE_ID_JOYPAD_L, BUTTON_OPT1 },
+  { RETRO_DEVICE_ID_JOYPAD_R, BUTTON_OPT2 },
+};
+
+static map* btn_map;
 
 void lynx_input();
 void lynx_initialize_system(const char*);
@@ -43,6 +70,8 @@ unsigned retro_api_version()
 
 void retro_init(void)
 {
+    btn_map = btn_map_no_rot;
+
     enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
 
     if(!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
@@ -72,6 +101,13 @@ void retro_deinit(void)
 
 void retro_set_environment(retro_environment_t cb)
 {
+   static const struct retro_variable vars[] = {
+      { "handy_rot", "Display rotation; None|90|240" },
+      { NULL, NULL },
+   };
+
+   cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void*)vars);
+
    environ_cb = cb;
 }
 
@@ -103,7 +139,7 @@ void retro_set_video_refresh(retro_video_refresh_t cb)
 unsigned get_lynx_input()
 {
     unsigned res = 0;
-    for (unsigned i = 0; i < sizeof(btn_map) / sizeof(map); i++)
+    for (unsigned i = 0; i < sizeof(btn_map_no_rot) / sizeof(map); ++i)
     {
         res |= input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, btn_map[i].retro) ? btn_map[i].lynx : 0;
     }
@@ -126,7 +162,7 @@ void retro_get_system_info(struct retro_system_info *info)
 
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
-	struct retro_game_geometry geom = { 160, 102, 160, 102 };
+	struct retro_game_geometry geom = { lynx_width, lynx_height, lynx_width, lynx_height };
 	struct retro_system_timing timing = { 75.0, 44100.0 };
 
 	info->geometry = geom;
@@ -256,7 +292,7 @@ UBYTE* lynx_display_callback(ULONG objref)
         return (UBYTE*)framebuffer;
     }
 
-    video_cb(framebuffer, 160, 102, 160*2);
+    video_cb(framebuffer, lynx_width, lynx_height, 160*2);
 
     if(gAudioBufferPointer > 0)
     {
@@ -309,7 +345,33 @@ void lynx_initialize_system(const char* gamepath)
 
     lynx = new CSystem(gamepath, romfilename);
 
-    lynx->DisplaySetAttributes(MIKIE_NO_ROTATE, MIKIE_PIXEL_FORMAT_16BPP_565, 320, lynx_display_callback, (ULONG)0);
+    ULONG rot = MIKIE_NO_ROTATE;
+    lynx_width = 160;
+    lynx_height = 102;
+    btn_map = btn_map_no_rot;
+
+    struct retro_variable var = {0};
+    var.key = "handy_rot";
+
+    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+    {
+      if (strcmp(var.value, "90") == 0)
+      {
+         rot = MIKIE_ROTATE_R; 
+	 lynx_width = 102;
+    	 lynx_height = 160;
+	 btn_map = btn_map_rot_90;
+      }
+      else if (strcmp(var.value, "240") == 0)
+      {
+         rot = MIKIE_ROTATE_L;
+	 lynx_width = 102;
+    	 lynx_height = 160;
+	 btn_map = btn_map_rot_240;
+      }
+    }
+
+    lynx->DisplaySetAttributes(rot, MIKIE_PIXEL_FORMAT_16BPP_565, 320, lynx_display_callback, (ULONG)0);
 }
 
 void gettempfilename(char *dest)
