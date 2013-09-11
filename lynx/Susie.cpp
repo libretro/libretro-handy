@@ -1468,7 +1468,7 @@ inline ULONG CSusie::LineGetBits(ULONG bits)
 
 	// Only return data IF there is enought bits left in the packet
 
-	if(mLinePacketBitsLeft<bits) return 0;
+	if(mLinePacketBitsLeft<=bits) return 0;
 
 	// Make sure shift reg has enough bits to fulfil the request
 
