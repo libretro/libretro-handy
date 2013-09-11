@@ -322,6 +322,57 @@ bool CSystem::IsZip(char *filename)
 	return FALSE;
 }
 
+void CSystem::HLE_BIOS_init()
+{
+	fprintf(stderr, "[handy] HLE_BIOS_Init\r\n");
+
+	unsigned char buffer[8];
+
+	int blocksize = (1 + mCart->mMaskBank0) / 256;
+
+	int blockcount = 0x100 - mCart->Peek(0);
+	int start = 1 + blockcount * 51;
+
+	int loadaddr;
+
+	if(blockcount == 1) // cc65
+	{
+		for (int i = 0; i < 0x97; ++i) //2nd loader to 0xFB68
+		{
+			Poke_CPU(0xFB68 + i,  mCart->Peek(start + i));
+		}
+
+		loadaddr = 0xFB68;
+	}
+	else // epyx
+	{
+		blockcount = 0x100 - mCart->Peek(start);
+		start += 1 + blockcount * 51;
+
+		int dir_idx = 1;
+
+		for (int i = 0; i < 8; ++i) //exec directory
+		{
+			buffer[i] = mCart->Peek(start + (dir_idx * 8) + i);
+		}
+
+		int offset = ((int)buffer[0]) * blocksize + (((int)buffer[2]) << 8) + buffer[1];
+
+		loadaddr = (((int)buffer[5]) << 8) + buffer[4];
+		int filesize = (((int)buffer[7]) << 8) + buffer[6];
+
+		for (int i = 0; i < filesize; ++i) 
+		{
+			Poke_CPU(i + loadaddr,  mCart->Peek(offset + i));
+		}	
+	}	
+
+	C6502_REGS regs;
+	mCpu->GetRegs(regs);
+	regs.PC=(UWORD)loadaddr;
+	mCpu->SetRegs(regs);
+}
+
 void CSystem::Reset(void)
 {
 	gSystemCycleCount=0;
@@ -355,6 +406,11 @@ void CSystem::Reset(void)
 	mMikie->Reset();
 	mSusie->Reset();
 	mCpu->Reset();
+
+	if(!mRom->mValid)
+	{
+		HLE_BIOS_init();
+	}
 
 	// Homebrew hashup
 
