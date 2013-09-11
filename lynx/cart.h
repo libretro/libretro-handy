@@ -138,11 +138,12 @@ class CCart : public CLynxBase
 		ULONG	mWriteEnableBank0;
 		ULONG	mWriteEnableBank1;
 		ULONG	mCartRAM;
+		ULONG	mMaskBank0;
+		ULONG	mMaskBank1;
 
 	private:
 		EMMODE	mBank;
-		ULONG	mMaskBank0;
-		ULONG	mMaskBank1;
+
 		UBYTE	*mCartBank0;
 		UBYTE	*mCartBank1;
 		char	mName[33];

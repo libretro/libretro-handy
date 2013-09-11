@@ -57,7 +57,8 @@ extern CErrorInterface *gError;
 
 CRom::CRom(const char *romfile)
 {
-	mWriteEnable=FALSE;
+	mWriteEnable = FALSE;
+	mValid = FALSE;
 	strncpy(mFileName,romfile,1024);
 	Reset();
 
@@ -71,6 +72,7 @@ CRom::CRom(const char *romfile)
 	if((fp=fopen(mFileName,"rb"))==NULL)
 	{
 		fprintf(stderr, "Invalid ROM.\n");
+		return;
 	}
 
 	// Read in the 512 bytes
@@ -78,6 +80,8 @@ CRom::CRom(const char *romfile)
 	if(fread(mRomData,sizeof(char),ROM_SIZE,fp)!=ROM_SIZE)
 	{
 		fprintf(stderr, "Invalid ROM.\n");
+		fclose(fp);
+		return;
 	}
 
 	fclose(fp);
@@ -100,10 +104,12 @@ CRom::CRom(const char *romfile)
 				gError->Warning("FAKE LYNXBOOT.IMG - CARTRIDGES WILL NOT WORK\n\n"
 								"PLEASE READ THE ACCOMPANYING README.TXT FILE\n\n"
 								"(Do not email the author asking for this image)\n");
-				break;
+				return;
 			}
 		}
 	}
+
+	mValid = TRUE;
 }
 
 void CRom::Reset(void)
