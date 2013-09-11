@@ -188,6 +188,7 @@ class CSystem : public CSystemBase
 		~CSystem();
 
 	public:
+		void 	HLE_BIOS_init();
 		void	Reset(void);
 		size_t	MemoryContextSave(const char* tmpfilename, char *context);
 		bool	MemoryContextLoad(const char *context, size_t size);

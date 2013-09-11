@@ -338,10 +338,7 @@ void lynx_initialize_system(const char* gamepath)
 
     char romfilename[1024];
 
-    if(!lynx_romfilename(romfilename))
-    {
-        return;
-    }
+    lynx_romfilename(romfilename);
 
     lynx = new CSystem(gamepath, romfilename);
 
