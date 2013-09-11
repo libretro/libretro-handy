@@ -174,7 +174,7 @@ void CSusie::Reset(void)
 }
 
 bool CSusie::ContextSave(FILE *fp)
-{	
+{
 	TRACE_SUSIE0("ContextSave()");
 
 	if(!fprintf(fp,"CSusie::ContextSave")) return 0;
@@ -365,7 +365,7 @@ void CSusie::DoMathMultiply(void)
 	mSPRSYS_Mathbit=FALSE;
 
 	// Multiplies with out sign or accumulate take 44 ticks to complete.
-	// Multiplies with sign and accumulate take 54 ticks to complete. 
+	// Multiplies with sign and accumulate take 54 ticks to complete.
 	//
 	//    AB                                    EFGH
 	//  * CD                                  /   NP
@@ -483,11 +483,12 @@ ULONG CSusie::PaintSprites(void)
 	}
 
 	cycles_used=0;
-	everonscreen=0;
 
 	do
 	{
 		TRACE_SUSIE1("PaintSprites() ************ Rendering Sprite %03d ************",sprcount);
+
+        everonscreen=0;
 
 		// Step 1 load up the SCB params into Susie
 
@@ -524,7 +525,7 @@ ULONG CSusie::PaintSprites(void)
 		mSPRCTL1_SkipSprite=data&0x0004;
 		mSPRCTL1_ReloadPalette=data&0x0008;
 		mSPRCTL1_ReloadDepth=(data&0x0030)>>4;
-		mSPRCTL1_Sizing=data&0x0040;	
+		mSPRCTL1_Sizing=data&0x0040;
 		mSPRCTL1_Literal=data&0x0080;
 		mTMPADR.Word+=1;
 
@@ -572,7 +573,7 @@ ULONG CSusie::PaintSprites(void)
 			bool enable_sizing=FALSE;
 			bool enable_stretch=FALSE;
 			bool enable_tilt=FALSE;
-		
+
 			// Optional section defined by reload type in Control 1
 
 			TRACE_SUSIE1("PaintSprites() mSPRCTL1.Bits.ReloadDepth=%d",mSPRCTL1_ReloadDepth);
@@ -658,7 +659,7 @@ ULONG CSusie::PaintSprites(void)
 			}
 
 			// Now we can start painting
-		
+
 			// Quadrant drawing order is: SE,NE,NW,SW
 			// start quadrant is given by sprite_control1:0 & 1
 
@@ -711,7 +712,7 @@ ULONG CSusie::PaintSprites(void)
 
 			// Loop for 4 quadrants
 
-			for(int loop=0;loop<4;loop++)	
+			for(int loop=0;loop<4;loop++)
 			{
 				TRACE_SUSIE1("PaintSprites() -------- Rendering Quadrant %03d --------",quadrant);
 
@@ -822,7 +823,7 @@ ULONG CSusie::PaintSprites(void)
 //					if(vsign==-1 && loop>0) voff+=vsign;
 					if(loop==0)	vquadoff=vsign;
 					if(vsign!=vquadoff) voff+=vsign;
-					
+
 					for(;;)
 					{
 						// Vertical scaling is done here
@@ -846,7 +847,7 @@ ULONG CSusie::PaintSprites(void)
 							break;
 						}
 
-						// Draw one horizontal line of the sprite 
+						// Draw one horizontal line of the sprite
 						for(vloop=0;vloop<pixel_height;vloop++)
 						{
 							// Early bailout if the sprite has moved off screen, terminate quad
@@ -914,7 +915,7 @@ ULONG CSusie::PaintSprites(void)
 								mTILTACUM.Word+=mTILT.Word;
 							}
 						}
-						// According to the docs this increments per dest line 
+						// According to the docs this increments per dest line
 						// but only gets set when the source line is read
 						if(mSPRSYS_VStretch) mSPRVSIZ.Word+=mSTRETCH.Word*pixel_height;
 
@@ -1002,7 +1003,7 @@ ULONG CSusie::PaintSprites(void)
 
 		// Check if we abort after 1st sprite is complete
 
-//		if(mSPRSYS.Read.StopOnCurrent) 
+//		if(mSPRSYS.Read.StopOnCurrent)
 //		{
 //			mSPRSYS.Read.Status=0;	// Engine has finished
 //			mSPRGO=FALSE;
@@ -1045,12 +1046,12 @@ ULONG CSusie::PaintSprites(void)
 // Non-Collideable----------| | | | | | |
 // Exclusive-or-Shadow----| | | | | | | |
 //                        | | | | | | | |
-//                        1 1 1 1 0 1 0 1   F is opaque 
-//                        0 0 0 0 1 1 0 0   E is collideable 
-//                        0 0 1 1 0 0 0 0   0 is opaque and collideable 
-//                        1 0 0 0 1 1 1 1   allow collision detect 
-//                        1 0 0 1 1 1 1 1   allow coll. buffer access 
-//                        1 0 0 0 0 0 0 0   exclusive-or the data 
+//                        1 1 1 1 0 1 0 1   F is opaque
+//                        0 0 0 0 1 1 0 0   E is collideable
+//                        0 0 1 1 0 0 0 0   0 is opaque and collideable
+//                        1 0 0 0 1 1 1 1   allow collision detect
+//                        1 0 0 1 1 1 1 1   allow coll. buffer access
+//                        1 0 0 0 0 0 0 0   exclusive-or the data
 //
 
 inline void CSusie::ProcessPixel(ULONG hoff,ULONG pixel)
@@ -1058,12 +1059,12 @@ inline void CSusie::ProcessPixel(ULONG hoff,ULONG pixel)
 	switch(mSPRCTL0_Type)
 	{
 		// BACKGROUND SHADOW
-		// 1   F is opaque 
-		// 0   E is collideable 
-		// 1   0 is opaque and collideable 
-		// 0   allow collision detect 
-		// 1   allow coll. buffer access 
-		// 0   exclusive-or the data 
+		// 1   F is opaque
+		// 0   E is collideable
+		// 1   0 is opaque and collideable
+		// 0   allow collision detect
+		// 1   allow coll. buffer access
+		// 0   exclusive-or the data
 		case sprite_background_shadow:
 			WritePixel(hoff,pixel);
 			if(!mSPRCOLL_Collide && !mSPRSYS_NoCollide && pixel!=0x0e)
@@ -1073,34 +1074,34 @@ inline void CSusie::ProcessPixel(ULONG hoff,ULONG pixel)
 			break;
 
 		// BACKGROUND NOCOLLIDE
-		// 1   F is opaque 
-		// 0   E is collideable 
-		// 1   0 is opaque and collideable 
-		// 0   allow collision detect 
-		// 0   allow coll. buffer access 
-		// 0   exclusive-or the data 
+		// 1   F is opaque
+		// 0   E is collideable
+		// 1   0 is opaque and collideable
+		// 0   allow collision detect
+		// 0   allow coll. buffer access
+		// 0   exclusive-or the data
 		case sprite_background_noncollide:
 			WritePixel(hoff,pixel);
 			break;
 
 		// NOCOLLIDE
-		// 1   F is opaque 
-		// 0   E is collideable 
-		// 0   0 is opaque and collideable 
-		// 0   allow collision detect 
-		// 0   allow coll. buffer access 
-		// 0   exclusive-or the data 
+		// 1   F is opaque
+		// 0   E is collideable
+		// 0   0 is opaque and collideable
+		// 0   allow collision detect
+		// 0   allow coll. buffer access
+		// 0   exclusive-or the data
 		case sprite_noncollide:
 			if(pixel!=0x00) WritePixel(hoff,pixel);
 			break;
 
 		// BOUNDARY
-		// 0   F is opaque 
-		// 1   E is collideable 
-		// 0   0 is opaque and collideable 
-		// 1   allow collision detect 
-		// 1   allow coll. buffer access 
-		// 0   exclusive-or the data 
+		// 0   F is opaque
+		// 1   E is collideable
+		// 0   0 is opaque and collideable
+		// 1   allow collision detect
+		// 1   allow coll. buffer access
+		// 0   exclusive-or the data
 		case sprite_boundary:
 			if(pixel!=0x00 && pixel!=0x0f)
 			{
@@ -1124,12 +1125,12 @@ inline void CSusie::ProcessPixel(ULONG hoff,ULONG pixel)
 			break;
 
 		// NORMAL
-		// 1   F is opaque 
-		// 1   E is collideable 
-		// 0   0 is opaque and collideable 
-		// 1   allow collision detect 
-		// 1   allow coll. buffer access 
-		// 0   exclusive-or the data 
+		// 1   F is opaque
+		// 1   E is collideable
+		// 0   0 is opaque and collideable
+		// 1   allow collision detect
+		// 1   allow coll. buffer access
+		// 0   exclusive-or the data
 		case sprite_normal:
 			if(pixel!=0x00)
 			{
@@ -1150,12 +1151,12 @@ inline void CSusie::ProcessPixel(ULONG hoff,ULONG pixel)
 			break;
 
 		// BOUNDARY_SHADOW
-		// 0   F is opaque 
-		// 0   E is collideable 
-		// 0   0 is opaque and collideable 
-		// 1   allow collision detect 
-		// 1   allow coll. buffer access 
-		// 0   exclusive-or the data 
+		// 0   F is opaque
+		// 0   E is collideable
+		// 0   0 is opaque and collideable
+		// 1   allow collision detect
+		// 1   allow coll. buffer access
+		// 0   exclusive-or the data
 		case sprite_boundary_shadow:
 			if(pixel!=0x00 && pixel!=0x0e && pixel!=0x0f)
 			{
@@ -1179,12 +1180,12 @@ inline void CSusie::ProcessPixel(ULONG hoff,ULONG pixel)
 			break;
 
 		// SHADOW
-		// 1   F is opaque 
-		// 0   E is collideable 
-		// 0   0 is opaque and collideable 
-		// 1   allow collision detect 
-		// 1   allow coll. buffer access 
-		// 0   exclusive-or the data 
+		// 1   F is opaque
+		// 0   E is collideable
+		// 0   0 is opaque and collideable
+		// 1   allow collision detect
+		// 1   allow coll. buffer access
+		// 0   exclusive-or the data
 		case sprite_shadow:
 			if(pixel!=0x00)
 			{
@@ -1208,12 +1209,12 @@ inline void CSusie::ProcessPixel(ULONG hoff,ULONG pixel)
 			break;
 
 		// XOR SHADOW
-		// 1   F is opaque 
-		// 0   E is collideable 
-		// 0   0 is opaque and collideable 
-		// 1   allow collision detect 
-		// 1   allow coll. buffer access 
-		// 1   exclusive-or the data 
+		// 1   F is opaque
+		// 0   E is collideable
+		// 0   0 is opaque and collideable
+		// 1   allow collision detect
+		// 1   allow coll. buffer access
+		// 1   exclusive-or the data
 		case sprite_xor_shadow:
 			if(pixel!=0x00)
 			{
@@ -1244,7 +1245,7 @@ inline void CSusie::ProcessPixel(ULONG hoff,ULONG pixel)
 inline void CSusie::WritePixel(ULONG hoff,ULONG pixel)
 {
 	ULONG scr_addr=mLineBaseAddress+(hoff/2);
-	
+
 	UBYTE dest=RAM_PEEK(scr_addr);
 	if(!(hoff&0x01))
 	{
@@ -1267,7 +1268,7 @@ inline void CSusie::WritePixel(ULONG hoff,ULONG pixel)
 inline ULONG CSusie::ReadPixel(ULONG hoff)
 {
 	ULONG scr_addr=mLineBaseAddress+(hoff/2);
-	
+
 	ULONG data=RAM_PEEK(scr_addr);
 	if(!(hoff&0x01))
 	{
@@ -1289,7 +1290,7 @@ inline ULONG CSusie::ReadPixel(ULONG hoff)
 inline void CSusie::WriteCollision(ULONG hoff,ULONG pixel)
 {
 	ULONG col_addr=mLineCollisionAddress+(hoff/2);
-	
+
 	UBYTE dest=RAM_PEEK(col_addr);
 	if(!(hoff&0x01))
 	{
@@ -1312,7 +1313,7 @@ inline void CSusie::WriteCollision(ULONG hoff,ULONG pixel)
 inline ULONG CSusie::ReadCollision(ULONG hoff)
 {
 	ULONG col_addr=mLineCollisionAddress+(hoff/2);
-	
+
 	ULONG data=RAM_PEEK(col_addr);
 	if(!(hoff&0x01))
 	{
@@ -1359,7 +1360,7 @@ inline ULONG CSusie::LineInit(ULONG voff)
 	mLinePacketBitsLeft=(offset-1)*8;
 
 	// Literals are a special case and get their count set on a line basis
-	
+
 	if(mSPRCTL1_Literal)
 	{
 		mLineType=line_abs_literal;
@@ -1843,7 +1844,7 @@ void CSusie::Poke(ULONG addr,UBYTE data)
 			mSPRCTL1_SkipSprite=data&0x0004;
 			mSPRCTL1_ReloadPalette=data&0x0008;
 			mSPRCTL1_ReloadDepth=(data&0x0030)>>4;
-			mSPRCTL1_Sizing=data&0x0040;	
+			mSPRCTL1_Sizing=data&0x0040;
 			mSPRCTL1_Literal=data&0x0080;
 			TRACE_SUSIE2("Poke(SPRCTL1,%02x) at PC=$%04x",data,mSystem.mCpu->GetPC());
 			break;
@@ -1886,7 +1887,7 @@ void CSusie::Poke(ULONG addr,UBYTE data)
 			mSystem.Poke_CARTB1(data);
 			TRACE_SUSIE2("Poke(RCART1,%02x) at PC=$%04x",data,mSystem.mCpu->GetPC());
 			break;
-			
+
 // These are not so important, so lets ignore them for the moment
 
 		case (LEDS&0xff):
@@ -2309,7 +2310,7 @@ UBYTE CSusie::Peek(ULONG addr)
 		case (SPRGO&0xff):
 			TRACE_SUSIE2("Peek(%04x) - Peek from write only register location at PC=$%04x",addr,mSystem.mCpu->GetPC());
 			break;
-		
+
 // Errors on illegal location accesses
 
 		default:
