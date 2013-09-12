@@ -61,6 +61,8 @@
 //#include "error.h"
 #include "zlib.h"
 
+void lynx_decrypt(unsigned char * result, const unsigned char * encrypted, const int length);
+
 int lss_read(void* dest,int varsize, int varcount,LSS_FILE *fp)
 {
 	ULONG copysize;
@@ -337,12 +339,22 @@ void CSystem::HLE_BIOS_init()
 
 	if(blockcount == 1) // cc65
 	{
-		for (int i = 0; i < 0x97; ++i) //2nd loader to 0xFB68
+        unsigned char buff[100];
+		unsigned char res[100];
+
+		for (int i = 0; i < 52; ++i) // first encrypted loader
 		{
-			Poke_CPU(0xFB68 + i,  mCart->Peek(start + i));
+			buff[i] = mCart->Peek0();
 		}
 
-		loadaddr = 0xFB68;
+		lynx_decrypt(res, buff, 51);
+
+		for (int i = 0; i < 100; ++i)
+		{
+			Poke_CPU(0x200 + i, res[i]);
+		}
+
+		loadaddr = 0x200;
 	}
 	else // epyx
 	{
@@ -361,11 +373,11 @@ void CSystem::HLE_BIOS_init()
 		loadaddr = (((int)buffer[5]) << 8) + buffer[4];
 		int filesize = (((int)buffer[7]) << 8) + buffer[6];
 
-		for (int i = 0; i < filesize; ++i) 
+		for (int i = 0; i < filesize; ++i)
 		{
 			Poke_CPU(i + loadaddr,  mCart->Peek(offset + i));
-		}	
-	}	
+		}
+	}
 
 	C6502_REGS regs;
 	mCpu->GetRegs(regs);
