@@ -166,7 +166,7 @@ void retro_get_system_info(struct retro_system_info *info)
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
 	struct retro_game_geometry geom = { lynx_width, lynx_height, lynx_width, lynx_height };
-	struct retro_system_timing timing = { 75.0, 44100.0 };
+	struct retro_system_timing timing = { 75.0, 22050.0 };
 
 	info->geometry = geom;
 	info->timing   = timing;
@@ -273,10 +273,6 @@ void lynx_sound_stream_update(unsigned short *buffer, int buf_length)
         ++buffer;
         *buffer = left;
         ++buffer;
-        *buffer = left;
-        ++buffer;
-        *buffer = left;
-        ++buffer;
     }
 
    gAudioBufferPointer = 0;
@@ -301,7 +297,7 @@ UBYTE* lynx_display_callback(ULONG objref)
     {
         int f = gAudioBufferPointer;
         lynx_sound_stream_update(soundBuffer, gAudioBufferPointer);
-        audio_batch_cb((const int16_t*)soundBuffer, f * 2);
+        audio_batch_cb((const int16_t*)soundBuffer, f);
     }
 
     newFrame = true;
