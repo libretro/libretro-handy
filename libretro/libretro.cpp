@@ -32,6 +32,7 @@ static map btn_map_no_rot[] = {
   { RETRO_DEVICE_ID_JOYPAD_DOWN, BUTTON_DOWN },
   { RETRO_DEVICE_ID_JOYPAD_L, BUTTON_OPT1 },
   { RETRO_DEVICE_ID_JOYPAD_R, BUTTON_OPT2 },
+  { RETRO_DEVICE_ID_JOYPAD_START, BUTTON_PAUSE },
 };
 
 static map btn_map_rot_240[] = {
@@ -43,6 +44,7 @@ static map btn_map_rot_240[] = {
   { RETRO_DEVICE_ID_JOYPAD_DOWN, BUTTON_RIGHT },
   { RETRO_DEVICE_ID_JOYPAD_L, BUTTON_OPT1 },
   { RETRO_DEVICE_ID_JOYPAD_R, BUTTON_OPT2 },
+  { RETRO_DEVICE_ID_JOYPAD_START, BUTTON_PAUSE },
 };
 
 static map btn_map_rot_90[] = {
@@ -54,6 +56,7 @@ static map btn_map_rot_90[] = {
   { RETRO_DEVICE_ID_JOYPAD_DOWN, BUTTON_LEFT },
   { RETRO_DEVICE_ID_JOYPAD_L, BUTTON_OPT1 },
   { RETRO_DEVICE_ID_JOYPAD_R, BUTTON_OPT2 },
+  { RETRO_DEVICE_ID_JOYPAD_START, BUTTON_PAUSE },
 };
 
 static map* btn_map;
