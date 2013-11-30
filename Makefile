@@ -34,8 +34,14 @@ ifeq ($(platform), unix)
    SHARED := -shared -Wl,-version-script=$(LIBRETRO_DIR)/link.T -Wl,-no-undefined
 else ifeq ($(platform),osx)
    fpic := -fPIC
-   TARGET := $(ARGET_NAME)_libretro.dylib
+   TARGET := $(TARGET_NAME)_libretro.dylib
 	SHARED := -dynamiclib
+else ifeq ($(platform),ios)
+   fpic := -fPIC
+   TARGET := $(TARGET_NAME)_libretro_ios.dylib
+   SHARED := -dynamiclib -miphoneos-version-min=5.0
+   CC = clang -arch armv7 -isysroot $(IOSSDK) -miphoneos-version-min=5.0
+   CXX = clang++ -arch armv7 -isysroot $(IOSSDK) -miphoneos-version-min=5.0
 else
    fpic :=
    TARGET := $(TARGET_NAME)_libretro.dll
