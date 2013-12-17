@@ -1,6 +1,9 @@
 #include "libretro.h"
+#include <string.h>
+#include <fstream>
 #include "handy.h"
 
+static retro_log_printf_t log_cb;
 static retro_video_refresh_t video_cb;
 static retro_audio_sample_t audio_cb;
 static retro_audio_sample_batch_t audio_batch_cb;
@@ -73,14 +76,17 @@ unsigned retro_api_version()
 
 void retro_init(void)
 {
-    btn_map = btn_map_no_rot;
+   struct retro_log_callback log;
+   environ_cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &log);
+   if (log.log)
+      log_cb = log.log;
 
-    enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
+   btn_map = btn_map_no_rot;
 
-    if(!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
-    {
-        fprintf(stderr, "[could not set RGB565]\n");
-    }
+   enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
+
+   if(!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt) && log_cb)
+      log_cb(RETRO_LOG_ERROR, "[could not set RGB565]\n");
 }
 
 void retro_reset(void)
@@ -315,8 +321,9 @@ bool lynx_romfilename(char *dest)
 
     if(!ifile)
     {
-        fprintf(stderr, "[handy]rom not found %s\n", dest);
-        return false;
+       if (log_cb)
+          log_cb(RETRO_LOG_ERROR, "[handy] ROM not found %s\n", dest);
+       return false;
     }
 
     return true;
