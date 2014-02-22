@@ -52,8 +52,8 @@
 #include <string.h>
 #include "system.h"
 #include "cart.h"
-#include "zlib.h"
-
+//#include "zlib.h"
+#include "scrc32.h"
 
 CCart::CCart(UBYTE *gamedata,ULONG gamesize)
 {

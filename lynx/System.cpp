@@ -59,7 +59,7 @@
 #include <string.h>
 #include "system.h"
 //#include "error.h"
-#include "zlib.h"
+//#include "zlib.h"
 
 void lynx_decrypt(unsigned char * result, const unsigned char * encrypted, const int length);
 

@@ -27,6 +27,7 @@ else ifneq ($(findstring MINGW,$(shell uname -a)),)
    system_platform = win
 endif
 
+LIBS = -lz
 
 ifeq ($(platform), unix)
    fpic := -fPIC
@@ -48,6 +49,14 @@ else ifeq ($(platform),qnx)
    SHARED := -shared -Wl,-version-script=$(LIBRETRO_DIR)/link.T -Wl,-no-undefined
 	CC = qcc -Vgcc_ntoarmv7le
 	CXX = QCC -Vgcc_ntoarmv7le_cpp
+else ifeq ($(platform),psp1)
+   TARGET := $(TARGET_NAME)_libretro_psp1.a
+	CC = psp-gcc
+	CXX = psp-g++
+	AR = psp-ar
+	FLAGS += -G0 -DLSB_FIRST -DWANT_CRC32
+	STATIC_LINKING := 1
+	LIBS :=
 else
    fpic :=
    TARGET := $(TARGET_NAME)_libretro.dll
@@ -62,16 +71,23 @@ CXXOBJ := $(CXXSRCS:.cpp=.o)
 
 OBJS := $(CXXOBJ)
 
-LIBS = -lz
 
 INCDIRS = -Ilynx/ -Ilibretro/
 
-FLAGS := -O3 -fomit-frame-pointer -fno-tree-vectorize -I. $(fpic) $(libs) $(includes)
+ifeq ($(DEBUG),1)
+FLAGS += -O0
+else ifeq ($(platform),psp1)
+FLAGS += -O2
+else
+FLAGS += -O3 
+endif
+
+FLAGS += -fomit-frame-pointer -fno-tree-vectorize -I. $(fpic) $(libs) $(includes)
 CXXFLAGS += $(FLAGS)
 CFLAGS += $(FLAGS)
 
 $(TARGET): $(OBJS)
-ifeq ((STATIC_LINKING), 1)
+ifeq ($(STATIC_LINKING), 1)
 	$(AR) rcs $@ $(OBJS)
 else
 	$(CXX) -o $@ $(SHARED) $(OBJS) $(LDFLAGS) $(LIBS)
