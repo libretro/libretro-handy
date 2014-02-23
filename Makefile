@@ -36,7 +36,9 @@ ifeq ($(platform), unix)
 else ifeq ($(platform),osx)
    fpic := -fPIC
    TARGET := $(TARGET_NAME)_libretro.dylib
-	SHARED := -dynamiclib
+   SHARED := -dynamiclib
+   FLAGS += -DWANT_CRC32
+   LIBS :=
 else ifeq ($(platform),ios)
    fpic := -fPIC
    TARGET := $(TARGET_NAME)_libretro_ios.dylib
