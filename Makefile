@@ -49,11 +49,31 @@ else ifeq ($(platform),qnx)
    SHARED := -shared -Wl,-version-script=$(LIBRETRO_DIR)/link.T -Wl,-no-undefined
 	CC = qcc -Vgcc_ntoarmv7le
 	CXX = QCC -Vgcc_ntoarmv7le_cpp
+else ifeq ($(platform),ps3)
+   TARGET := $(TARGET_NAME)_libretro_ps3.a
+
+   CC = $(CELL_SDK)/host-win32/ppu/bin/ppu-lv2-gcc.exe
+	CXX = $(CELL_SDK)/host-win32/ppu/bin/ppu-lv2-g++.exe
+   AR = $(CELL_SDK)/host-win32/ppu/bin/ppu-lv2-ar.exe
+
+	FLAGS += -DMSB_FIRST -DWANT_CRC32
+	STATIC_LINKING := 1
+	LIBS :=
+else ifeq ($(platform), sncps3)
+   TARGET := $(TARGET_NAME)_libretro_ps3.a
+
+   CC = $(CELL_SDK)/host-win32/sn/bin/ps3ppusnc.exe
+   CXX = $(CELL_SDK)/host-win32/sn/bin/ps3ppusnc.exe
+   AR = $(CELL_SDK)/host-win32/sn/bin/ps3snarl.exe
+
+	FLAGS += -DMSB_FIRST -DWANT_CRC32
+	STATIC_LINKING := 1
+	LIBS :=
 else ifeq ($(platform),psp1)
    TARGET := $(TARGET_NAME)_libretro_psp1.a
-	CC = psp-gcc
-	CXX = psp-g++
-	AR = psp-ar
+	CC = psp-gcc$(EXE_EXT)
+	CXX = psp-g++$(EXE_EXT)
+	AR = psp-ar$(EXE_EXT)
 	FLAGS += -G0 -DLSB_FIRST -DWANT_CRC32
 	STATIC_LINKING := 1
 	LIBS :=
