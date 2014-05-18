@@ -33,6 +33,7 @@ ifeq ($(platform), unix)
    fpic := -fPIC
    TARGET := $(TARGET_NAME)_libretro.so
    SHARED := -shared -Wl,-version-script=$(LIBRETRO_DIR)/link.T -Wl,-no-undefined
+   FLAGS += -DWANT_CRC32
 else ifeq ($(platform),osx)
    fpic := -fPIC
    TARGET := $(TARGET_NAME)_libretro.dylib
