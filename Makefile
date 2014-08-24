@@ -27,8 +27,6 @@ else ifneq ($(findstring MINGW,$(shell uname -a)),)
    system_platform = win
 endif
 
-LIBS = -lz
-
 ifeq ($(platform), unix)
    fpic := -fPIC
    TARGET := $(TARGET_NAME)_libretro.so
