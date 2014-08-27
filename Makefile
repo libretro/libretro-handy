@@ -96,6 +96,7 @@ else
    CC = gcc
    CXX = g++
    SHARED := -shared -static-libgcc -static-libstdc++ -Wl,-no-undefined -Wl,-version-script=$(LIBRETRO_DIR)/link.T
+   FLAGS += -DWANT_CRC32
 endif
 
 CXXSRCS := lynx/lynxdec.cpp lynx/Cart.cpp lynx/Memmap.cpp lynx/Mikie.cpp lynx/Ram.cpp lynx/Rom.cpp lynx/Susie.cpp lynx/System.cpp libretro/libretro.cpp
