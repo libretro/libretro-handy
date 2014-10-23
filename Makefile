@@ -38,20 +38,27 @@ else ifeq ($(platform),osx)
    SHARED := -dynamiclib
    FLAGS += -DWANT_CRC32
    LIBS :=
-OSXVER = `sw_vers -productVersion | cut -c 4`
-ifneq ($(shell sw_vers | grep -c 10.9),1)
+   OSXVER = `sw_vers -productVersion | cut -d. -f 2`
+   OSX_LT_MAVERICKS = `(( $(OSXVER) <= 9)) && echo "YES"`
+ifeq ($(OSX_LT_MAVERICKS),"YES")
    fpic += -mmacosx-version-min=10.5
 endif
 else ifeq ($(platform),ios)
    fpic := -fPIC
    TARGET := $(TARGET_NAME)_libretro_ios.dylib
    SHARED := -dynamiclib
+
+ifeq ($(IOSSDK),)
+   IOSSDK := $(shell xcrun -sdk iphoneos -show-sdk-path)
+endif
+
    CC = clang -arch armv7 -isysroot $(IOSSDK)
    CXX = clang++ -arch armv7 -isysroot $(IOSSDK)
    FLAGS += -DWANT_CRC32
    LIBS :=
-OSXVER = `sw_vers -productVersion | cut -c 4`
-ifneq ($(OSXVER),9)
+   OSXVER = `sw_vers -productVersion | cut -d. -f 2`
+   OSX_LT_MAVERICKS = `(( $(OSXVER) <= 9)) && echo "YES"`
+ifeq ($(OSX_LT_MAVERICKS),"YES")
    SHARED += -miphoneos-version-min=5.0
    CC +=  -miphoneos-version-min=5.0
    CXX +=  -miphoneos-version-min=5.0
