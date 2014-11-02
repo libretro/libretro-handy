@@ -1,0 +1,11 @@
+INCFLAGS = -I$(CORE_DIR)/lynx -I$(CORE_DIR)/libretro
+
+SOURCES_CXX := $(CORE_DIR)/lynx/lynxdec.cpp \
+	$(CORE_DIR)/lynx/Cart.cpp \
+	$(CORE_DIR)/lynx/Memmap.cpp \
+	$(CORE_DIR)/lynx/Mikie.cpp \
+	$(CORE_DIR)/lynx/Ram.cpp \
+	$(CORE_DIR)/lynx/Rom.cpp \
+	$(CORE_DIR)/lynx/Susie.cpp \
+	$(CORE_DIR)/lynx/System.cpp \
+	$(CORE_DIR)/libretro/libretro.cpp

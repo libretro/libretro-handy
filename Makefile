@@ -106,14 +106,12 @@ else
    FLAGS += -DWANT_CRC32
 endif
 
-CXXSRCS := lynx/lynxdec.cpp lynx/Cart.cpp lynx/Memmap.cpp lynx/Mikie.cpp lynx/Ram.cpp lynx/Rom.cpp lynx/Susie.cpp lynx/System.cpp libretro/libretro.cpp
+CORE_DIR := .
 
-CXXOBJ := $(CXXSRCS:.cpp=.o)
+include Makefile.common
 
-OBJS := $(CXXOBJ)
+OBJECTS := $(SOURCES_CXX:.cpp=.o)
 
-
-INCDIRS = -Ilynx/ -Ilibretro/
 
 ifeq ($(DEBUG),1)
 FLAGS += -O0
@@ -127,24 +125,24 @@ FLAGS += -fomit-frame-pointer -fno-tree-vectorize -I. $(fpic) $(libs) $(includes
 CXXFLAGS += $(FLAGS)
 CFLAGS += $(FLAGS)
 
-$(TARGET): $(OBJS)
+$(TARGET): $(OBJECTS)
 ifeq ($(STATIC_LINKING), 1)
-	$(AR) rcs $@ $(OBJS)
+	$(AR) rcs $@ $(OBJECTS)
 else
-	$(CXX) -o $@ $(SHARED) $(OBJS) $(LDFLAGS) $(LIBS)
+	$(CXX) -o $@ $(SHARED) $(OBJECTS) $(LDFLAGS) $(LIBS)
 endif
 
 %.o: %.cpp
-	$(CXX) -c -o $@ $< $(CXXFLAGS) $(INCDIRS)
+	$(CXX) -c -o $@ $< $(CXXFLAGS) $(INCFLAGS)
 
 %.o: %.c
-	$(CC) -c -o $@ $< $(CFLAGS) $(INCDIRS)
+	$(CC) -c -o $@ $< $(CFLAGS) $(INCFLAGS)
 
 clean-objs:
-	rm -f $(OBJS)
+	rm -f $(OBJECTS)
 
 clean:
-	rm -f $(OBJS)
+	rm -f $(OBJECTS)
 	rm -f $(TARGET)
 
 .PHONY: clean clean-objs all
