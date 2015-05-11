@@ -162,7 +162,7 @@ void retro_set_controller_port_device(unsigned, unsigned)
 void retro_get_system_info(struct retro_system_info *info)
 {
    memset(info, 0, sizeof(*info));
-   info->library_name     = "handy";
+   info->library_name     = "Handy";
    info->library_version  = HANDYVER;
    info->need_fullpath    = true;
    info->valid_extensions = "lnx";
