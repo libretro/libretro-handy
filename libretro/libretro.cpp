@@ -5,7 +5,6 @@
 
 static retro_log_printf_t log_cb;
 static retro_video_refresh_t video_cb;
-static retro_audio_sample_t audio_cb;
 static retro_audio_sample_batch_t audio_batch_cb;
 static retro_environment_t environ_cb;
 static retro_input_poll_t input_poll_cb;
@@ -122,7 +121,6 @@ void retro_set_environment(retro_environment_t cb)
 
 void retro_set_audio_sample(retro_audio_sample_t cb)
 {
-   audio_cb = cb;
 }
 
 void retro_set_audio_sample_batch(retro_audio_sample_batch_t cb)
@@ -182,10 +180,8 @@ void retro_run(void)
 {
     lynx_input();
 
-    while(!newFrame)
-    {
-        lynx->Update();
-    }
+    while (!newFrame)
+       lynx->Update();
 
     newFrame = false;
 }
@@ -271,12 +267,11 @@ unsigned retro_get_region()
    return RETRO_REGION_NTSC;
 }
 
-void* retro_get_memory_data(unsigned type)
+void *retro_get_memory_data(unsigned type)
 {
-   if(NULL != lynx)
-   {
-       return lynx->GetRamPointer();
-   }
+   if (lynx)
+      return lynx->GetRamPointer();
+   return NULL;
 }
 
 size_t retro_get_memory_size(unsigned type)
