@@ -90,6 +90,7 @@ else ifeq ($(platform),qnx)
 	SHARED := -shared -Wl,-version-script=$(LIBRETRO_DIR)/link.T -Wl,-no-undefined
 	CC = qcc -Vgcc_ntoarmv7le
 	CXX = QCC -Vgcc_ntoarmv7le_cpp
+	FLAGS += -DWANT_CRC32
 
 # PS3
 else ifeq ($(platform),ps3)
