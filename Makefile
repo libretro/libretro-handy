@@ -43,9 +43,7 @@ else ifeq ($(platform),osx)
 	LIBS :=
 	OSXVER = `sw_vers -productVersion | cut -d. -f 2`
 	OSX_LT_MAVERICKS = `(( $(OSXVER) <= 9)) && echo "YES"`
-	ifeq ($(OSX_LT_MAVERICKS),"YES")
-		fpic += -mmacosx-version-min=10.5
-	endif
+	fpic += -mmacosx-version-min=10.1
 	ifndef ($(NOUNIVERSAL))
 		CFLAGS  += $(ARCHFLAGS)
 		CXXFLAGS  += $(ARCHFLAGS)
@@ -170,7 +168,7 @@ else
 FLAGS += -O3 
 endif
 
-FLAGS += -fomit-frame-pointer -fno-tree-vectorize -I. $(fpic) $(libs) $(includes)
+FLAGS += -fomit-frame-pointer -I. $(fpic) $(libs) $(includes)
 CXXFLAGS += $(FLAGS)
 CFLAGS += $(FLAGS)
 
