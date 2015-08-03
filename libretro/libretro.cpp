@@ -222,6 +222,17 @@ static void lynx_initialize_sound(void)
     snd_buffer8 = (unsigned char *) (&gAudioBuffer);
 }
 
+static int file_exists(const char *path)
+{
+   FILE *dummy = fopen(path, "rb");
+
+   if (!dummy)
+      return 0;
+
+   fclose(dummy);
+   return 1;
+}
+
 static bool lynx_romfilename(char *dest)
 {
    const char *dir = 0;
@@ -229,9 +240,7 @@ static bool lynx_romfilename(char *dest)
 
    sprintf(dest, "%s%c%s", dir, SLASH_STR, ROM_FILE);
 
-   std::ifstream ifile(dest, std::ifstream::in);
-
-   if(!ifile)
+   if (!file_exists(dest))
    {
       if (log_cb)
          log_cb(RETRO_LOG_ERROR, "[handy] ROM not found %s\n", dest);
