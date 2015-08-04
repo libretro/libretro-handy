@@ -1418,9 +1418,10 @@ inline ULONG CSusie::LineGetPixel()
 					mLinePixel=mPenIndex[LineGetBits(mSPRCTL0_PixelBits)];
 				mLineRepeatCount++;
 				break;
+			default:
+				return 0;
 		}
 
-      return 0;
 	}
 
 	if(mLinePixel!=LINE_END)
@@ -1442,8 +1443,9 @@ inline ULONG CSusie::LineGetPixel()
 				break;
 			case line_packed:
 				break;
+			default:
+				return 0;
 		}
-      return 0;
 	}
 
 	return mLinePixel;
