@@ -86,65 +86,65 @@
 //
 
 #ifdef SYSTEM_CPP
-	ULONG	gSystemCycleCount=0;
-	ULONG	gNextTimerEvent=0;
-	ULONG	gCPUWakeupTime=0;
-	ULONG	gIRQEntryCycle=0;
-	ULONG	gCPUBootAddress=0;
-	ULONG	gBreakpointHit=FALSE;
-	ULONG	gSingleStepMode=FALSE;
-	ULONG	gSingleStepModeSprites=FALSE;
-	ULONG	gSystemIRQ=FALSE;
-	ULONG	gSystemNMI=FALSE;
-	ULONG	gSystemCPUSleep=FALSE;
-	ULONG	gSystemCPUSleep_Saved=FALSE;
-	ULONG	gSystemHalt=FALSE;
-	ULONG	gThrottleMaxPercentage=100;
-	ULONG	gThrottleLastTimerCount=0;
-	ULONG	gThrottleNextCycleCheckpoint=0;
+ULONG	gSystemCycleCount=0;
+ULONG	gNextTimerEvent=0;
+ULONG	gCPUWakeupTime=0;
+ULONG	gIRQEntryCycle=0;
+ULONG	gCPUBootAddress=0;
+ULONG	gBreakpointHit=FALSE;
+ULONG	gSingleStepMode=FALSE;
+ULONG	gSingleStepModeSprites=FALSE;
+ULONG	gSystemIRQ=FALSE;
+ULONG	gSystemNMI=FALSE;
+ULONG	gSystemCPUSleep=FALSE;
+ULONG	gSystemCPUSleep_Saved=FALSE;
+ULONG	gSystemHalt=FALSE;
+ULONG	gThrottleMaxPercentage=100;
+ULONG	gThrottleLastTimerCount=0;
+ULONG	gThrottleNextCycleCheckpoint=0;
 
-	volatile ULONG gTimerCount=0;
+volatile ULONG gTimerCount=0;
 
-	ULONG	gAudioEnabled=FALSE;
-	UBYTE	gAudioBuffer[HANDY_AUDIO_BUFFER_SIZE];
-	ULONG	gAudioBufferPointer=0;
-	ULONG	gAudioLastUpdateCycle=0;
+ULONG	gAudioEnabled=FALSE;
+UBYTE	gAudioBuffer[HANDY_AUDIO_BUFFER_SIZE];
+ULONG	gAudioBufferPointer=0;
+ULONG	gAudioLastUpdateCycle=0;
 
-	CErrorInterface *gError=NULL;
+CErrorInterface *gError=NULL;
 #else
 
-	extern ULONG	gSystemCycleCount;
-	extern ULONG	gNextTimerEvent;
-	extern ULONG	gCPUWakeupTime;
-	extern ULONG	gIRQEntryCycle;
-	extern ULONG	gCPUBootAddress;
-	extern ULONG	gBreakpointHit;
-	extern ULONG	gSingleStepMode;
-	extern ULONG	gSingleStepModeSprites;
-	extern ULONG	gSystemIRQ;
-	extern ULONG	gSystemNMI;
-	extern ULONG	gSystemCPUSleep;
-	extern ULONG	gSystemCPUSleep_Saved;
-	extern ULONG	gSystemHalt;
-	extern ULONG	gThrottleMaxPercentage;
-	extern ULONG	gThrottleLastTimerCount;
-	extern ULONG	gThrottleNextCycleCheckpoint;
+extern ULONG	gSystemCycleCount;
+extern ULONG	gNextTimerEvent;
+extern ULONG	gCPUWakeupTime;
+extern ULONG	gIRQEntryCycle;
+extern ULONG	gCPUBootAddress;
+extern ULONG	gBreakpointHit;
+extern ULONG	gSingleStepMode;
+extern ULONG	gSingleStepModeSprites;
+extern ULONG	gSystemIRQ;
+extern ULONG	gSystemNMI;
+extern ULONG	gSystemCPUSleep;
+extern ULONG	gSystemCPUSleep_Saved;
+extern ULONG	gSystemHalt;
+extern ULONG	gThrottleMaxPercentage;
+extern ULONG	gThrottleLastTimerCount;
+extern ULONG	gThrottleNextCycleCheckpoint;
 
-	extern volatile ULONG gTimerCount;
+extern volatile ULONG gTimerCount;
 
-	extern ULONG	gAudioEnabled;
-	extern UBYTE	gAudioBuffer[HANDY_AUDIO_BUFFER_SIZE];
-	extern ULONG	gAudioBufferPointer;
-	extern ULONG	gAudioLastUpdateCycle;
+extern ULONG	gAudioEnabled;
+extern UBYTE	gAudioBuffer[HANDY_AUDIO_BUFFER_SIZE];
+extern ULONG	gAudioBufferPointer;
+extern ULONG	gAudioLastUpdateCycle;
 
-	extern CErrorInterface *gError;
+extern CErrorInterface *gError;
 #endif
 
 typedef struct lssfile
 {
-	UBYTE *memptr;
-	ULONG index;
-	ULONG index_limit;
+   UBYTE *memptr;
+   ULONG index;
+   ULONG index_limit;
 } LSS_FILE;
 
 int lss_read(void* dest,int varsize, int varcount,LSS_FILE *fp);
@@ -183,146 +183,145 @@ class CSystem;
 
 class CSystem : public CSystemBase
 {
-	public:
-		CSystem(const char* gamefile, const char* romfile);
-		~CSystem();
+   public:
+      CSystem(const char* gamefile, const char* romfile);
+      ~CSystem();
 
-	public:
-		void 	HLE_BIOS_init();
-		void	Reset(void);
-		size_t	MemoryContextSave(const char* tmpfilename, char *context);
-		bool	MemoryContextLoad(const char *context, size_t size);
-		bool	ContextSave(const char *context);
-		bool	ContextLoad(const char *context);
-		bool	IsZip(char *filename);
+   public:
+      void 	HLE_BIOS_init();
+      void	Reset(void);
+      size_t	MemoryContextSave(const char* tmpfilename, char *context);
+      bool	MemoryContextLoad(const char *context, size_t size);
+      bool	ContextSave(const char *context);
+      bool	ContextLoad(const char *context);
+      bool	IsZip(char *filename);
 
-		inline void Update(void)
-		{
-//		    fprintf(stderr, "sys update\n");
-			//
-			// Only update if there is a predicted timer event
-			//
-			if(gSystemCycleCount>=gNextTimerEvent)
-			{
-				mMikie->Update();
-			}
-			//
-			// Step the processor through 1 instruction
-			//
-			mCpu->Update();
-//			fprintf(stderr, "end cpu update\n");
+      inline void Update(void)
+      {
+         //		    fprintf(stderr, "sys update\n");
+         //
+         // Only update if there is a predicted timer event
+         //
+         if(gSystemCycleCount>=gNextTimerEvent)
+         {
+            mMikie->Update();
+         }
+         //
+         // Step the processor through 1 instruction
+         //
+         mCpu->Update();
+         //			fprintf(stderr, "end cpu update\n");
 
 #ifdef _LYNXDBG
-			// Check breakpoint
-			static ULONG lastcycle=0;
-			if(lastcycle<mCycleCountBreakpoint && gSystemCycleCount>=mCycleCountBreakpoint) gBreakpointHit=TRUE;
-			lastcycle=gSystemCycleCount;
+         // Check breakpoint
+         static ULONG lastcycle=0;
+         if(lastcycle<mCycleCountBreakpoint && gSystemCycleCount>=mCycleCountBreakpoint) gBreakpointHit=TRUE;
+         lastcycle=gSystemCycleCount;
 
-			// Check single step mode
-			if(gSingleStepMode) gBreakpointHit=TRUE;
+         // Check single step mode
+         if(gSingleStepMode) gBreakpointHit=TRUE;
 #endif
 
-			//
-			// If the CPU is asleep then skip to the next timer event
-			//
-			if(gSystemCPUSleep)
-			{
-				gSystemCycleCount=gNextTimerEvent;
-			}
+         //
+         // If the CPU is asleep then skip to the next timer event
+         //
+         if(gSystemCPUSleep)
+         {
+            gSystemCycleCount=gNextTimerEvent;
+         }
 
-//			fprintf(stderr, "end sys update\n");
-		}
+         //			fprintf(stderr, "end sys update\n");
+      }
 
-		//
-		// We MUST have separate CPU & RAM peek & poke handlers as all CPU accesses must
-		// go thru the address generator at $FFF9
-		//
-		// BUT, Mikie video refresh & Susie see the whole system as RAM
-		//
-		// Complete and utter wankers, its taken me 1 week to find the 2 lines
-		// in all the documentation that mention this fact, the mother of all
-		// bugs has been found and FIXED.......
+      //
+      // We MUST have separate CPU & RAM peek & poke handlers as all CPU accesses must
+      // go thru the address generator at $FFF9
+      //
+      // BUT, Mikie video refresh & Susie see the whole system as RAM
+      //
+      // Complete and utter wankers, its taken me 1 week to find the 2 lines
+      // in all the documentation that mention this fact, the mother of all
+      // bugs has been found and FIXED.......
 
-		//
-		// CPU
-		//
-		inline void  Poke_CPU(ULONG addr, UBYTE data) { mMemoryHandlers[addr]->Poke(addr,data);};
-		inline UBYTE Peek_CPU(ULONG addr) { return mMemoryHandlers[addr]->Peek(addr);};
-		inline void  PokeW_CPU(ULONG addr,UWORD data) { mMemoryHandlers[addr]->Poke(addr,data&0xff);addr++;mMemoryHandlers[addr]->Poke(addr,data>>8);};
-		inline UWORD PeekW_CPU(ULONG addr) {return ((mMemoryHandlers[addr]->Peek(addr))+(mMemoryHandlers[addr]->Peek(addr+1)<<8));};
+      //
+      // CPU
+      //
+      inline void  Poke_CPU(ULONG addr, UBYTE data) { mMemoryHandlers[addr]->Poke(addr,data);};
+      inline UBYTE Peek_CPU(ULONG addr) { return mMemoryHandlers[addr]->Peek(addr);};
+      inline void  PokeW_CPU(ULONG addr,UWORD data) { mMemoryHandlers[addr]->Poke(addr,data&0xff);addr++;mMemoryHandlers[addr]->Poke(addr,data>>8);};
+      inline UWORD PeekW_CPU(ULONG addr) {return ((mMemoryHandlers[addr]->Peek(addr))+(mMemoryHandlers[addr]->Peek(addr+1)<<8));};
 
-		//
-		// RAM
-		//
-		inline void  Poke_RAM(ULONG addr, UBYTE data) { mRam->Poke(addr,data);};
-		inline UBYTE Peek_RAM(ULONG addr) { return mRam->Peek(addr);};
-		inline void  PokeW_RAM(ULONG addr,UWORD data) { mRam->Poke(addr,data&0xff);addr++;mRam->Poke(addr,data>>8);};
-		inline UWORD PeekW_RAM(ULONG addr) {return ((mRam->Peek(addr))+(mRam->Peek(addr+1)<<8));};
+      //
+      // RAM
+      //
+      inline void  Poke_RAM(ULONG addr, UBYTE data) { mRam->Poke(addr,data);};
+      inline UBYTE Peek_RAM(ULONG addr) { return mRam->Peek(addr);};
+      inline void  PokeW_RAM(ULONG addr,UWORD data) { mRam->Poke(addr,data&0xff);addr++;mRam->Poke(addr,data>>8);};
+      inline UWORD PeekW_RAM(ULONG addr) {return ((mRam->Peek(addr))+(mRam->Peek(addr+1)<<8));};
 
-// High level cart access for debug etc
+      // High level cart access for debug etc
 
-		inline void  Poke_CART(ULONG addr, UBYTE data) {mCart->Poke(addr,data);};
-		inline UBYTE Peek_CART(ULONG addr) {return mCart->Peek(addr);};
-		inline void  CartBank(EMMODE bank) {mCart->BankSelect(bank);};
-		inline ULONG CartSize(void) {return mCart->ObjectSize();};
-		inline const char* CartGetName(void) { return mCart->CartGetName();};
-		inline const char* CartGetManufacturer(void) { return mCart->CartGetManufacturer();};
-		inline ULONG CartGetRotate(void) {return mCart->CartGetRotate();};
+      inline void  Poke_CART(ULONG addr, UBYTE data) {mCart->Poke(addr,data);};
+      inline UBYTE Peek_CART(ULONG addr) {return mCart->Peek(addr);};
+      inline void  CartBank(EMMODE bank) {mCart->BankSelect(bank);};
+      inline ULONG CartSize(void) {return mCart->ObjectSize();};
+      inline const char* CartGetName(void) { return mCart->CartGetName();};
+      inline const char* CartGetManufacturer(void) { return mCart->CartGetManufacturer();};
+      inline ULONG CartGetRotate(void) {return mCart->CartGetRotate();};
 
-// Low level cart access for Suzy, Mikey
+      // Low level cart access for Suzy, Mikey
 
-		inline void  Poke_CARTB0(UBYTE data) {mCart->Poke0(data);};
-		inline void  Poke_CARTB1(UBYTE data) {mCart->Poke1(data);};
-		inline UBYTE Peek_CARTB0(void) {return mCart->Peek0();}
-		inline UBYTE Peek_CARTB1(void) {return mCart->Peek1();}
-		inline void  CartAddressStrobe(bool strobe) {mCart->CartAddressStrobe(strobe);};
-		inline void  CartAddressData(bool data) {mCart->CartAddressData(data);};
+      inline void  Poke_CARTB0(UBYTE data) {mCart->Poke0(data);};
+      inline void  Poke_CARTB1(UBYTE data) {mCart->Poke1(data);};
+      inline UBYTE Peek_CARTB0(void) {return mCart->Peek0();}
+      inline UBYTE Peek_CARTB1(void) {return mCart->Peek1();}
+      inline void  CartAddressStrobe(bool strobe) {mCart->CartAddressStrobe(strobe);};
+      inline void  CartAddressData(bool data) {mCart->CartAddressData(data);};
 
-// Low level CPU access
+      // Low level CPU access
 
-		void	SetRegs(C6502_REGS &regs) {mCpu->SetRegs(regs);};
-		void	GetRegs(C6502_REGS &regs) {mCpu->GetRegs(regs);};
+      void	SetRegs(C6502_REGS &regs) {mCpu->SetRegs(regs);};
+      void	GetRegs(C6502_REGS &regs) {mCpu->GetRegs(regs);};
 
-// Mikey system interfacing
+      // Mikey system interfacing
 
-		void	DisplaySetAttributes(ULONG Rotate,ULONG Format,ULONG Pitch,UBYTE* (*DisplayCallback)(ULONG objref),ULONG objref) { mMikie->DisplaySetAttributes(Rotate,Format,Pitch,DisplayCallback,objref); };
+      void	DisplaySetAttributes(ULONG Rotate,ULONG Format,ULONG Pitch,UBYTE* (*DisplayCallback)(ULONG objref),ULONG objref) { mMikie->DisplaySetAttributes(Rotate,Format,Pitch,DisplayCallback,objref); };
 
-		void	ComLynxCable(int status) { mMikie->ComLynxCable(status); };
-		void	ComLynxRxData(int data)  { mMikie->ComLynxRxData(data); };
-		void	ComLynxTxCallback(void (*function)(int data,ULONG objref),ULONG objref) { mMikie->ComLynxTxCallback(function,objref); };
+      void	ComLynxCable(int status) { mMikie->ComLynxCable(status); };
+      void	ComLynxRxData(int data)  { mMikie->ComLynxRxData(data); };
+      void	ComLynxTxCallback(void (*function)(int data,ULONG objref),ULONG objref) { mMikie->ComLynxTxCallback(function,objref); };
 
-// Suzy system interfacing
+      // Suzy system interfacing
 
-		ULONG	PaintSprites(void) {return mSusie->PaintSprites();};
+      ULONG	PaintSprites(void) {return mSusie->PaintSprites();};
 
-// Miscellaneous
+      // Miscellaneous
 
-		void	SetButtonData(ULONG data) {mSusie->SetButtonData(data);};
-		ULONG	GetButtonData(void) {return mSusie->GetButtonData();};
-		void	SetCycleBreakpoint(ULONG breakpoint) {mCycleCountBreakpoint=breakpoint;};
-		UBYTE*	GetRamPointer(void) {return mRam->GetRamPointer();};
+      void	SetButtonData(ULONG data) {mSusie->SetButtonData(data);};
+      ULONG	GetButtonData(void) {return mSusie->GetButtonData();};
+      void	SetCycleBreakpoint(ULONG breakpoint) {mCycleCountBreakpoint=breakpoint;};
+      UBYTE*	GetRamPointer(void) {return mRam->GetRamPointer();};
 #ifdef _LYNXDBG
-		void	DebugTrace(int address);
+      void	DebugTrace(int address);
 
-		void	DebugSetCallback(void (*function)(ULONG objref, char *message),ULONG objref);
+      void	DebugSetCallback(void (*function)(ULONG objref, char *message),ULONG objref);
 
-		void	(*mpDebugCallback)(ULONG objref, char *message);
-		ULONG	mDebugCallbackObject;
+      void	(*mpDebugCallback)(ULONG objref, char *message);
+      ULONG	mDebugCallbackObject;
 #endif
 
-	public:
-		ULONG			mCycleCountBreakpoint;
-		CLynxBase		*mMemoryHandlers[SYSTEM_SIZE];
-		CCart			*mCart;
-		CRom			*mRom;
-		CMemMap			*mMemMap;
-		CRam			*mRam;
-		C65C02			*mCpu;
-		CMikie			*mMikie;
-		CSusie			*mSusie;
+   public:
+      ULONG			mCycleCountBreakpoint;
+      CLynxBase		*mMemoryHandlers[SYSTEM_SIZE];
+      CCart			*mCart;
+      CRom			*mRom;
+      CMemMap			*mMemMap;
+      CRam			*mRam;
+      C65C02			*mCpu;
+      CMikie			*mMikie;
+      CSusie			*mSusie;
 
-		ULONG			mFileType;
+      ULONG			mFileType;
 };
-
 
 #endif

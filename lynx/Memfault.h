@@ -29,15 +29,15 @@
 
 class CMemFaultObj : public CLynxBase
 {
-	// Function members
+   // Function members
 
-	public:
-		CMemFaultObj() {};
-		~CMemFaultObj() {};
+   public:
+      CMemFaultObj() {};
+      ~CMemFaultObj() {};
 
-	public:
-		void	Poke(ULONG addr,UBYTE data) { }
-		UBYTE	Peek(ULONG addr) { return 0xEE; }
+   public:
+      void	Poke(ULONG addr,UBYTE data) { }
+      UBYTE	Peek(ULONG addr) { return 0xEE; }
 };
 
 #endif

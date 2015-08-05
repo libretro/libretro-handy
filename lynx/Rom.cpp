@@ -57,81 +57,81 @@ extern CErrorInterface *gError;
 
 CRom::CRom(const char *romfile)
 {
-	mWriteEnable = FALSE;
-	mValid = FALSE;
-	strncpy(mFileName,romfile,1024);
-	Reset();
+   mWriteEnable = FALSE;
+   mValid = FALSE;
+   strncpy(mFileName,romfile,1024);
+   Reset();
 
-	// Initialise ROM
-	for(int loop=0;loop<ROM_SIZE;loop++) mRomData[loop]=DEFAULT_ROM_CONTENTS;
+   // Initialise ROM
+   for(int loop=0;loop<ROM_SIZE;loop++) mRomData[loop]=DEFAULT_ROM_CONTENTS;
 
-	// Load up the file
+   // Load up the file
 
-	FILE	*fp;
+   FILE	*fp;
 
-	if((fp=fopen(mFileName,"rb"))==NULL)
-	{
-		fprintf(stderr, "Invalid ROM.\n");
-		return;
-	}
+   if((fp=fopen(mFileName,"rb"))==NULL)
+   {
+      fprintf(stderr, "Invalid ROM.\n");
+      return;
+   }
 
-	// Read in the 512 bytes
+   // Read in the 512 bytes
 
-	if(fread(mRomData,sizeof(char),ROM_SIZE,fp)!=ROM_SIZE)
-	{
-		fprintf(stderr, "Invalid ROM.\n");
-		fclose(fp);
-		return;
-	}
+   if(fread(mRomData,sizeof(char),ROM_SIZE,fp)!=ROM_SIZE)
+   {
+      fprintf(stderr, "Invalid ROM.\n");
+      fclose(fp);
+      return;
+   }
 
-	fclose(fp);
+   fclose(fp);
 
-	// Check the code that has been loaded and report an error if its a
-	// fake version of the bootrom
+   // Check the code that has been loaded and report an error if its a
+   // fake version of the bootrom
 
-	UBYTE mRomCheck[16]={0x38,0x80,0x0A,0x90,0x04,0x8E,0x8B,0xFD,
-						 0x18,0xE8,0x8E,0x87,0xFD,0xA2,0x02,0x8E};
+   UBYTE mRomCheck[16]={0x38,0x80,0x0A,0x90,0x04,0x8E,0x8B,0xFD,
+      0x18,0xE8,0x8E,0x87,0xFD,0xA2,0x02,0x8E};
 
-	static bool firsttime=TRUE;
+   static bool firsttime=TRUE;
 
-	if(firsttime)
-	{
-		firsttime=FALSE;
-		for(ULONG loop=0;loop<16;loop++)
-		{
-			if(mRomCheck[loop]!=mRomData[loop])
-			{
-				gError->Warning("FAKE LYNXBOOT.IMG - CARTRIDGES WILL NOT WORK\n\n"
-								"PLEASE READ THE ACCOMPANYING README.TXT FILE\n\n"
-								"(Do not email the author asking for this image)\n");
-				return;
-			}
-		}
-	}
+   if(firsttime)
+   {
+      firsttime=FALSE;
+      for(ULONG loop=0;loop<16;loop++)
+      {
+         if(mRomCheck[loop]!=mRomData[loop])
+         {
+            gError->Warning("FAKE LYNXBOOT.IMG - CARTRIDGES WILL NOT WORK\n\n"
+                  "PLEASE READ THE ACCOMPANYING README.TXT FILE\n\n"
+                  "(Do not email the author asking for this image)\n");
+            return;
+         }
+      }
+   }
 
-	mValid = TRUE;
+   mValid = TRUE;
 }
 
 void CRom::Reset(void)
 {
-	// Nothing to do here
+   // Nothing to do here
 }
 
 bool CRom::ContextSave(FILE *fp)
 {
-	if(!fprintf(fp,"CRom::ContextSave")) return 0;
-	if(!fwrite(mRomData,sizeof(UBYTE),ROM_SIZE,fp)) return 0;
-	return 1;
+   if(!fprintf(fp,"CRom::ContextSave")) return 0;
+   if(!fwrite(mRomData,sizeof(UBYTE),ROM_SIZE,fp)) return 0;
+   return 1;
 }
 
 bool CRom::ContextLoad(LSS_FILE *fp)
 {
-	char teststr[100]="XXXXXXXXXXXXXXXXX";
-	if(!lss_read(teststr,sizeof(char),17,fp)) return 0;
-	if(strcmp(teststr,"CRom::ContextSave")!=0) return 0;
+   char teststr[100]="XXXXXXXXXXXXXXXXX";
+   if(!lss_read(teststr,sizeof(char),17,fp)) return 0;
+   if(strcmp(teststr,"CRom::ContextSave")!=0) return 0;
 
-	if(!lss_read(mRomData,sizeof(UBYTE),ROM_SIZE,fp)) return 0;
-	return 1;
+   if(!lss_read(mRomData,sizeof(UBYTE),ROM_SIZE,fp)) return 0;
+   return 1;
 }
 
 

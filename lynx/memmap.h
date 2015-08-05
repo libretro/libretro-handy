@@ -66,31 +66,31 @@
 
 class CMemMap : public CLynxBase
 {
-	// Function members
+   // Function members
 
-	public:
-		CMemMap(CSystem& parent);
+   public:
+      CMemMap(CSystem& parent);
 
-	public:
-		bool	ContextSave(FILE *fp);
-		bool	ContextLoad(LSS_FILE *fp);
-		void	Reset(void);
+   public:
+      bool	ContextSave(FILE *fp);
+      bool	ContextLoad(LSS_FILE *fp);
+      void	Reset(void);
 
-		void	Poke(ULONG addr,UBYTE data);
-		UBYTE	Peek(ULONG addr);
-		ULONG	ReadCycle(void) {return 5;};
-		ULONG	WriteCycle(void) {return 5;};
-		ULONG	ObjectSize(void) {return MEMMAP_SIZE;};
+      void	Poke(ULONG addr,UBYTE data);
+      UBYTE	Peek(ULONG addr);
+      ULONG	ReadCycle(void) {return 5;};
+      ULONG	WriteCycle(void) {return 5;};
+      ULONG	ObjectSize(void) {return MEMMAP_SIZE;};
 
-	// Data members
+      // Data members
 
-	private:
-		int				mMikieEnabled;
-		int				mSusieEnabled;
-		int				mRomEnabled;
-		int				mVectorsEnabled;
+   private:
+      int				mMikieEnabled;
+      int				mSusieEnabled;
+      int				mRomEnabled;
+      int				mVectorsEnabled;
 
-		CSystem&		mSystem;
+      CSystem&		mSystem;
 };
 
 #endif

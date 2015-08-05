@@ -78,8 +78,5 @@ typedef unsigned long ULONG;
 
 #include "lynxbase.h"
 #include "errorinterface.h"
-//#include "error.h"
 
 #endif
-
-

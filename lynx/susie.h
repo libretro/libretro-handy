@@ -90,374 +90,374 @@ enum {line_error=0,line_abs_literal,line_literal,line_packed};
 enum {math_finished=0,math_divide,math_multiply,math_init_divide,math_init_multiply};
 
 enum {sprite_background_shadow=0,
-      sprite_background_noncollide,
-      sprite_boundary_shadow,
-      sprite_boundary,
-	  sprite_normal,
-	  sprite_noncollide,
-	  sprite_xor_shadow,
-	  sprite_shadow};
+   sprite_background_noncollide,
+   sprite_boundary_shadow,
+   sprite_boundary,
+   sprite_normal,
+   sprite_noncollide,
+   sprite_xor_shadow,
+   sprite_shadow};
 
 // Define register typdefs
 
 typedef struct 
 {
-	union
-	{
-		struct
-		{
+   union
+   {
+      struct
+      {
 #ifdef MSB_FIRST
-			UBYTE	High;
-			UBYTE	Low;
+         UBYTE	High;
+         UBYTE	Low;
 #else
-			UBYTE	Low;
-			UBYTE	High;
+         UBYTE	Low;
+         UBYTE	High;
 #endif
-		}Byte;
-		UWORD	Word;
-	};
+      }Byte;
+      UWORD	Word;
+   };
 }UUWORD;
 
 
 typedef struct
 {
-	union
-	{
-		struct
-		{
+   union
+   {
+      struct
+      {
 #ifdef MSB_FIRST
-			UBYTE	Fc1:1;
-			UBYTE	Fc2:1;
-			UBYTE	Fc3:1;
-			UBYTE	reserved:1;
-			UBYTE	Ac1:1;
-			UBYTE	Ac2:1;
-			UBYTE	Ac3:1;
-			UBYTE	Ac4:1;
+         UBYTE	Fc1:1;
+         UBYTE	Fc2:1;
+         UBYTE	Fc3:1;
+         UBYTE	reserved:1;
+         UBYTE	Ac1:1;
+         UBYTE	Ac2:1;
+         UBYTE	Ac3:1;
+         UBYTE	Ac4:1;
 #else
-			UBYTE	Ac4:1;
-			UBYTE	Ac3:1;
-			UBYTE	Ac2:1;
-			UBYTE	Ac1:1;
-			UBYTE	reserved:1;
-			UBYTE	Fc3:1;
-			UBYTE	Fc2:1;
-			UBYTE	Fc1:1;
+         UBYTE	Ac4:1;
+         UBYTE	Ac3:1;
+         UBYTE	Ac2:1;
+         UBYTE	Ac1:1;
+         UBYTE	reserved:1;
+         UBYTE	Fc3:1;
+         UBYTE	Fc2:1;
+         UBYTE	Fc1:1;
 #endif
-		}Bits;
-		UBYTE	Byte;
-	};
+      }Bits;
+      UBYTE	Byte;
+   };
 }TSPRINIT;
 
 typedef struct
 {
-	union
-	{
-		struct
-		{
+   union
+   {
+      struct
+      {
 #ifdef MSB_FIRST
-			UBYTE	Up:1;
-			UBYTE	Down:1;
-			UBYTE	Left:1;
-			UBYTE	Right:1;
-			UBYTE	Option1:1;
-			UBYTE	Option2:1;
-			UBYTE	Inside:1;
-			UBYTE	Outside:1;
+         UBYTE	Up:1;
+         UBYTE	Down:1;
+         UBYTE	Left:1;
+         UBYTE	Right:1;
+         UBYTE	Option1:1;
+         UBYTE	Option2:1;
+         UBYTE	Inside:1;
+         UBYTE	Outside:1;
 #else
-			UBYTE	Outside:1;
-			UBYTE	Inside:1;
-			UBYTE	Option2:1;
-			UBYTE	Option1:1;
-			UBYTE	Right:1;
-			UBYTE	Left:1;
-			UBYTE	Down:1;
-			UBYTE	Up:1;
+         UBYTE	Outside:1;
+         UBYTE	Inside:1;
+         UBYTE	Option2:1;
+         UBYTE	Option1:1;
+         UBYTE	Right:1;
+         UBYTE	Left:1;
+         UBYTE	Down:1;
+         UBYTE	Up:1;
 #endif
-		}Bits;
-		UBYTE	Byte;
-	};
+      }Bits;
+      UBYTE	Byte;
+   };
 }TJOYSTICK;
 
 typedef struct
 {
-	union
-	{
-		struct
-		{
+   union
+   {
+      struct
+      {
 #ifdef MSB_FIRST
-			UBYTE	spare:5;
-			UBYTE	Cart1IO:1;
-			UBYTE	Cart0IO:1;
-			UBYTE	Pause:1;
+         UBYTE	spare:5;
+         UBYTE	Cart1IO:1;
+         UBYTE	Cart0IO:1;
+         UBYTE	Pause:1;
 #else
-			UBYTE	Pause:1;
-			UBYTE	Cart0IO:1;
-			UBYTE	Cart1IO:1;
-			UBYTE	spare:5;
+         UBYTE	Pause:1;
+         UBYTE	Cart0IO:1;
+         UBYTE	Cart1IO:1;
+         UBYTE	spare:5;
 #endif
-		}Bits;
-		UBYTE	Byte;
-	};
+      }Bits;
+      UBYTE	Byte;
+   };
 }TSWITCHES;
 
 typedef struct
 {
-	union
-	{
-		struct
-		{
+   union
+   {
+      struct
+      {
 #ifdef MSB_FIRST
-			UBYTE	A;
-			UBYTE	B;
-			UBYTE	C;
-			UBYTE	D;
+         UBYTE	A;
+         UBYTE	B;
+         UBYTE	C;
+         UBYTE	D;
 #else
-			UBYTE	D;
-			UBYTE	C;
-			UBYTE	B;
-			UBYTE	A;
+         UBYTE	D;
+         UBYTE	C;
+         UBYTE	B;
+         UBYTE	A;
 #endif
-		}Bytes;
-		struct
-		{
+      }Bytes;
+      struct
+      {
 #ifdef MSB_FIRST
-			UWORD	AB;
-			UWORD	CD;
+         UWORD	AB;
+         UWORD	CD;
 #else
-			UWORD	CD;
-			UWORD	AB;
+         UWORD	CD;
+         UWORD	AB;
 #endif
-		}Words;
-		ULONG	Long;
-	};
+      }Words;
+      ULONG	Long;
+   };
 }TMATHABCD;
 
 typedef struct
 {
-	union
-	{
-		struct
-		{
+   union
+   {
+      struct
+      {
 #ifdef MSB_FIRST
-			UBYTE	E;
-			UBYTE	F;
-			UBYTE	G;
-			UBYTE	H;
+         UBYTE	E;
+         UBYTE	F;
+         UBYTE	G;
+         UBYTE	H;
 #else
-			UBYTE	H;
-			UBYTE	G;
-			UBYTE	F;
-			UBYTE	E;
+         UBYTE	H;
+         UBYTE	G;
+         UBYTE	F;
+         UBYTE	E;
 #endif
-		}Bytes;
-		struct
-		{
+      }Bytes;
+      struct
+      {
 #ifdef MSB_FIRST
-			UWORD	EF;
-			UWORD	GH;
+         UWORD	EF;
+         UWORD	GH;
 #else
-			UWORD	GH;
-			UWORD	EF;
+         UWORD	GH;
+         UWORD	EF;
 #endif
-		}Words;
-		ULONG	Long;
-	};
+      }Words;
+      ULONG	Long;
+   };
 }TMATHEFGH;
 
 typedef struct
 {
-	union
-	{
-		struct
-		{
+   union
+   {
+      struct
+      {
 #ifdef MSB_FIRST
-			UBYTE	J;
-			UBYTE	K;
-			UBYTE	L;
-			UBYTE	M;
+         UBYTE	J;
+         UBYTE	K;
+         UBYTE	L;
+         UBYTE	M;
 #else
-			UBYTE	M;
-			UBYTE	L;
-			UBYTE	K;
-			UBYTE	J;
+         UBYTE	M;
+         UBYTE	L;
+         UBYTE	K;
+         UBYTE	J;
 #endif
-		}Bytes;
-		struct
-		{
+      }Bytes;
+      struct
+      {
 #ifdef MSB_FIRST
-			UWORD	JK;
-			UWORD	LM;
+         UWORD	JK;
+         UWORD	LM;
 #else
-			UWORD	LM;
-			UWORD	JK;
+         UWORD	LM;
+         UWORD	JK;
 #endif
-		}Words;
-		ULONG	Long;
-	};
+      }Words;
+      ULONG	Long;
+   };
 }TMATHJKLM;
 
 typedef struct
 {
-	union
-	{
-		struct
-		{
+   union
+   {
+      struct
+      {
 #ifdef MSB_FIRST
-			UBYTE	xx2;
-			UBYTE	xx1;
-			UBYTE	N;
-			UBYTE	P;
+         UBYTE	xx2;
+         UBYTE	xx1;
+         UBYTE	N;
+         UBYTE	P;
 #else
-			UBYTE	P;
-			UBYTE	N;
-			UBYTE	xx1;
-			UBYTE	xx2;
+         UBYTE	P;
+         UBYTE	N;
+         UBYTE	xx1;
+         UBYTE	xx2;
 #endif
-		}Bytes;
-		struct
-		{
+      }Bytes;
+      struct
+      {
 #ifdef MSB_FIRST
-			UWORD	xx1;
-			UWORD	NP;
+         UWORD	xx1;
+         UWORD	NP;
 #else
-			UWORD	NP;
-			UWORD	xx1;
+         UWORD	NP;
+         UWORD	xx1;
 #endif
-		}Words;
-		ULONG	Long;
-	};
+      }Words;
+      ULONG	Long;
+   };
 }TMATHNP;
 
 
 class CSusie : public CLynxBase
 {
-	public:
-		CSusie(CSystem& parent);
-		~CSusie();
+   public:
+      CSusie(CSystem& parent);
+      ~CSusie();
 
-		void	Reset(void);
-		bool	ContextSave(FILE *fp);
-		bool	ContextLoad(LSS_FILE *fp);
+      void	Reset(void);
+      bool	ContextSave(FILE *fp);
+      bool	ContextLoad(LSS_FILE *fp);
 
-		UBYTE	Peek(ULONG addr);
-		void	Poke(ULONG addr,UBYTE data);
-		ULONG	ReadCycle(void) {return 9;};
-		ULONG	WriteCycle(void) {return 5;};
-		ULONG	ObjectSize(void) {return SUSIE_SIZE;};
+      UBYTE	Peek(ULONG addr);
+      void	Poke(ULONG addr,UBYTE data);
+      ULONG	ReadCycle(void) {return 9;};
+      ULONG	WriteCycle(void) {return 5;};
+      ULONG	ObjectSize(void) {return SUSIE_SIZE;};
 
-		void	SetButtonData(ULONG data) {mJOYSTICK.Byte=(UBYTE)data;mSWITCHES.Byte=(UBYTE)(data>>8);};
-		ULONG	GetButtonData(void) {return mJOYSTICK.Byte+(mSWITCHES.Byte<<8);};
+      void	SetButtonData(ULONG data) {mJOYSTICK.Byte=(UBYTE)data;mSWITCHES.Byte=(UBYTE)(data>>8);};
+      ULONG	GetButtonData(void) {return mJOYSTICK.Byte+(mSWITCHES.Byte<<8);};
 
-		ULONG	PaintSprites(void);
+      ULONG	PaintSprites(void);
 
-	private:
-		void	DoMathDivide(void);
-		void	DoMathMultiply(void);
-		ULONG	LineInit(ULONG voff);
-		ULONG	LineGetPixel(void);
-		ULONG	LineGetBits(ULONG bits);
+   private:
+      void	DoMathDivide(void);
+      void	DoMathMultiply(void);
+      ULONG	LineInit(ULONG voff);
+      ULONG	LineGetPixel(void);
+      ULONG	LineGetBits(ULONG bits);
 
-		void	ProcessPixel(ULONG hoff,ULONG pixel);
-		void	WritePixel(ULONG hoff,ULONG pixel);
-		ULONG	ReadPixel(ULONG hoff);
-		void	WriteCollision(ULONG hoff,ULONG pixel);
-		ULONG	ReadCollision(ULONG hoff);
+      void	ProcessPixel(ULONG hoff,ULONG pixel);
+      void	WritePixel(ULONG hoff,ULONG pixel);
+      ULONG	ReadPixel(ULONG hoff);
+      void	WriteCollision(ULONG hoff,ULONG pixel);
+      ULONG	ReadCollision(ULONG hoff);
 
-	private:
-		CSystem&	mSystem;
+   private:
+      CSystem&	mSystem;
 
-		UUWORD		mTMPADR;		// ENG
-		UUWORD		mTILTACUM;		// ENG
-		UUWORD		mHOFF;			// CPU
-		UUWORD		mVOFF;			// CPU
-		UUWORD		mVIDBAS;		// CPU
-		UUWORD		mCOLLBAS;		// CPU
-		UUWORD		mVIDADR;		// ENG
-		UUWORD		mCOLLADR;		// ENG
-		UUWORD		mSCBNEXT;		// SCB
-		UUWORD		mSPRDLINE;		// SCB
-		UUWORD		mHPOSSTRT;		// SCB
-		UUWORD		mVPOSSTRT;		// SCB
-		UUWORD		mSPRHSIZ;		// SCB
-		UUWORD		mSPRVSIZ;		// SCB
-		UUWORD		mSTRETCH;		// ENG
-		UUWORD		mTILT;			// ENG
-		UUWORD		mSPRDOFF;		// ENG
-		UUWORD		mSPRVPOS;		// ENG
-		UUWORD		mCOLLOFF;		// CPU
-		UUWORD		mVSIZACUM;		// ENG
-		UUWORD		mHSIZACUM;		//    K.s creation
-		UUWORD		mHSIZOFF;		// CPU
-		UUWORD		mVSIZOFF;		// CPU
-		UUWORD		mSCBADR;		// ENG
-		UUWORD		mPROCADR;		// ENG
+      UUWORD		mTMPADR;		// ENG
+      UUWORD		mTILTACUM;		// ENG
+      UUWORD		mHOFF;			// CPU
+      UUWORD		mVOFF;			// CPU
+      UUWORD		mVIDBAS;		// CPU
+      UUWORD		mCOLLBAS;		// CPU
+      UUWORD		mVIDADR;		// ENG
+      UUWORD		mCOLLADR;		// ENG
+      UUWORD		mSCBNEXT;		// SCB
+      UUWORD		mSPRDLINE;		// SCB
+      UUWORD		mHPOSSTRT;		// SCB
+      UUWORD		mVPOSSTRT;		// SCB
+      UUWORD		mSPRHSIZ;		// SCB
+      UUWORD		mSPRVSIZ;		// SCB
+      UUWORD		mSTRETCH;		// ENG
+      UUWORD		mTILT;			// ENG
+      UUWORD		mSPRDOFF;		// ENG
+      UUWORD		mSPRVPOS;		// ENG
+      UUWORD		mCOLLOFF;		// CPU
+      UUWORD		mVSIZACUM;		// ENG
+      UUWORD		mHSIZACUM;		//    K.s creation
+      UUWORD		mHSIZOFF;		// CPU
+      UUWORD		mVSIZOFF;		// CPU
+      UUWORD		mSCBADR;		// ENG
+      UUWORD		mPROCADR;		// ENG
 
-		TMATHABCD	mMATHABCD;		// ENG
-		TMATHEFGH	mMATHEFGH;		// ENG
-		TMATHJKLM	mMATHJKLM;		// ENG
-		TMATHNP		mMATHNP;		// ENG
-		int			mMATHAB_sign;
-		int			mMATHCD_sign;
-		int			mMATHEFGH_sign;
+      TMATHABCD	mMATHABCD;		// ENG
+      TMATHEFGH	mMATHEFGH;		// ENG
+      TMATHJKLM	mMATHJKLM;		// ENG
+      TMATHNP		mMATHNP;		// ENG
+      int			mMATHAB_sign;
+      int			mMATHCD_sign;
+      int			mMATHEFGH_sign;
 
-		int			mSPRCTL0_Type;			// SCB
-		int			mSPRCTL0_Vflip;
-		int			mSPRCTL0_Hflip;
-		int			mSPRCTL0_PixelBits;
+      int			mSPRCTL0_Type;			// SCB
+      int			mSPRCTL0_Vflip;
+      int			mSPRCTL0_Hflip;
+      int			mSPRCTL0_PixelBits;
 
-		int			mSPRCTL1_StartLeft;		// SCB
-		int			mSPRCTL1_StartUp;
-		int			mSPRCTL1_SkipSprite;
-		int			mSPRCTL1_ReloadPalette;
-		int			mSPRCTL1_ReloadDepth;
-		int			mSPRCTL1_Sizing;
-		int			mSPRCTL1_Literal;
+      int			mSPRCTL1_StartLeft;		// SCB
+      int			mSPRCTL1_StartUp;
+      int			mSPRCTL1_SkipSprite;
+      int			mSPRCTL1_ReloadPalette;
+      int			mSPRCTL1_ReloadDepth;
+      int			mSPRCTL1_Sizing;
+      int			mSPRCTL1_Literal;
 
-		int			mSPRCOLL_Number;		//CPU
-		int			mSPRCOLL_Collide;
+      int			mSPRCOLL_Number;		//CPU
+      int			mSPRCOLL_Collide;
 
-		int			mSPRSYS_StopOnCurrent;	//CPU
-		int			mSPRSYS_LeftHand;
-		int			mSPRSYS_VStretch;
-		int			mSPRSYS_NoCollide;
-		int			mSPRSYS_Accumulate;
-		int			mSPRSYS_SignedMath;
-		int			mSPRSYS_Status;
-		int			mSPRSYS_UnsafeAccess;
-		int			mSPRSYS_LastCarry;
-		int			mSPRSYS_Mathbit;
-		int			mSPRSYS_MathInProgress;
+      int			mSPRSYS_StopOnCurrent;	//CPU
+      int			mSPRSYS_LeftHand;
+      int			mSPRSYS_VStretch;
+      int			mSPRSYS_NoCollide;
+      int			mSPRSYS_Accumulate;
+      int			mSPRSYS_SignedMath;
+      int			mSPRSYS_Status;
+      int			mSPRSYS_UnsafeAccess;
+      int			mSPRSYS_LastCarry;
+      int			mSPRSYS_Mathbit;
+      int			mSPRSYS_MathInProgress;
 
-		ULONG		mSUZYBUSEN;		// CPU
+      ULONG		mSUZYBUSEN;		// CPU
 
-		TSPRINIT	mSPRINIT;		// CPU
+      TSPRINIT	mSPRINIT;		// CPU
 
-		ULONG		mSPRGO;			// CPU
-		int			mEVERON;
+      ULONG		mSPRGO;			// CPU
+      int			mEVERON;
 
-		UBYTE		mPenIndex[16];	// SCB
+      UBYTE		mPenIndex[16];	// SCB
 
-		// Line rendering related variables
+      // Line rendering related variables
 
-		ULONG		mLineType;
-		ULONG		mLineShiftRegCount;
-		ULONG		mLineShiftReg;
-		ULONG		mLineRepeatCount;
-		ULONG		mLinePixel;
-		ULONG		mLinePacketBitsLeft;
+      ULONG		mLineType;
+      ULONG		mLineShiftRegCount;
+      ULONG		mLineShiftReg;
+      ULONG		mLineRepeatCount;
+      ULONG		mLinePixel;
+      ULONG		mLinePacketBitsLeft;
 
-		int			mCollision;
+      int			mCollision;
 
-		UBYTE		*mRamPointer;
+      UBYTE		*mRamPointer;
 
-		ULONG		mLineBaseAddress;
-		ULONG		mLineCollisionAddress;
+      ULONG		mLineBaseAddress;
+      ULONG		mLineCollisionAddress;
 
-		// Joystick switches
+      // Joystick switches
 
-		TJOYSTICK	mJOYSTICK;
-		TSWITCHES	mSWITCHES;
+      TJOYSTICK	mJOYSTICK;
+      TSWITCHES	mSWITCHES;
 };
 
 #endif

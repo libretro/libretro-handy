@@ -57,30 +57,30 @@
 class CRom : public CLynxBase
 {
 
-	// Function members
+   // Function members
 
-	public:
-		CRom(const char *romfile);
+   public:
+      CRom(const char *romfile);
 
-	public:
-		void	Reset(void);
-		bool	ContextSave(FILE *fp);
-		bool	ContextLoad(LSS_FILE *fp);
+   public:
+      void	Reset(void);
+      bool	ContextSave(FILE *fp);
+      bool	ContextLoad(LSS_FILE *fp);
 
-		void	Poke(ULONG addr,UBYTE data) { if(mWriteEnable) mRomData[addr&ROM_ADDR_MASK]=data;};
-		UBYTE	Peek(ULONG addr) { return(mRomData[addr&ROM_ADDR_MASK]);};
-		ULONG	ReadCycle(void) {return 5;};
-		ULONG	WriteCycle(void) {return 5;};
-		ULONG	ObjectSize(void) {return ROM_SIZE;};
+      void	Poke(ULONG addr,UBYTE data) { if(mWriteEnable) mRomData[addr&ROM_ADDR_MASK]=data;};
+      UBYTE	Peek(ULONG addr) { return(mRomData[addr&ROM_ADDR_MASK]);};
+      ULONG	ReadCycle(void) {return 5;};
+      ULONG	WriteCycle(void) {return 5;};
+      ULONG	ObjectSize(void) {return ROM_SIZE;};
 
-	// Data members
+      // Data members
 
-	public:
-		bool	mWriteEnable;
-		bool	mValid;
-	private:
-		UBYTE	mRomData[ROM_SIZE];
-		char	mFileName[1024];
+   public:
+      bool	mWriteEnable;
+      bool	mValid;
+   private:
+      UBYTE	mRomData[ROM_SIZE];
+      char	mFileName[1024];
 };
 
 #endif

@@ -26,46 +26,46 @@ static bool initialized = false;
 struct map { unsigned retro; unsigned lynx; };
 
 static map btn_map_no_rot[] = {
-  { RETRO_DEVICE_ID_JOYPAD_A, BUTTON_A },
-  { RETRO_DEVICE_ID_JOYPAD_B, BUTTON_B },
-  { RETRO_DEVICE_ID_JOYPAD_RIGHT, BUTTON_RIGHT },
-  { RETRO_DEVICE_ID_JOYPAD_LEFT, BUTTON_LEFT },
-  { RETRO_DEVICE_ID_JOYPAD_UP, BUTTON_UP },
-  { RETRO_DEVICE_ID_JOYPAD_DOWN, BUTTON_DOWN },
-  { RETRO_DEVICE_ID_JOYPAD_L, BUTTON_OPT1 },
-  { RETRO_DEVICE_ID_JOYPAD_R, BUTTON_OPT2 },
-  { RETRO_DEVICE_ID_JOYPAD_START, BUTTON_PAUSE },
+   { RETRO_DEVICE_ID_JOYPAD_A, BUTTON_A },
+   { RETRO_DEVICE_ID_JOYPAD_B, BUTTON_B },
+   { RETRO_DEVICE_ID_JOYPAD_RIGHT, BUTTON_RIGHT },
+   { RETRO_DEVICE_ID_JOYPAD_LEFT, BUTTON_LEFT },
+   { RETRO_DEVICE_ID_JOYPAD_UP, BUTTON_UP },
+   { RETRO_DEVICE_ID_JOYPAD_DOWN, BUTTON_DOWN },
+   { RETRO_DEVICE_ID_JOYPAD_L, BUTTON_OPT1 },
+   { RETRO_DEVICE_ID_JOYPAD_R, BUTTON_OPT2 },
+   { RETRO_DEVICE_ID_JOYPAD_START, BUTTON_PAUSE },
 };
 
 static map btn_map_rot_240[] = {
-  { RETRO_DEVICE_ID_JOYPAD_A, BUTTON_A },
-  { RETRO_DEVICE_ID_JOYPAD_B, BUTTON_B },
-  { RETRO_DEVICE_ID_JOYPAD_RIGHT, BUTTON_UP },
-  { RETRO_DEVICE_ID_JOYPAD_LEFT, BUTTON_DOWN },
-  { RETRO_DEVICE_ID_JOYPAD_UP, BUTTON_LEFT },
-  { RETRO_DEVICE_ID_JOYPAD_DOWN, BUTTON_RIGHT },
-  { RETRO_DEVICE_ID_JOYPAD_L, BUTTON_OPT1 },
-  { RETRO_DEVICE_ID_JOYPAD_R, BUTTON_OPT2 },
-  { RETRO_DEVICE_ID_JOYPAD_START, BUTTON_PAUSE },
+   { RETRO_DEVICE_ID_JOYPAD_A, BUTTON_A },
+   { RETRO_DEVICE_ID_JOYPAD_B, BUTTON_B },
+   { RETRO_DEVICE_ID_JOYPAD_RIGHT, BUTTON_UP },
+   { RETRO_DEVICE_ID_JOYPAD_LEFT, BUTTON_DOWN },
+   { RETRO_DEVICE_ID_JOYPAD_UP, BUTTON_LEFT },
+   { RETRO_DEVICE_ID_JOYPAD_DOWN, BUTTON_RIGHT },
+   { RETRO_DEVICE_ID_JOYPAD_L, BUTTON_OPT1 },
+   { RETRO_DEVICE_ID_JOYPAD_R, BUTTON_OPT2 },
+   { RETRO_DEVICE_ID_JOYPAD_START, BUTTON_PAUSE },
 };
 
 static map btn_map_rot_90[] = {
-  { RETRO_DEVICE_ID_JOYPAD_A, BUTTON_A },
-  { RETRO_DEVICE_ID_JOYPAD_B, BUTTON_B },
-  { RETRO_DEVICE_ID_JOYPAD_RIGHT, BUTTON_DOWN },
-  { RETRO_DEVICE_ID_JOYPAD_LEFT, BUTTON_UP },
-  { RETRO_DEVICE_ID_JOYPAD_UP, BUTTON_RIGHT },
-  { RETRO_DEVICE_ID_JOYPAD_DOWN, BUTTON_LEFT },
-  { RETRO_DEVICE_ID_JOYPAD_L, BUTTON_OPT1 },
-  { RETRO_DEVICE_ID_JOYPAD_R, BUTTON_OPT2 },
-  { RETRO_DEVICE_ID_JOYPAD_START, BUTTON_PAUSE },
+   { RETRO_DEVICE_ID_JOYPAD_A, BUTTON_A },
+   { RETRO_DEVICE_ID_JOYPAD_B, BUTTON_B },
+   { RETRO_DEVICE_ID_JOYPAD_RIGHT, BUTTON_DOWN },
+   { RETRO_DEVICE_ID_JOYPAD_LEFT, BUTTON_UP },
+   { RETRO_DEVICE_ID_JOYPAD_UP, BUTTON_RIGHT },
+   { RETRO_DEVICE_ID_JOYPAD_DOWN, BUTTON_LEFT },
+   { RETRO_DEVICE_ID_JOYPAD_L, BUTTON_OPT1 },
+   { RETRO_DEVICE_ID_JOYPAD_R, BUTTON_OPT2 },
+   { RETRO_DEVICE_ID_JOYPAD_START, BUTTON_PAUSE },
 };
 
 static map* btn_map;
 
 unsigned retro_api_version(void)
 {
-    return RETRO_API_VERSION;
+   return RETRO_API_VERSION;
 }
 
 void retro_init(void)
@@ -136,16 +136,16 @@ void retro_set_video_refresh(retro_video_refresh_t cb)
 
 static unsigned get_lynx_input(void)
 {
-    unsigned i, res = 0;
-    for (i = 0; i < sizeof(btn_map_no_rot) / sizeof(map); ++i)
-        res |= input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, btn_map[i].retro) ? btn_map[i].lynx : 0;
-    return res;
+   unsigned i, res = 0;
+   for (i = 0; i < sizeof(btn_map_no_rot) / sizeof(map); ++i)
+      res |= input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, btn_map[i].retro) ? btn_map[i].lynx : 0;
+   return res;
 }
 
 static void lynx_input(void)
 {
-    input_poll_cb();
-    lynx->SetButtonData(get_lynx_input());
+   input_poll_cb();
+   lynx->SetButtonData(get_lynx_input());
 }
 
 void retro_set_controller_port_device(unsigned, unsigned)
@@ -164,28 +164,28 @@ void retro_get_system_info(struct retro_system_info *info)
 
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
-	struct retro_game_geometry geom = { lynx_width, lynx_height, lynx_width, lynx_height };
-	struct retro_system_timing timing = { 75.0, 22050.0 };
+   struct retro_game_geometry geom = { lynx_width, lynx_height, lynx_width, lynx_height };
+   struct retro_system_timing timing = { 75.0, 22050.0 };
 
-	info->geometry = geom;
-	info->timing   = timing;
+   info->geometry = geom;
+   info->timing   = timing;
 }
 
 void retro_run(void)
 {
-    lynx_input();
+   lynx_input();
 
-    while (!newFrame)
-       lynx->Update();
+   while (!newFrame)
+      lynx->Update();
 
-    newFrame = false;
+   newFrame = false;
 }
 
 static void gettempfilename(char *dest)
 {
-    const char *dir = 0;
-    environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &dir);
-    sprintf(dest, "%s%chandy.tmp", dir, SLASH_STR);
+   const char *dir = 0;
+   environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &dir);
+   sprintf(dest, "%s%chandy.tmp", dir, SLASH_STR);
 }
 
 size_t retro_serialize_size(void)
@@ -210,16 +210,16 @@ bool retro_serialize(void *data, size_t size)
 
 bool retro_unserialize(const void *data, size_t size)
 {
-    if(!lynx)
-       return false;
+   if(!lynx)
+      return false;
 
-	return lynx->MemoryContextLoad((const char*)data, size);
+   return lynx->MemoryContextLoad((const char*)data, size);
 }
 
 static void lynx_initialize_sound(void)
 {
-    gAudioEnabled = true;
-    snd_buffer8 = (unsigned char *) (&gAudioBuffer);
+   gAudioEnabled = true;
+   snd_buffer8 = (unsigned char *) (&gAudioBuffer);
 }
 
 static int file_exists(const char *path)
@@ -352,7 +352,7 @@ bool retro_load_game(const struct retro_game_info *info)
 
 bool retro_load_game_special(unsigned, const struct retro_game_info*, size_t)
 {
-    return false;
+   return false;
 }
 
 void retro_unload_game(void)
@@ -381,8 +381,5 @@ void *retro_get_memory_data(unsigned type)
 
 size_t retro_get_memory_size(unsigned type)
 {
-    return 1024 * 64;
+   return 1024 * 64;
 }
-
-
-

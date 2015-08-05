@@ -99,73 +99,73 @@ typedef struct
 class CCart : public CLynxBase
 {
 
-	// Function members
+   // Function members
 
-	public:
-		CCart(UBYTE *gamedata,ULONG gamesize);
-		~CCart();
+   public:
+      CCart(UBYTE *gamedata,ULONG gamesize);
+      ~CCart();
 
-	public:
+   public:
 
-// Access for sensible members of the clan
+      // Access for sensible members of the clan
 
-		void	Reset(void);
-		bool	ContextSave(FILE *fp);
-		bool	ContextLoad(LSS_FILE *fp);
-		bool	ContextLoadLegacy(LSS_FILE *fp);
+      void	Reset(void);
+      bool	ContextSave(FILE *fp);
+      bool	ContextLoad(LSS_FILE *fp);
+      bool	ContextLoadLegacy(LSS_FILE *fp);
 
-		void	Poke(ULONG addr,UBYTE data);
-		UBYTE	Peek(ULONG addr);
-		ULONG	ReadCycle(void) {return 15;};
-		ULONG	WriteCycle(void) {return 15;};
-		void	BankSelect(EMMODE newbank) {mBank=newbank;}
-		ULONG	ObjectSize(void) {return (mBank==bank0)?mMaskBank0+1:mMaskBank1+1;};
+      void	Poke(ULONG addr,UBYTE data);
+      UBYTE	Peek(ULONG addr);
+      ULONG	ReadCycle(void) {return 15;};
+      ULONG	WriteCycle(void) {return 15;};
+      void	BankSelect(EMMODE newbank) {mBank=newbank;}
+      ULONG	ObjectSize(void) {return (mBank==bank0)?mMaskBank0+1:mMaskBank1+1;};
 
-		const char*	CartGetName(void) { return mName;};
-		const char*	CartGetManufacturer(void) { return mManufacturer; };
-		ULONG	CartGetRotate(void) { return mRotation;};
-		int		CartHeaderLess(void) { return mHeaderLess;};
-		ULONG	CRC32(void) { return mCRC32; };
+      const char*	CartGetName(void) { return mName;};
+      const char*	CartGetManufacturer(void) { return mManufacturer; };
+      ULONG	CartGetRotate(void) { return mRotation;};
+      int		CartHeaderLess(void) { return mHeaderLess;};
+      ULONG	CRC32(void) { return mCRC32; };
 
-// Access for the lynx itself, it has no idea of address etc as this is done by the
-// cartridge emulation hardware
-		void	CartAddressStrobe(bool strobe);
-		void	CartAddressData(bool data);
-		void	Poke0(UBYTE data);
-		void	Poke1(UBYTE data);
-		UBYTE	Peek0(void);
-		UBYTE	Peek1(void);
+      // Access for the lynx itself, it has no idea of address etc as this is done by the
+      // cartridge emulation hardware
+      void	CartAddressStrobe(bool strobe);
+      void	CartAddressData(bool data);
+      void	Poke0(UBYTE data);
+      void	Poke1(UBYTE data);
+      UBYTE	Peek0(void);
+      UBYTE	Peek1(void);
 
-	// Data members
+      // Data members
 
-	public:
-		ULONG	mWriteEnableBank0;
-		ULONG	mWriteEnableBank1;
-		ULONG	mCartRAM;
-		ULONG	mMaskBank0;
-		ULONG	mMaskBank1;
+   public:
+      ULONG	mWriteEnableBank0;
+      ULONG	mWriteEnableBank1;
+      ULONG	mCartRAM;
+      ULONG	mMaskBank0;
+      ULONG	mMaskBank1;
 
-	private:
-		EMMODE	mBank;
+   private:
+      EMMODE	mBank;
 
-		UBYTE	*mCartBank0;
-		UBYTE	*mCartBank1;
-		char	mName[33];
-		char	mManufacturer[17];
-		ULONG	mRotation;
-		ULONG	mHeaderLess;
+      UBYTE	*mCartBank0;
+      UBYTE	*mCartBank1;
+      char	mName[33];
+      char	mManufacturer[17];
+      ULONG	mRotation;
+      ULONG	mHeaderLess;
 
-		ULONG	mCounter;
-		ULONG	mShifter;
-		ULONG	mAddrData;
-		ULONG	mStrobe;
+      ULONG	mCounter;
+      ULONG	mShifter;
+      ULONG	mAddrData;
+      ULONG	mStrobe;
 
-		ULONG	mShiftCount0;
-		ULONG	mCountMask0;
-		ULONG	mShiftCount1;
-		ULONG	mCountMask1;
+      ULONG	mShiftCount0;
+      ULONG	mCountMask0;
+      ULONG	mShiftCount1;
+      ULONG	mCountMask1;
 
-		ULONG	mCRC32;
+      ULONG	mCRC32;
 
 };
 

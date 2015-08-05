@@ -33,12 +33,12 @@
 
 class CErrorInterface  
 {
-	public:
-		virtual ~CErrorInterface() {};
+   public:
+      virtual ~CErrorInterface() {};
 
-	public:
-		virtual int		Warning(const char *message) { return 0; };
-		virtual int		Fatal(const char *message) { return 0; };
+   public:
+      virtual int		Warning(const char *message) { return 0; };
+      virtual int		Fatal(const char *message) { return 0; };
 };
 
 #endif // !defined(AFX_ERRORINTERFACE_H__A3B25DE2_6F78_11D2_8E90_444553540000__INCLUDED_)
