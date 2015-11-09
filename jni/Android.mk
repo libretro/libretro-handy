@@ -16,8 +16,8 @@ LOCAL_CFLAGS += -DANDROID_MIPS
 endif
 
 LOCAL_MODULE    := libretro
-LOCAL_LDLIBS    += -lz -llog
-CORE_DIR := ../..
+LOCAL_LDLIBS    += -lz 
+CORE_DIR := ..
 
 include $(CORE_DIR)/Makefile.common
 
