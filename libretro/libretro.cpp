@@ -254,19 +254,36 @@ static bool lynx_romfilename(char *dest)
 
 static void lynx_sound_stream_update(unsigned short *buffer, int buf_length)
 {
-//   unsigned i;
-//   uint16_t left;
-//
-//   for (i = 0; i < buf_length; i++)
-//   {
-//      left = (snd_buffer8[i] << 8) - 32768;
-//      *buffer = left;
-//      ++buffer;
-//      *buffer = left;
-//      ++buffer;
-//   }
-    memcpy(snd_buffer16s, buffer, buf_length);
-   
+#if 0
+   unsigned i;
+   uint16_t left;
+
+   for (i = 0; i < buf_length; i++)
+   {
+      left = (snd_buffer16s[i] << 8) - 32768;
+      *buffer = left;
+      ++buffer;
+      *buffer = left;
+      ++buffer;
+   }
+#endif
+#if 0
+   unsigned i;
+   uint16_t left;
+
+   for (i = 0; i < buf_length; i++)
+   {
+      left = (snd_buffer16s[i] << 8) - 32768;
+      *buffer = left;
+      ++buffer;
+      left = (snd_buffer16s[i] << 8) - 32768;
+      *buffer = left;
+      ++buffer;
+   }
+#endif
+#if 1
+    memcpy(buffer, snd_buffer16s, buf_length);
+#endif
    gAudioBufferPointer = 0;
 }
 
@@ -279,7 +296,7 @@ static UBYTE* lynx_display_callback(ULONG objref)
 
    if(gAudioBufferPointer > 0)
    {
-      int f = gAudioBufferPointer;
+      int f = gAudioBufferPointer / 4; // /1 - 8 bit mono, /2 8 bit stereo, /4 16 bit stereo
       lynx_sound_stream_update(soundBuffer, gAudioBufferPointer);
       audio_batch_cb((const int16_t*)soundBuffer, f);
    }
