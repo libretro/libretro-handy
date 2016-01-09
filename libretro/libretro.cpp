@@ -252,38 +252,9 @@ static bool lynx_romfilename(char *dest)
    return true;
 }
 
-static void lynx_sound_stream_update(unsigned short *buffer, int buf_length)
+inline static void lynx_sound_stream_update(unsigned short *buffer, int buf_length)
 {
-#if 0
-   unsigned i;
-   uint16_t left;
-
-   for (i = 0; i < buf_length; i++)
-   {
-      left = (snd_buffer16s[i] << 8) - 32768;
-      *buffer = left;
-      ++buffer;
-      *buffer = left;
-      ++buffer;
-   }
-#endif
-#if 0
-   unsigned i;
-   uint16_t left;
-
-   for (i = 0; i < buf_length; i++)
-   {
-      left = (snd_buffer16s[i] << 8) - 32768;
-      *buffer = left;
-      ++buffer;
-      left = (snd_buffer16s[i] << 8) - 32768;
-      *buffer = left;
-      ++buffer;
-   }
-#endif
-#if 1
     memcpy(buffer, snd_buffer16s, buf_length);
-#endif
    gAudioBufferPointer = 0;
 }
 
