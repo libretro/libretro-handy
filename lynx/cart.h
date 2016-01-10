@@ -92,7 +92,8 @@ typedef struct
    UBYTE   cartname[32];
    UBYTE   manufname[16];
    UBYTE   rotation;
-   UBYTE   spare[5];
+   UBYTE   aud_bits; 
+   UBYTE   spare[4];
 }LYNX_HEADER;
 
 
@@ -124,6 +125,7 @@ class CCart : public CLynxBase
       const char*	CartGetName(void) { return mName;};
       const char*	CartGetManufacturer(void) { return mManufacturer; };
       ULONG	CartGetRotate(void) { return mRotation;};
+      bool	CartGetAudin(void) { return mAudinFlag;};
       int		CartHeaderLess(void) { return mHeaderLess;};
       ULONG	CRC32(void) { return mCRC32; };
 
@@ -133,8 +135,12 @@ class CCart : public CLynxBase
       void	CartAddressData(bool data);
       void	Poke0(UBYTE data);
       void	Poke1(UBYTE data);
+      void	Poke0A(UBYTE data);
+      void	Poke1A(UBYTE data);
       UBYTE	Peek0(void);
       UBYTE	Peek1(void);
+      UBYTE	Peek0A(void);
+      UBYTE	Peek1A(void);
 
       // Data members
 
@@ -150,9 +156,12 @@ class CCart : public CLynxBase
 
       UBYTE	*mCartBank0;
       UBYTE	*mCartBank1;
+      UBYTE	*mCartBank0A;
+      UBYTE	*mCartBank1A;
       char	mName[33];
       char	mManufacturer[17];
       ULONG	mRotation;
+      bool      mAudinFlag;
       ULONG	mHeaderLess;
 
       ULONG	mCounter;

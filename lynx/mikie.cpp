@@ -4011,7 +4011,6 @@ inline void CMikie::UpdateSound(void)
               }
             }
 
-            // Stereo 16 bit signed
 		// Upsample to 16 bit signed
 		SWORD sample_l, sample_r;
 		sample_l= (cur_lsample<<5); // koennte auch 6 sein

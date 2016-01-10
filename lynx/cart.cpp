@@ -95,6 +95,7 @@ CCart::CCart(UBYTE *gamedata,ULONG gamesize)
 
       mRotation=header.rotation;
       if(mRotation!=CART_NO_ROTATE && mRotation!=CART_ROTATE_LEFT && mRotation!=CART_ROTATE_RIGHT) mRotation=CART_NO_ROTATE;
+      mAudinFlag=(header.aud_bits&0x01) ;
    }
    else
    {
@@ -108,6 +109,7 @@ CCart::CCart(UBYTE *gamedata,ULONG gamesize)
 
       // Setup rotation
 
+      mAudinFlag=false;
       mRotation=CART_NO_ROTATE;
    }
 
@@ -196,6 +198,8 @@ CCart::CCart(UBYTE *gamedata,ULONG gamesize)
 
    mCartBank0 = (UBYTE*) new UBYTE[mMaskBank0+1];
    mCartBank1 = (UBYTE*) new UBYTE[mMaskBank1+1];
+   mCartBank0A = (UBYTE*) new UBYTE[mMaskBank0+1];
+   mCartBank1A = (UBYTE*) new UBYTE[mMaskBank1+1];
 
    // Set default bank
 
@@ -211,6 +215,8 @@ CCart::CCart(UBYTE *gamedata,ULONG gamesize)
 
    memset(mCartBank0, DEFAULT_CART_CONTENTS, bank0size);
    memset(mCartBank1, DEFAULT_CART_CONTENTS, bank1size);
+   memset(mCartBank0A, DEFAULT_CART_CONTENTS, bank0size);
+   memset(mCartBank1A, DEFAULT_CART_CONTENTS, bank1size);
    if( bank0size==1) bank0size=0;// workaround ...
    if( bank1size==1) bank1size=0;// workaround ...
    
@@ -223,6 +229,18 @@ CCart::CCart(UBYTE *gamedata,ULONG gamesize)
          mCartBank1,
          gamedata+(sizeof(LYNX_HEADER) + bank0size),
          bank1size);
+
+   if(mAudinFlag){// TODO clean up code
+      memcpy(
+		mCartBank0A,
+		gamedata+(sizeof(LYNX_HEADER)+ bank0size + bank1size),
+		bank0size);
+
+      memcpy(
+		mCartBank1A,
+		gamedata+(sizeof(LYNX_HEADER) + bank0size + bank1size + bank0size),
+		bank1size);
+   }
 
    if( bank0size==0) bank0size=1;// workaround ...
    if( bank1size==0) bank1size=1;// workaround ...
@@ -437,6 +455,20 @@ void CCart::Poke0(UBYTE data)
    }
 }
 
+void CCart::Poke0A(UBYTE data)
+{
+	if(mWriteEnableBank0)
+	{
+		ULONG address=(mShifter<<mShiftCount0)+(mCounter&mCountMask0);
+		mCartBank0A[address&mMaskBank0]=data;		
+	}
+	if(!mStrobe)
+	{
+		mCounter++;
+		mCounter&=0x07ff;
+	}
+}
+
 void CCart::Poke1(UBYTE data)
 {
    if(mWriteEnableBank1)
@@ -451,6 +483,19 @@ void CCart::Poke1(UBYTE data)
    }
 }
 
+void CCart::Poke1A(UBYTE data)
+{
+	if(mWriteEnableBank1)
+	{
+		ULONG address=(mShifter<<mShiftCount1)+(mCounter&mCountMask1);
+		mCartBank1A[address&mMaskBank1]=data;		
+	}
+	if(!mStrobe)
+	{
+		mCounter++;
+		mCounter&=0x07ff;
+	}
+}
 
 UBYTE CCart::Peek0(void)
 {
@@ -466,6 +511,20 @@ UBYTE CCart::Peek0(void)
    return data;
 }
 
+UBYTE CCart::Peek0A(void)
+{
+	ULONG address=(mShifter<<mShiftCount0)+(mCounter&mCountMask0);
+	UBYTE data=mCartBank0A[address&mMaskBank0];		
+
+	if(!mStrobe)
+	{
+		mCounter++;
+		mCounter&=0x07ff;
+	}
+
+	return data;
+}
+
 UBYTE CCart::Peek1(void)
 {
    ULONG address=(mShifter<<mShiftCount1)+(mCounter&mCountMask1);
@@ -478,5 +537,19 @@ UBYTE CCart::Peek1(void)
    }
 
    return data;
+}
+
+UBYTE CCart::Peek1A(void)
+{
+	ULONG address=(mShifter<<mShiftCount1)+(mCounter&mCountMask1);
+	UBYTE data=mCartBank1A[address&mMaskBank1];		
+
+	if(!mStrobe)
+	{
+                mCounter++;
+		mCounter&=0x07ff;
+	}
+
+	return data;
 }
 
