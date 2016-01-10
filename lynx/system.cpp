@@ -415,6 +415,7 @@ void CSystem::Reset(void)
    mSusie->Reset();
    mCpu->Reset();
 
+   // TODO Ram image homebrew do not need a ROM decryption... might crash
    if(!mRom->mValid)
    {
       HLE_BIOS_init();
