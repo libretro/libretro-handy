@@ -12,7 +12,8 @@ static retro_input_state_t input_state_cb;
 
 static CSystem *lynx = NULL;
 
-static unsigned char *snd_buffer8;
+//static unsigned char *snd_buffer8;
+static unsigned char *snd_buffer16s;
 static unsigned short soundBuffer[4096 * 8];
 
 static uint8_t lynx_width = 160;
@@ -219,7 +220,8 @@ bool retro_unserialize(const void *data, size_t size)
 static void lynx_initialize_sound(void)
 {
    gAudioEnabled = true;
-   snd_buffer8 = (unsigned char *) (&gAudioBuffer);
+//   snd_buffer8 = (unsigned char *) (&gAudioBuffer);
+   snd_buffer16s = (unsigned char *) (&gAudioBuffer);
 }
 
 static int file_exists(const char *path)
@@ -250,20 +252,9 @@ static bool lynx_romfilename(char *dest)
    return true;
 }
 
-static void lynx_sound_stream_update(unsigned short *buffer, int buf_length)
+inline static void lynx_sound_stream_update(unsigned short *buffer, int buf_length)
 {
-   unsigned i;
-   uint16_t left;
-
-   for (i = 0; i < buf_length; i++)
-   {
-      left = (snd_buffer8[i] << 8) - 32768;
-      *buffer = left;
-      ++buffer;
-      *buffer = left;
-      ++buffer;
-   }
-
+    memcpy(buffer, snd_buffer16s, buf_length);
    gAudioBufferPointer = 0;
 }
 
@@ -276,7 +267,7 @@ static UBYTE* lynx_display_callback(ULONG objref)
 
    if(gAudioBufferPointer > 0)
    {
-      int f = gAudioBufferPointer;
+      int f = gAudioBufferPointer / 4; // /1 - 8 bit mono, /2 8 bit stereo, /4 16 bit stereo
       lynx_sound_stream_update(soundBuffer, gAudioBufferPointer);
       audio_batch_cb((const int16_t*)soundBuffer, f);
    }

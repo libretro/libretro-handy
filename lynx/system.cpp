@@ -400,7 +400,8 @@ void CSystem::Reset(void)
 
    gAudioBufferPointer=0;
    gAudioLastUpdateCycle=0;
-   memset(gAudioBuffer,128,HANDY_AUDIO_BUFFER_SIZE);
+//	memset(gAudioBuffer,128,HANDY_AUDIO_BUFFER_SIZE); // only for unsigned 8bit
+	memset(gAudioBuffer,0,HANDY_AUDIO_BUFFER_SIZE); // for unsigned 8/16 bit
 
 #ifdef _LYNXDBG
    gSystemHalt=TRUE;
