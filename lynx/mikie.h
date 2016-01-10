@@ -214,7 +214,7 @@ class CMikie : public CLynxBase
       inline void ClearCPUSleep(void) {gSystemCPUSleep=FALSE;gSystemCPUSleep_Saved=FALSE;};
 
 
-      inline void Update(void);
+      void Update(void);
       inline void UpdateSound(void);
 
    private:
