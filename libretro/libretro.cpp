@@ -220,7 +220,6 @@ bool retro_unserialize(const void *data, size_t size)
 static void lynx_initialize_sound(void)
 {
    gAudioEnabled = true;
-//   snd_buffer8 = (unsigned char *) (&gAudioBuffer);
    snd_buffer16s = (unsigned char *) (&gAudioBuffer);
 }
 
