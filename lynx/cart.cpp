@@ -203,25 +203,29 @@ CCart::CCart(UBYTE *gamedata,ULONG gamesize)
 
    // Initialiase
 
+   // TODO: the following code to read the banks is not very nice .. should be reworked
+   // TODO: actually its dangerous, if more than one bank is used ... (only homebrews)
    int cartsize = __max(0, int(gamesize - sizeof(LYNX_HEADER)));
    int bank0size = __min(cartsize, (int)(mMaskBank0+1));
    int bank1size = __min(cartsize, (int)(mMaskBank1+1));
+
+   memset(mCartBank0, DEFAULT_CART_CONTENTS, bank0size);
+   memset(mCartBank1, DEFAULT_CART_CONTENTS, bank1size);
+   if( bank0size==1) bank0size=0;// workaround ...
+   if( bank1size==1) bank1size=0;// workaround ...
+   
    memcpy(
          mCartBank0,
          gamedata+(sizeof(LYNX_HEADER)),
          bank0size);
-   memset(
-         mCartBank0 + bank0size,
-         DEFAULT_CART_CONTENTS,
-         mMaskBank0+1 - bank0size);
+
    memcpy(
          mCartBank1,
-         gamedata+(sizeof(LYNX_HEADER)),
+         gamedata+(sizeof(LYNX_HEADER) + bank0size),
          bank1size);
-   memset(
-         mCartBank1 + bank0size,
-         DEFAULT_CART_CONTENTS,
-         mMaskBank1+1 - bank1size);
+
+   if( bank0size==0) bank0size=1;// workaround ...
+   if( bank1size==0) bank1size=1;// workaround ...
 
    // Copy the cart banks from the image
    if(gamesize)
