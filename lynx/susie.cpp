@@ -1871,11 +1871,19 @@ void CSusie::Poke(ULONG addr,UBYTE data)
          // Cartridge writing ports
 
       case (RCART0&0xff):
-         mSystem.Poke_CARTB0(data);
+         if(mSystem.mCart->CartGetAudin() && mSystem.mMikie->SwitchAudInValue()){
+           mSystem.Poke_CARTB0A(data);
+         }else{
+           mSystem.Poke_CARTB0(data);
+         }
          TRACE_SUSIE2("Poke(RCART0,%02x) at PC=$%04x",data,mSystem.mCpu->GetPC());
          break;
       case (RCART1&0xff):
-         mSystem.Poke_CARTB1(data);
+        if(mSystem.mCart->CartGetAudin() && mSystem.mMikie->SwitchAudInValue()){
+           mSystem.Poke_CARTB1A(data);
+        }else{
+            mSystem.Poke_CARTB1(data);
+         }
          TRACE_SUSIE2("Poke(RCART1,%02x) at PC=$%04x",data,mSystem.mCpu->GetPC());
          break;
 
@@ -2204,11 +2212,19 @@ UBYTE CSusie::Peek(ULONG addr)
          // Cartridge reading ports
 
       case (RCART0&0xff):
-         retval=mSystem.Peek_CARTB0();
+         if(mSystem.mCart->CartGetAudin() && mSystem.mMikie->SwitchAudInValue()){
+            retval=mSystem.Peek_CARTB0A();
+         }else{
+            retval=mSystem.Peek_CARTB0();
+         }
          //			TRACE_SUSIE2("Peek(RCART0)=$%02x at PC=$%04x",retval,mSystem.mCpu->GetPC());
          return retval;
       case (RCART1&0xff):
-         retval=mSystem.Peek_CARTB1();
+         if(mSystem.mCart->CartGetAudin() && mSystem.mMikie->SwitchAudInValue()){
+            retval=mSystem.Peek_CARTB1A();
+         }else{
+           retval=mSystem.Peek_CARTB1();
+         }
          //			TRACE_SUSIE2("Peek(RCART1)=$%02x at PC=$%04x",retval,mSystem.mCpu->GetPC());
          return retval;
 

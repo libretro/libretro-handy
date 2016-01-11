@@ -72,7 +72,8 @@
 //#define HANDY_AUDIO_BUFFER_SIZE					8192	// Needed for SDL STEREO 8bit
 #define HANDY_AUDIO_BUFFER_SIZE					16384	// Needed for SDL STEREO 16bit
 #else
-#define HANDY_AUDIO_BUFFER_SIZE					(HANDY_AUDIO_SAMPLE_FREQ/4)
+//#define HANDY_AUDIO_BUFFER_SIZE					(HANDY_AUDIO_SAMPLE_FREQ/4)
+#define HANDY_AUDIO_BUFFER_SIZE					(HANDY_AUDIO_SAMPLE_FREQ)
 #endif
 
 
@@ -275,8 +276,12 @@ class CSystem : public CSystemBase
 
       inline void  Poke_CARTB0(UBYTE data) {mCart->Poke0(data);};
       inline void  Poke_CARTB1(UBYTE data) {mCart->Poke1(data);};
+      inline void  Poke_CARTB0A(UBYTE data) {mCart->Poke0A(data);};
+      inline void  Poke_CARTB1A(UBYTE data) {mCart->Poke1A(data);};
       inline UBYTE Peek_CARTB0(void) {return mCart->Peek0();}
       inline UBYTE Peek_CARTB1(void) {return mCart->Peek1();}
+      inline UBYTE Peek_CARTB0A(void) {return mCart->Peek0A();}
+      inline UBYTE Peek_CARTB1A(void) {return mCart->Peek1A();}
       inline void  CartAddressStrobe(bool strobe) {mCart->CartAddressStrobe(strobe);};
       inline void  CartAddressData(bool data) {mCart->CartAddressData(data);};
 
