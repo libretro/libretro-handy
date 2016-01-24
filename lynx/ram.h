@@ -69,6 +69,7 @@ class CRam : public CLynxBase
    public:
 
       void	Reset(void);
+      void      Clear(void);
       bool	ContextSave(FILE *fp);
       bool	ContextLoad(LSS_FILE *fp);
 

@@ -123,6 +123,11 @@ void CRam::Reset(void)
    }
 }
 
+void CRam::Clear(void)
+{
+   memset(mRamData, 0, RAM_SIZE);
+}
+
 bool CRam::ContextSave(FILE *fp)
 {
    if(!fprintf(fp,"CRam::ContextSave")) return 0;

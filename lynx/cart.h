@@ -142,6 +142,7 @@ class CCart : public CLynxBase
       UBYTE	Peek0A(void);
       UBYTE	Peek1A(void);
 
+      void SetShifterValue(UBYTE a){mShifter=a; mCounter=0;}; // for fake bios
       // Data members
 
    public:
