@@ -58,12 +58,22 @@ extern CErrorInterface *gError;
 CRom::CRom(const char *romfile)
 {
    mWriteEnable = FALSE;
-   mValid = FALSE;
+   mValid = TRUE;
    strncpy(mFileName,romfile,1024);
    Reset();
 
    // Initialise ROM
    for(int loop=0;loop<ROM_SIZE;loop++) mRomData[loop]=DEFAULT_ROM_CONTENTS;
+   // actually not part of Boot ROM but uninitialized otherwise
+   // Reset Vector etc
+   mRomData[0x1F8]=0x00;
+   mRomData[0x1F9]=0x80;
+   mRomData[0x1FA]=0x00;
+   mRomData[0x1FB]=0x30;
+   mRomData[0x1FC]=0x80;
+   mRomData[0x1FD]=0xFF;
+   mRomData[0x1FE]=0x80;
+   mRomData[0x1FF]=0xFF;
 
    // Load up the file
 
@@ -71,45 +81,29 @@ CRom::CRom(const char *romfile)
 
    if((fp=fopen(mFileName,"rb"))==NULL)
    {
-      fprintf(stderr, "Invalid ROM.\n");
-      return;
+      fprintf(stdout, "The Lynx Boot ROM image couldn't be located! Using built-in replacement\n");
+      mValid = FALSE;
+   }else{
+      // Read in the 512 bytes
+      fprintf(stdout, "Read Lynx Boot ROM image\n");
+
+      if(fread(mRomData,sizeof(char),ROM_SIZE,fp)!=ROM_SIZE)
+      {
+         fprintf(stdout, "The Lynx Boot ROM image couldn't be loaded! Using built-in replacement\n");
+         mValid = FALSE;
+      }
+
+      if(fp) fclose(fp);
    }
-
-   // Read in the 512 bytes
-
-   if(fread(mRomData,sizeof(char),ROM_SIZE,fp)!=ROM_SIZE)
-   {
-      fprintf(stderr, "Invalid ROM.\n");
-      fclose(fp);
-      return;
-   }
-
-   fclose(fp);
 
    // Check the code that has been loaded and report an error if its a
-   // fake version of the bootrom
+   // fake version (from handy distribution) of the bootrom
+   // would be more intelligent to make a crc
 
-   UBYTE mRomCheck[16]={0x38,0x80,0x0A,0x90,0x04,0x8E,0x8B,0xFD,
-      0x18,0xE8,0x8E,0x87,0xFD,0xA2,0x02,0x8E};
-
-   static bool firsttime=TRUE;
-
-   if(firsttime)
-   {
-      firsttime=FALSE;
-      for(ULONG loop=0;loop<16;loop++)
-      {
-         if(mRomCheck[loop]!=mRomData[loop])
-         {
-            gError->Warning("FAKE LYNXBOOT.IMG - CARTRIDGES WILL NOT WORK\n\n"
-                  "PLEASE READ THE ACCOMPANYING README.TXT FILE\n\n"
-                  "(Do not email the author asking for this image)\n");
-            return;
-         }
-      }
+   if(mRomData[0x1FE]!=0x80 || mRomData[0x1FF]!=0xFF){
+      fprintf(stdout, "The Lynx Boot ROM image is invalid! Using built-in replacement\n");
+      mValid = FALSE;
    }
-
-   mValid = TRUE;
 }
 
 void CRom::Reset(void)
