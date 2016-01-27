@@ -57,13 +57,14 @@
 
 CCart::CCart(UBYTE *gamedata,ULONG gamesize)
 {
+   int headersize=0
    TRACE_CART1("CCart() called with %s",gamefile);
    LYNX_HEADER	header;
 
    mWriteEnableBank0=FALSE;
    mWriteEnableBank1=FALSE;
    mCartRAM=FALSE;
-   mHeaderLess=FALSE;
+   mHeaderLess=0;
    mCRC32=0;
    mCRC32=crc32(mCRC32,gamedata,gamesize);
 
@@ -83,12 +84,18 @@ CCart::CCart(UBYTE *gamedata,ULONG gamesize)
 
       if(header.magic[0]!='L' || header.magic[1]!='Y' || header.magic[2]!='N' || header.magic[3]!='X' || header.version!=1)
       {
-         fprintf(stderr, "Invalid cart.\n");
+        memset(&header,0,sizeof(LYNX_HEADER));
+        fprintf(stderr, "Invalid cart (no header?).\nGuessing a ROM layout...\n");
+        strncpy((char*)&header.cartname,"NO HEADER",32);
+        strncpy((char*)&header.manufname,"HANDY",16);
+        header.page_size_bank0=gamesize>>8;// Hard workaround...
+      }else{
+         headersize=sizeof(LYNX_HEADER);
       }
 
       // Setup name & manufacturer
 
-      strncpy(mName,(char*)&header.cartname,32);;
+      strncpy(mName,(char*)&header.cartname,32);
       strncpy(mManufacturer,(char*)&header.manufname,16);
 
       // Setup rotation
@@ -151,7 +158,7 @@ CCart::CCart(UBYTE *gamedata,ULONG gamesize)
          mCountMask0=0x7ff;
          break;
       default:
-         fprintf(stderr, "Invalid cart.\n");
+         fprintf(stderr, "Invalid cart (bank0 size).\n");
          break;
    }
    TRACE_CART1("CCart() - Bank0 = $%06x",mMaskBank0);
@@ -189,7 +196,7 @@ CCart::CCart(UBYTE *gamedata,ULONG gamesize)
          mCountMask1=0x7ff;
          break;
       default:
-         fprintf(stderr, "Invalid cart.\n");
+         fprintf(stderr, "Invalid cart (bank1 size).\n");
          break;
    }
    TRACE_CART1("CCart() - Bank1 = $%06x",mMaskBank1);
@@ -222,23 +229,23 @@ CCart::CCart(UBYTE *gamedata,ULONG gamesize)
    
    memcpy(
          mCartBank0,
-         gamedata+(sizeof(LYNX_HEADER)),
+         gamedata+(headersize),
          bank0size);
 
    memcpy(
          mCartBank1,
-         gamedata+(sizeof(LYNX_HEADER) + bank0size),
+         gamedata+(headersize + bank0size),
          bank1size);
 
    if(mAudinFlag){// TODO clean up code
       memcpy(
 		mCartBank0A,
-		gamedata+(sizeof(LYNX_HEADER)+ bank0size + bank1size),
+		gamedata+(headersize+ bank0size + bank1size),
 		bank0size);
 
       memcpy(
 		mCartBank1A,
-		gamedata+(sizeof(LYNX_HEADER) + bank0size + bank1size + bank0size),
+		gamedata+(headersize + bank0size + bank1size + bank0size),
 		bank1size);
    }
 
@@ -254,7 +261,7 @@ CCart::CCart(UBYTE *gamedata,ULONG gamesize)
 
       //
       // Check if this is a headerless cart
-      //
+      // Headerless used for Howie type... but this cannot work...
       mHeaderLess=TRUE;
       for(int loop=0;loop<32;loop++)
       {
@@ -286,6 +293,8 @@ CCart::~CCart()
    TRACE_CART0("~CCart()");
    delete[] mCartBank0;
    delete[] mCartBank1;
+   delete[] mCartBank0A;
+   delete[] mCartBank1A;
 }
 
 

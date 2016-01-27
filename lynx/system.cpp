@@ -142,7 +142,7 @@ void _splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
    ULONG filesize=0;
    ULONG howardsize=0;
 
-   mFileType=HANDY_FILETYPE_LNX;
+   mFileType=HANDY_FILETYPE_ILLEGAL;
    if(strcmp(gamefile,"")==0)
    {
       // No file
@@ -168,7 +168,7 @@ void _splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
 
       if(fread(filememory,sizeof(char),filesize,fp)!=filesize)
       {
-         fprintf(stderr, "Invalid Cart.\n");
+         fprintf(stderr, "Invalid Cart (filesize).\n");
          delete filememory;
       }
 
@@ -186,10 +186,13 @@ void _splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
       if(!strcmp(&clip[6],"BS93")) mFileType=HANDY_FILETYPE_HOMEBREW;
       else if(!strcmp(&clip[0],"LYNX")) mFileType=HANDY_FILETYPE_LNX;
       else if(!strcmp(&clip[0],LSS_VERSION_OLD)) mFileType=HANDY_FILETYPE_SNAPSHOT;
-      else
+      else if(filesize==128*1024 || filesize==128*1024 || filesize==128*1024)
       {
-         fprintf(stderr, "Invalid Cart.\n");
-         delete filememory;
+         fprintf(stderr, "Invalid Cart (type). but 128/256/512k size -> set to RAW and try to load raw rom image\n");
+         mFileType=HANDY_FILETYPE_RAW;
+         //delete filememory;// WHY????? -> crash!
+      }else{
+         fprintf(stderr, "Invalid Cart (type). -> set to RAW and try to load raw rom image\n");
       }
    }
 
@@ -205,10 +208,12 @@ void _splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
 
    switch(mFileType)
    {
+      case HANDY_FILETYPE_RAW:
       case HANDY_FILETYPE_LNX:
          mCart = new CCart(filememory,filesize);
          if(mCart->CartHeaderLess())
-         {
+         {// veryvery strange Howard Check CANNOT work, as there are two different loader-less card types...
+          // unclear HOW this should do anything useful...
             FILE	*fp;
             char drive[3],dir[256],cartgo[256];
             mFileType=HANDY_FILETYPE_HOMEBREW;

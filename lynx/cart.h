@@ -45,6 +45,9 @@
 #ifndef CART_H
 #define CART_H
 
+#define EPYX_HEADER_OLD 512
+#define EPYX_HEADER_NEW 410
+
 #ifndef __max
 #define __max(a,b) \
    ({ __typeof__ (a) _a = (a); \
@@ -75,7 +78,7 @@
 
 #endif
 
-#define DEFAULT_CART_CONTENTS	0x11
+#define DEFAULT_CART_CONTENTS	0xFF
 
 enum CTYPE {UNUSED,C64K,C128K,C256K,C512K,C1024K};
 
@@ -163,7 +166,7 @@ class CCart : public CLynxBase
       char	mManufacturer[17];
       ULONG	mRotation;
       bool      mAudinFlag;
-      ULONG	mHeaderLess;
+      int	mHeaderLess;
 
       ULONG	mCounter;
       ULONG	mShifter;
