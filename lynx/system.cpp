@@ -186,7 +186,7 @@ void _splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
       if(!strcmp(&clip[6],"BS93")) mFileType=HANDY_FILETYPE_HOMEBREW;
       else if(!strcmp(&clip[0],"LYNX")) mFileType=HANDY_FILETYPE_LNX;
       else if(!strcmp(&clip[0],LSS_VERSION_OLD)) mFileType=HANDY_FILETYPE_SNAPSHOT;
-      else if(filesize==128*1024 || filesize==128*1024 || filesize==128*1024)
+      else if(filesize==128*1024 || filesize==256*1024 || filesize==512*1024)
       {
          fprintf(stderr, "Invalid Cart (type). but 128/256/512k size -> set to RAW and try to load raw rom image\n");
          mFileType=HANDY_FILETYPE_RAW;
