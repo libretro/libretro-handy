@@ -4,7 +4,7 @@
 #include "system.h"
 #include "lynxdef.h"
 
-#define HANDYVER    "0.95"
+#define HANDYVER    "0.97"
 #define ROM_FILE    "lynxboot.img"
 
 #if defined(_WIN32)
