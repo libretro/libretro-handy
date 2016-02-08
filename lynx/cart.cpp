@@ -216,7 +216,7 @@ CCart::CCart(UBYTE *gamedata,ULONG gamesize)
 
    // TODO: the following code to read the banks is not very nice .. should be reworked
    // TODO: actually its dangerous, if more than one bank is used ... (only homebrews)
-   int cartsize = __max(0, int(gamesize - sizeof(LYNX_HEADER)));
+   int cartsize = __max(0, int(gamesize - headersize));
    int bank0size = __min(cartsize, (int)(mMaskBank0+1));
    int bank1size = __min(cartsize, (int)(mMaskBank1+1));
 
