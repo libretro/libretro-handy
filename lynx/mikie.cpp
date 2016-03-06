@@ -274,7 +274,7 @@ void CMikie::Reset(void)
    mAUDIO_3_INTEGRATE_ENABLE=0;
    mAUDIO_3_WAVESHAPER=0;
 
-	mSTEREO=0xff;	// xored! All channels enabled
+	mSTEREO=0x00;	// xored! All channels enabled
 	mPAN=0x00;      // all channels panning OFF
         mAUDIO_ATTEN[0]=0xff; // Full volume
         mAUDIO_ATTEN[1]=0xff;
@@ -1929,7 +1929,6 @@ void CMikie::Poke(ULONG addr,UBYTE data)
 
       case (MSTEREO&0xff):
 			TRACE_MIKIE2("Poke(MSTEREO,%02x) at PC=%04x",data,mSystem.mCpu->GetPC());
-         data^=0xff; // TODO warum kein XOR in libretto?
 			mSTEREO=data;
          //			if(!(mSTEREO&0x11) && (data&0x11))
          //			{
@@ -2601,7 +2600,7 @@ UBYTE CMikie::Peek(ULONG addr)
 
       case (MSTEREO&0xff):
          TRACE_MIKIE2("Peek(MSTEREO,%02x) at PC=%04x",(UBYTE)mSTEREO^0xff,mSystem.mCpu->GetPC());
-         return (UBYTE) mSTEREO^0xff;
+         return (UBYTE) mSTEREO;
 
          // Miscellaneous registers
 
@@ -4018,14 +4017,14 @@ inline void CMikie::UpdateSound(void)
               /// the values stored in mSTEREO are bit-inverted ...
               /// mSTEREO was found to be set like that already (why?), but unused
 
-              if(mSTEREO & (0x10 << x))
+              if(!(mSTEREO & (0x10 << x)))
               {
                 if(mPAN & (0x10 << x))
                   cur_lsample += (mAUDIO_OUTPUT[x]*(mAUDIO_ATTEN[x]&0xF0))/(16*16); /// NOT /15*16 see remark above
                 else
                   cur_lsample += mAUDIO_OUTPUT[x];
               }
-              if(mSTEREO & (0x01 << x))
+              if(!(mSTEREO & (0x01 << x)))
               {
                 if(mPAN & (0x01 << x))
                   cur_rsample += (mAUDIO_OUTPUT[x]*(mAUDIO_ATTEN[x]&0x0F))/16; /// NOT /15 see remark above
