@@ -96,7 +96,8 @@ typedef struct
    UBYTE   manufname[16];
    UBYTE   rotation;
    UBYTE   aud_bits; 
-   UBYTE   spare[4];
+   UBYTE   eeprom;
+   UBYTE   spare[3];
 }LYNX_HEADER;
 
 
@@ -146,6 +147,10 @@ class CCart : public CLynxBase
       UBYTE	Peek1A(void);
 
       void SetShifterValue(UBYTE a){mShifter=a; mCounter=0;}; // for fake bios
+   inline ULONG GetCounterValue(void)
+   {
+      return mCounter;
+   }; // for eeprom
       // Data members
 
    public:
@@ -154,6 +159,7 @@ class CCart : public CLynxBase
       ULONG	mCartRAM;
       ULONG	mMaskBank0;
       ULONG	mMaskBank1;
+      UBYTE     mEEPROMType;
 
    private:
       EMMODE	mBank;

@@ -645,9 +645,9 @@ ULONG CSusie::PaintSprites(void)
             TRACE_SUSIE0("PaintSprites() Palette reloaded");
             for(int loop=0;loop<8;loop++)
             {
-               UBYTE data=RAM_PEEK(mTMPADR.Word++);
-               mPenIndex[loop*2]=(data>>4)&0x0f;
-               mPenIndex[(loop*2)+1]=data&0x0f;
+               UBYTE data_tmp=RAM_PEEK(mTMPADR.Word++);
+               mPenIndex[loop*2]=(data_tmp>>4)&0x0f;
+               mPenIndex[(loop*2)+1]=data_tmp&0x0f;
             }
             // Increment cycle count for the reads
             cycles_used+=8*SPR_RDWR_CYC;
@@ -1876,6 +1876,7 @@ void CSusie::Poke(ULONG addr,UBYTE data)
          }else{
            mSystem.Poke_CARTB0(data);
          }
+         mSystem.mEEPROM->ProcessEepromCounter(mSystem.mCart->GetCounterValue());
          TRACE_SUSIE2("Poke(RCART0,%02x) at PC=$%04x",data,mSystem.mCpu->GetPC());
          break;
       case (RCART1&0xff):
@@ -1884,6 +1885,7 @@ void CSusie::Poke(ULONG addr,UBYTE data)
         }else{
             mSystem.Poke_CARTB1(data);
          }
+         mSystem.mEEPROM->ProcessEepromCounter(mSystem.mCart->GetCounterValue());
          TRACE_SUSIE2("Poke(RCART1,%02x) at PC=$%04x",data,mSystem.mCpu->GetPC());
          break;
 
@@ -2217,6 +2219,7 @@ UBYTE CSusie::Peek(ULONG addr)
          }else{
             retval=mSystem.Peek_CARTB0();
          }
+         mSystem.mEEPROM->ProcessEepromCounter(mSystem.mCart->GetCounterValue());
          //			TRACE_SUSIE2("Peek(RCART0)=$%02x at PC=$%04x",retval,mSystem.mCpu->GetPC());
          return retval;
       case (RCART1&0xff):
@@ -2225,6 +2228,7 @@ UBYTE CSusie::Peek(ULONG addr)
          }else{
            retval=mSystem.Peek_CARTB1();
          }
+         mSystem.mEEPROM->ProcessEepromCounter(mSystem.mCart->GetCounterValue());
          //			TRACE_SUSIE2("Peek(RCART1)=$%02x at PC=$%04x",retval,mSystem.mCpu->GetPC());
          return retval;
 
