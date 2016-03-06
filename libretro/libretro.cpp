@@ -18,8 +18,8 @@ static unsigned short soundBuffer[4096 * 8];
 static uint8_t lynx_width = 160;
 static uint8_t lynx_height = 102;
 
-#define VIDEO_CORE_PIXELSIZE	2 // MIKIE_PIXEL_FORMAT_16BPP_565
-//#define VIDEO_CORE_PIXELSIZE	4 // MIKIE_PIXEL_FORMAT_32BPP
+//#define VIDEO_CORE_PIXELSIZE	2 // MIKIE_PIXEL_FORMAT_16BPP_565
+#define VIDEO_CORE_PIXELSIZE	4 // MIKIE_PIXEL_FORMAT_32BPP
 
 
 static uint16_t framebuffer[160*102*VIDEO_CORE_PIXELSIZE];
