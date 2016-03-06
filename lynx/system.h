@@ -171,6 +171,7 @@ class CSystem;
 #include "rom.h"
 #include "memmap.h"
 #include "cart.h"
+#include "eeprom.h"
 #include "susie.h"
 #include "mikie.h"
 #include "c65c02.h"
@@ -331,6 +332,7 @@ class CSystem : public CSystemBase
       C65C02			*mCpu;
       CMikie			*mMikie;
       CSusie			*mSusie;
+      CEEPROM			*mEEPROM;
 
       ULONG			mFileType;
 };

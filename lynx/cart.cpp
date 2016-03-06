@@ -65,6 +65,7 @@ CCart::CCart(UBYTE *gamedata,ULONG gamesize)
    mWriteEnableBank1=FALSE;
    mCartRAM=FALSE;
    mHeaderLess=0;
+   mEEPROMType=0;
    mCRC32=0;
    mCRC32=crc32(mCRC32,gamedata,gamesize);
 
@@ -103,6 +104,7 @@ CCart::CCart(UBYTE *gamedata,ULONG gamesize)
       mRotation=header.rotation;
       if(mRotation!=CART_NO_ROTATE && mRotation!=CART_ROTATE_LEFT && mRotation!=CART_ROTATE_RIGHT) mRotation=CART_NO_ROTATE;
       mAudinFlag=(header.aud_bits&0x01) ;
+      mEEPROMType=header.eeprom;
    }
    else
    {

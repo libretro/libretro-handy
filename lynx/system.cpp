@@ -128,7 +128,8 @@ void _splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
    mRam(NULL),
    mCpu(NULL),
    mMikie(NULL),
-   mSusie(NULL)
+    mSusie(NULL),
+    mEEPROM()
 {
 
 #ifdef _LYNXDBG
@@ -294,12 +295,14 @@ void _splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
    }
    if(filesize) delete filememory;
    if(howardsize) delete howardmemory;
+   mEEPROM->SetEEPROMType(mCart->mEEPROMType);
 }
 
 CSystem::~CSystem()
 {
    // Cleanup all our objects
 
+   if(mEEPROM!=NULL) delete mEEPROM;
    if(mCart!=NULL) delete mCart;
    if(mRom!=NULL) delete mRom;
    if(mRam!=NULL) delete mRam;
@@ -416,6 +419,7 @@ void CSystem::Reset(void)
 
    mMemMap->Reset();
    mCart->Reset();
+   mEEPROM->Reset();
    mRom->Reset();
    mRam->Reset();
    mMikie->Reset();
@@ -502,6 +506,7 @@ bool CSystem::ContextSave(const char *context)
    // Save other device contexts
    if(!mMemMap->ContextSave(fp)) status=0;
    if(!mCart->ContextSave(fp)) status=0;
+   if(!mEEPROM->ContextSave(fp)) status=0;
    //	if(!mRom->ContextSave(fp)) status=0; We no longer save the system ROM
    if(!mRam->ContextSave(fp)) status=0;
    if(!mMikie->ContextSave(fp)) status=0;
