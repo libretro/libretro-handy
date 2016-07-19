@@ -217,10 +217,11 @@ bool retro_unserialize(const void *data, size_t size)
    return lynx->MemoryContextLoad((const char*)data, size);
 }
 
-static void lynx_initialize_sound(void)
+static bool lynx_initialize_sound(void)
 {
    gAudioEnabled = true;
    snd_buffer16s = (unsigned char *) (&gAudioBuffer);
+   return true;
 }
 
 static int file_exists(const char *path)
@@ -275,7 +276,7 @@ static UBYTE* lynx_display_callback(ULONG objref)
    return (UBYTE*)framebuffer;
 }
 
-static void lynx_initialize_system(const char* gamepath)
+static bool lynx_initialize_system(const char* gamepath)
 {
    ULONG rot;
    char romfilename[1024];
@@ -313,6 +314,8 @@ static void lynx_initialize_system(const char* gamepath)
    }
 
    lynx->DisplaySetAttributes(rot, MIKIE_PIXEL_FORMAT_16BPP_565, 320, lynx_display_callback, (ULONG)0);
+
+   return true;
 }
 
 bool retro_load_game(const struct retro_game_info *info)
@@ -333,11 +336,17 @@ bool retro_load_game(const struct retro_game_info *info)
 
    environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
 
-   lynx_initialize_system(info->path);
-   lynx_initialize_sound();
+   if (!lynx_initialize_system(info->path))
+      goto failed;
+
+   if (!lynx_initialize_sound())
+      goto failed;
 
    initialized = true;
    return true;
+
+failed:
+   return false;
 }
 
 bool retro_load_game_special(unsigned, const struct retro_game_info*, size_t)
@@ -347,6 +356,7 @@ bool retro_load_game_special(unsigned, const struct retro_game_info*, size_t)
 
 void retro_unload_game(void)
 {
+   initialized = false;
 }
 
 void retro_cheat_reset(void)
