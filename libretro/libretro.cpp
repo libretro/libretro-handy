@@ -337,16 +337,13 @@ bool retro_load_game(const struct retro_game_info *info)
    environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
 
    if (!lynx_initialize_system(info->path))
-      goto failed;
+      return false;
 
    if (!lynx_initialize_sound())
-      goto failed;
+      return false;
 
    initialized = true;
    return true;
-
-failed:
-   return false;
 }
 
 bool retro_load_game_special(unsigned, const struct retro_game_info*, size_t)
