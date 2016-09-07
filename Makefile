@@ -87,7 +87,7 @@ else ifeq ($(platform), theos_ios)
 # QNX
 else ifeq ($(platform),qnx)
 	fpic := -fPIC
-	TARGET := $(TARGET_NAME)_libretro_qnx.so
+	TARGET := $(TARGET_NAME)_libretro_$(platform).so
 	SHARED := -shared -Wl,-version-script=$(LIBRETRO_DIR)/link.T -Wl,-no-undefined
 	CC = qcc -Vgcc_ntoarmv7le
 	CXX = QCC -Vgcc_ntoarmv7le_cpp
@@ -95,7 +95,7 @@ else ifeq ($(platform),qnx)
 
 # PS3
 else ifeq ($(platform),ps3)
-	TARGET := $(TARGET_NAME)_libretro_ps3.a
+	TARGET := $(TARGET_NAME)_libretro_$(platform).a
 	CC = $(CELL_SDK)/host-win32/ppu/bin/ppu-lv2-gcc.exe
 	CXX = $(CELL_SDK)/host-win32/ppu/bin/ppu-lv2-g++.exe
 	AR = $(CELL_SDK)/host-win32/ppu/bin/ppu-lv2-ar.exe
@@ -115,7 +115,7 @@ else ifeq ($(platform), sncps3)
 
 # PSP
 else ifeq ($(platform),psp1)
-	TARGET := $(TARGET_NAME)_libretro_psp1.a
+	TARGET := $(TARGET_NAME)_libretro_$(platform).a
 	CC = psp-gcc$(EXE_EXT)
 	CXX = psp-g++$(EXE_EXT)
 	AR = psp-ar$(EXE_EXT)
@@ -125,7 +125,7 @@ else ifeq ($(platform),psp1)
 
 # Vita
 else ifeq ($(platform),vita)
-	TARGET := $(TARGET_NAME)_libretro_vita.a
+	TARGET := $(TARGET_NAME)_libretro_$(platform).a
 	CC = arm-vita-eabi-gcc$(EXE_EXT)
 	CXX = arm-vita-eabi-g++$(EXE_EXT)
 	AR = arm-vita-eabi-ar$(EXE_EXT)
@@ -135,7 +135,7 @@ else ifeq ($(platform),vita)
 
 # Nintendo Game Cube
 else ifeq ($(platform), ngc)
-	TARGET := $(TARGET_NAME)_libretro_ngc.a
+	TARGET := $(TARGET_NAME)_libretro_$(platform).a
 	CC = $(DEVKITPPC)/bin/powerpc-eabi-gcc$(EXE_EXT)
 	CXX = $(DEVKITPPC)/bin/powerpc-eabi-gcc$(EXE_EXT)
 	AR = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT)
@@ -146,7 +146,7 @@ else ifeq ($(platform), ngc)
 
 # Nintendo Wii
 else ifeq ($(platform), wii)
-	TARGET := $(TARGET_NAME)_libretro_wii.a
+	TARGET := $(TARGET_NAME)_libretro_$(platform).a
 	CC = $(DEVKITPPC)/bin/powerpc-eabi-gcc$(EXE_EXT)
 	CXX = $(DEVKITPPC)/bin/powerpc-eabi-g++$(EXE_EXT)
 	AR = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT)
@@ -177,6 +177,12 @@ else ifneq (,$(findstring armv,$(platform)))
 	else ifneq (,$(findstring hardfloat,$(platform)))
 		FLAGS += -mfloat-abi=hard
 	endif
+
+# Emscripten
+else ifeq ($(platform), emscripten)
+	TARGET := $(TARGET_NAME)_libretro_$(platform).bc
+	STATIC_LINKING = 1
+	FLAGS += -DWANT_CRC32
 
 # Windows
 else
