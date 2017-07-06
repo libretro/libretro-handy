@@ -258,7 +258,11 @@ else
 FLAGS += -O2 -DNDEBUG
 endif
 
-FLAGS += -fomit-frame-pointer -I. $(fpic) $(libs) $(includes) -DWANT_CRC32
+ifeq (,$(findstring msvc,$(platform)))
+FLAGS += -fomit-frame-pointer
+endif
+
+FLAGS += -I. $(fpic) $(libs) $(includes) -DWANT_CRC32
 CXXFLAGS += $(FLAGS) $(INCFLAGS) $(INCFLAGS_PLATFORM)
 CFLAGS += $(FLAGS) $(INCFLAGS) $(INCFLAGS_PLATFORM)
 
