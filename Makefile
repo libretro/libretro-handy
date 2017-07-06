@@ -36,14 +36,12 @@ ifeq ($(platform), unix)
 	fpic := -fPIC
 	TARGET := $(TARGET_NAME)_libretro.so
 	SHARED := -shared -Wl,-version-script=$(LIBRETRO_DIR)/link.T -Wl,-no-undefined
-	FLAGS += -DWANT_CRC32
 
 # OS X
 else ifeq ($(platform),osx)
 	fpic := -fPIC
 	TARGET := $(TARGET_NAME)_libretro.dylib
 	SHARED := -dynamiclib
-	FLAGS += -DWANT_CRC32
 	LIBS :=
 	OSXVER = `sw_vers -productVersion | cut -d. -f 2`
 	OSX_LT_MAVERICKS = `(( $(OSXVER) <= 9)) && echo "YES"`
@@ -65,7 +63,6 @@ else ifneq (,$(findstring ios,$(platform)))
 	endif
 	CC = cc -arch armv7 -isysroot $(IOSSDK)
 	CXX = c++ -arch armv7 -isysroot $(IOSSDK)
-	FLAGS += -DWANT_CRC32
 	LIBS :=
 ifeq ($(platform),ios9)
 	SHARED += -miphoneos-version-min=8.0
@@ -86,7 +83,6 @@ else ifeq ($(platform), theos_ios)
 	THEOS_BUILD_DIR := objs
 	include $(THEOS)/makefiles/common.mk
 	LIBRARY_NAME = $(TARGET_NAME)_libretro_ios
-	FLAGS += -DWANT_CRC32
 
 # QNX
 else ifeq ($(platform),qnx)
@@ -95,7 +91,6 @@ else ifeq ($(platform),qnx)
 	SHARED := -shared -Wl,-version-script=$(LIBRETRO_DIR)/link.T -Wl,-no-undefined
 	CC = qcc -Vgcc_ntoarmv7le
 	CXX = QCC -Vgcc_ntoarmv7le_cpp
-	FLAGS += -DWANT_CRC32
 
 # PS3
 else ifeq ($(platform),ps3)
@@ -103,7 +98,7 @@ else ifeq ($(platform),ps3)
 	CC = $(CELL_SDK)/host-win32/ppu/bin/ppu-lv2-gcc.exe
 	CXX = $(CELL_SDK)/host-win32/ppu/bin/ppu-lv2-g++.exe
 	AR = $(CELL_SDK)/host-win32/ppu/bin/ppu-lv2-ar.exe
-	FLAGS += -DMSB_FIRST -DWANT_CRC32
+	FLAGS += -DMSB_FIRST
 	STATIC_LINKING := 1
 	LIBS :=
 
@@ -113,7 +108,7 @@ else ifeq ($(platform), sncps3)
 	CC = $(CELL_SDK)/host-win32/sn/bin/ps3ppusnc.exe
 	CXX = $(CELL_SDK)/host-win32/sn/bin/ps3ppusnc.exe
 	AR = $(CELL_SDK)/host-win32/sn/bin/ps3snarl.exe
-	FLAGS += -DMSB_FIRST -DWANT_CRC32
+	FLAGS += -DMSB_FIRST
 	STATIC_LINKING := 1
 	LIBS :=
 
@@ -123,7 +118,7 @@ else ifeq ($(platform),psp1)
 	CC = psp-gcc$(EXE_EXT)
 	CXX = psp-g++$(EXE_EXT)
 	AR = psp-ar$(EXE_EXT)
-	FLAGS += -G0 -DLSB_FIRST -DWANT_CRC32
+	FLAGS += -G0 -DLSB_FIRST
 	STATIC_LINKING := 1
 	LIBS :=
 
@@ -133,7 +128,7 @@ else ifeq ($(platform),vita)
 	CC = arm-vita-eabi-gcc$(EXE_EXT)
 	CXX = arm-vita-eabi-g++$(EXE_EXT)
 	AR = arm-vita-eabi-ar$(EXE_EXT)
-	FLAGS += -DVITA -DLSB_FIRST -DWANT_CRC32
+	FLAGS += -DVITA -DLSB_FIRST
 	STATIC_LINKING := 1
 	LIBS :=
 
@@ -145,7 +140,6 @@ else ifeq ($(platform), ngc)
 	AR = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT)
 	FLAGS += -DGEKKO -DHW_DOL -mrvl -mcpu=750 -meabi -mhard-float -D__ppc__ -DMSB_FIRST
 	STATIC_LINKING = 1
-	FLAGS += -DWANT_CRC32
 	LIBS :=
 
 # Nintendo Wii
@@ -156,7 +150,6 @@ else ifeq ($(platform), wii)
 	AR = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT)
 	FLAGS += -DGEKKO -DHW_RVL -mrvl -mcpu=750 -meabi -mhard-float -D__ppc__ -DMSB_FIRST
 	STATIC_LINKING = 1
-	FLAGS += -DWANT_CRC32
 	LIBS :=
 
 # Nintendo Wii
@@ -167,14 +160,12 @@ else ifeq ($(platform), wiiu)
 	AR = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT)
 	FLAGS += -DGEKKO -DWIIU -DHW_RVL -mrvl -mcpu=750 -meabi -mhard-float -D__ppc__ -DMSB_FIRST
 	STATIC_LINKING = 1
-	FLAGS += -DWANT_CRC32
 	LIBS :=
 
 # ARM
 else ifneq (,$(findstring armv,$(platform)))
 	TARGET := $(TARGET_NAME)_libretro.so
 	SHARED := -shared -Wl,-version-script=$(LIBRETRO_DIR)/link.T -Wl,-no-undefined
-	FLAGS += -DWANT_CRC32
 	fpic := -fPIC
 	ifneq (,$(findstring cortexa5,$(platform)))
 		FLAGS += -marm -mcpu=cortex-a5
@@ -197,7 +188,6 @@ else ifneq (,$(findstring armv,$(platform)))
 else ifeq ($(platform), emscripten)
 	TARGET := $(TARGET_NAME)_libretro_$(platform).bc
 	STATIC_LINKING = 1
-	FLAGS += -DWANT_CRC32
 # Windows MSVC 2010 x64
 else ifeq ($(platform), windows_msvc2010_x64)
 	CC  = cl.exe
@@ -253,7 +243,6 @@ else
 	CC = gcc
 	CXX = g++
 	SHARED := -shared -static-libgcc -static-libstdc++ -Wl,-no-undefined -Wl,-version-script=$(LIBRETRO_DIR)/link.T
-	FLAGS += -DWANT_CRC32
 
 endif
 
@@ -269,7 +258,7 @@ else
 FLAGS += -O2 -DNDEBUG
 endif
 
-FLAGS += -fomit-frame-pointer -I. $(fpic) $(libs) $(includes)
+FLAGS += -fomit-frame-pointer -I. $(fpic) $(libs) $(includes) -DWANT_CRC32
 CXXFLAGS += $(FLAGS) $(INCFLAGS) $(INCFLAGS_PLATFORM)
 CFLAGS += $(FLAGS) $(INCFLAGS) $(INCFLAGS_PLATFORM)
 
