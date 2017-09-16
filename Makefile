@@ -20,6 +20,11 @@ endif
 LIBRETRO_DIR := libretro
 CORE_DIR := src
 
+prefix := /usr
+libdir := $(prefix)/lib
+
+LIBRETRO_INSTALL_DIR := libretro
+
 # system platform
 system_platform = unix
 ifeq ($(shell uname -a),)
@@ -325,5 +330,11 @@ clean:
 	rm -f $(OBJECTS)
 	rm -f $(TARGET)
 
-.PHONY: clean clean-objs all
+install:
+	install -D -m 755 $(TARGET) $(DESTDIR)$(libdir)/$(LIBRETRO_INSTALL_DIR)/$(TARGET)
+
+uninstall:
+	rm $(DESTDIR)$(libdir)/$(LIBRETRO_INSTALL_DIR)/$(TARGET)
+
+.PHONY: clean clean-objs all install uninstall
 endif
