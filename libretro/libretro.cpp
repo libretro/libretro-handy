@@ -389,5 +389,5 @@ size_t retro_get_memory_size(unsigned type)
 {
    if (type == RETRO_MEMORY_SYSTEM_RAM)
       return 1024 * 64;
-   return NULL;
+   return 0;
 }
