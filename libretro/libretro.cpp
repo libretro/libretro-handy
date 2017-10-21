@@ -380,12 +380,14 @@ unsigned retro_get_region()
 
 void *retro_get_memory_data(unsigned type)
 {
-   if (lynx)
+   if (lynx && type == RETRO_MEMORY_SYSTEM_RAM)
       return lynx->GetRamPointer();
    return NULL;
 }
 
 size_t retro_get_memory_size(unsigned type)
 {
-   return 1024 * 64;
+   if (type == RETRO_MEMORY_SYSTEM_RAM)
+      return 1024 * 64;
+   return NULL;
 }
