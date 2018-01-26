@@ -172,6 +172,12 @@ else ifeq ($(platform), wiiu)
 	STATIC_LINKING = 1
 	LIBS :=
 
+# Nintendo Switch (libtransistor)
+else ifeq ($(platform), switch)
+   TARGET := $(TARGET_NAME)_libretro_$(platform).a
+   include $(LIBTRANSISTOR_HOME)/libtransistor.mk
+   STATIC_LINKING=1
+
 # ARM
 else ifneq (,$(findstring armv,$(platform)))
 	TARGET := $(TARGET_NAME)_libretro.so
