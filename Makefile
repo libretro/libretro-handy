@@ -162,7 +162,7 @@ else ifeq ($(platform), wii)
 	STATIC_LINKING = 1
 	LIBS :=
 
-# Nintendo Wii
+# Nintendo Wiiu
 else ifeq ($(platform), wiiu)
 	TARGET := $(TARGET_NAME)_libretro_$(platform).a
 	CC = $(DEVKITPPC)/bin/powerpc-eabi-gcc$(EXE_EXT)
@@ -171,6 +171,19 @@ else ifeq ($(platform), wiiu)
 	FLAGS += -DGEKKO -DWIIU -DHW_RVL -mrvl -mcpu=750 -meabi -mhard-float -D__ppc__ -DMSB_FIRST
 	STATIC_LINKING = 1
 	LIBS :=
+	
+# CTR (3DS)
+else ifeq ($(platform), ctr)
+	TARGET := $(TARGET_NAME)_libretro_$(platform).a
+	CC = $(DEVKITARM)/bin/arm-none-eabi-gcc$(EXE_EXT)
+	CXX = $(DEVKITARM)/bin/arm-none-eabi-g++$(EXE_EXT)
+	AR = $(DEVKITARM)/bin/arm-none-eabi-ar$(EXE_EXT)
+	PLATFORM_DEFINES := -DARM11 -D_3DS -DCC_RESAMPLER -DCC_RESAMPLER_NO_HIGHPASS
+	CFLAGS += -march=armv6k -mtune=mpcore -mfloat-abi=hard
+	CFLAGS += -Wall -mword-relocations
+	CFLAGS += -fomit-frame-pointer -ffast-math
+	CXXFLAGS += $(CFLAGS)
+	STATIC_LINKING = 1
 
 # Nintendo Switch (libtransistor)
 else ifeq ($(platform), switch)
