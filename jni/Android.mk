@@ -1,35 +1,20 @@
 LOCAL_PATH := $(call my-dir)
 
-include $(CLEAR_VARS)
-
-GIT_VERSION := " $(shell git rev-parse --short HEAD || echo unknown)"
-ifneq ($(GIT_VERSION)," unknown")
-	LOCAL_CXXFLAGS += -DGIT_VERSION=\"$(GIT_VERSION)\"
-endif
-
-ifeq ($(TARGET_ARCH),arm)
-LOCAL_CFLAGS += -DANDROID_ARM
-LOCAL_ARM_MODE := arm
-endif
-
-ifeq ($(TARGET_ARCH),x86)
-LOCAL_CFLAGS +=  -DANDROID_X86
-endif
-
-ifeq ($(TARGET_ARCH),mips)
-LOCAL_CFLAGS += -DANDROID_MIPS
-endif
-
-LOCAL_MODULE    := libretro
-LOCAL_LDLIBS    += -lz 
-CORE_DIR := ..
+CORE_DIR := $(LOCAL_PATH)/..
 
 include $(CORE_DIR)/Makefile.common
 
-LOCAL_SRC_FILES    =  $(SOURCES_CXX)
+COREFLAGS := -DANDROID -D__LIBRETRO__ -DHAVE_STRINGS_H -DHAVE_STDINT_H -DWANT_CRC32 $(INCFLAGS)
 
-LOCAL_CXXFLAGS += -DANDROID -DARM -D__LIBRETRO__ -DHAVE_STRINGS_H -DHAVE_STDINT_H -DWANT_CRC32
+GIT_VERSION := " $(shell git rev-parse --short HEAD || echo unknown)"
+ifneq ($(GIT_VERSION)," unknown")
+  COREFLAGS += -DGIT_VERSION=\"$(GIT_VERSION)\"
+endif
 
-LOCAL_C_INCLUDES = $(CORE_DIR) $(CORE_DIR)/lynx $(CORE_DIR)/libretro
-
+include $(CLEAR_VARS)
+LOCAL_MODULE    := retro
+LOCAL_SRC_FILES := $(SOURCES_CXX)
+LOCAL_CXXFLAGS  := $(COREFLAGS)
+LOCAL_LDFLAGS   := -Wl,-version-script=$(CORE_DIR)/libretro/link.T
+LOCAL_LDLIBS    := -lz
 include $(BUILD_SHARED_LIBRARY)
