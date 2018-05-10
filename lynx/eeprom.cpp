@@ -207,6 +207,7 @@ void CEEPROM::UpdateEeprom(UWORD cnt)
                   break;
                case 0x00:
                   if((data>>(ADDR_BITS-2))==0x0) {
+
 //                      printf("EWDS\n");
                      readonly=true;
                      break;
