@@ -484,7 +484,7 @@ ULONG CSusie::PaintSprites(void)
    {
       TRACE_SUSIE1("PaintSprites() ************ Rendering Sprite %03d ************",sprcount);
 
-      everonscreen=0;
+      everonscreen=0;// everon has to be reset for every sprite, thus line was moved inside this loop
 
       // Step 1 load up the SCB params into Susie
 
@@ -1459,7 +1459,7 @@ inline ULONG CSusie::LineGetBits(ULONG bits)
 
    // Only return data IF there is enought bits left in the packet
 
-   if(mLinePacketBitsLeft<=bits) return 0;
+   if(mLinePacketBitsLeft<=bits) return 0;// <= fixes issues with polygones e.g. "demo006"
 
    // Make sure shift reg has enough bits to fulfil the request
 

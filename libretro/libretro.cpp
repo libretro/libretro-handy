@@ -103,8 +103,10 @@ void retro_init(void)
 
 void retro_reset(void)
 {
-   if(lynx)
+   if(lynx){
+       lynx->SaveEEPROM();
       lynx->Reset();
+   }
 }
 
 void retro_deinit(void)
@@ -112,8 +114,11 @@ void retro_deinit(void)
    retro_reset();
    initialized = false;
 
-   if(lynx)
+   if(lynx){
+       lynx->SaveEEPROM();
       delete lynx;
+       lynx=0;
+   }
 }
 
 void retro_set_environment(retro_environment_t cb)
@@ -301,12 +306,15 @@ static bool lynx_initialize_system(const char* gamepath)
    ULONG rot;
    char romfilename[1024];
    struct retro_variable var = {0};
-   if(lynx)
-      delete(lynx);
+   if(lynx){
+       lynx->SaveEEPROM();
+      delete lynx;
+      lynx=0;
+   }
 
    lynx_romfilename(romfilename);
 
-   lynx = new CSystem(gamepath, romfilename);
+   lynx = new CSystem(gamepath, romfilename, true);
 
    rot = MIKIE_NO_ROTATE;
    lynx_width = 160;
@@ -380,6 +388,12 @@ bool retro_load_game_special(unsigned, const struct retro_game_info*, size_t)
 
 void retro_unload_game(void)
 {
+// TODO should be save EEPROM here, too?
+//    if(lynx){
+//        lynx->SaveEEPROM();
+//        delete lynx;
+//        lynx=0;
+//    }
    initialized = false;
 }
 

@@ -55,7 +55,7 @@
 
 extern CErrorInterface *gError;
 
-CRom::CRom(const char *romfile)
+CRom::CRom(const char *romfile,bool useEmu)
 {
    mWriteEnable = FALSE;
    mValid = TRUE;
@@ -75,34 +75,43 @@ CRom::CRom(const char *romfile)
    mRomData[0x1FE]=0x80;
    mRomData[0x1FF]=0xFF;
 
-   // Load up the file
-
-   FILE	*fp;
-
-   if((fp=fopen(mFileName,"rb"))==NULL)
-   {
-      fprintf(stdout, "The Lynx Boot ROM image couldn't be located! Using built-in replacement\n");
+   if(useEmu){
       mValid = FALSE;
    }else{
-      // Read in the 512 bytes
-      fprintf(stdout, "Read Lynx Boot ROM image\n");
+      // Load up the file
 
-      if(fread(mRomData,sizeof(char),ROM_SIZE,fp)!=ROM_SIZE)
+      FILE	*fp;
+
+      if((fp=fopen(mFileName,"rb"))==NULL)
       {
-         fprintf(stdout, "The Lynx Boot ROM image couldn't be loaded! Using built-in replacement\n");
+        fprintf(stdout, "The Lynx Boot ROM image couldn't be located! Using built-in replacement\n");
+        mValid = FALSE;
+      }else{
+         // Read in the 512 bytes
+         fprintf(stdout, "Read Lynx Boot ROM image\n");
+
+         if(fread(mRomData,sizeof(char),ROM_SIZE,fp)!=ROM_SIZE)
+         {
+            fprintf(stdout, "The Lynx Boot ROM image couldn't be loaded! Using built-in replacement\n");
+            mValid = FALSE;
+         }
+         if(fp) fclose(fp);
+      }
+
+      // Check the code that has been loaded and report an error if its a
+      // fake version (from handy distribution) of the bootrom
+      // would be more intelligent to make a crc
+
+      if(mRomData[0x1FE]!=0x80 || mRomData[0x1FF]!=0xFF){
+         fprintf(stdout, "The Lynx Boot ROM image is invalid! Using built-in replacement\n");
          mValid = FALSE;
       }
 
-      if(fp) fclose(fp);
-   }
-
-   // Check the code that has been loaded and report an error if its a
-   // fake version (from handy distribution) of the bootrom
-   // would be more intelligent to make a crc
-
-   if(mRomData[0x1FE]!=0x80 || mRomData[0x1FF]!=0xFF){
-      fprintf(stdout, "The Lynx Boot ROM image is invalid! Using built-in replacement\n");
-      mValid = FALSE;
+      if(mValid==FALSE){
+         fprintf(stdout, "The chosen bootrom is not existing or invalid.\n"
+                      "Switching now to bootrom emulation.\n"
+                     );
+      }
    }
 }
 

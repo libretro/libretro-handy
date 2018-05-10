@@ -121,7 +121,7 @@ void _splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
    }
 }
 
-   CSystem::CSystem(const char* gamefile, const char* romfile)
+   CSystem::CSystem(const char* gamefile, const char* romfile, bool useEmu)
 :mCart(NULL),
    mRom(NULL),
    mMemMap(NULL),
@@ -129,7 +129,7 @@ void _splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
    mCpu(NULL),
    mMikie(NULL),
     mSusie(NULL),
-    mEEPROM()
+    mEEPROM(NULL)
 {
 
 #ifdef _LYNXDBG
@@ -203,9 +203,10 @@ void _splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
 
    // Attempt to load the cartridge errors caught above here...
 
-   mRom = new CRom(romfile);
+   mRom = new CRom(romfile,useEmu);
 
    // An exception from this will be caught by the level above
+   mEEPROM = new CEEPROM();
 
    switch(mFileType)
    {
@@ -296,6 +297,20 @@ void _splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
    if(filesize) delete filememory;
    if(howardsize) delete howardmemory;
    mEEPROM->SetEEPROMType(mCart->mEEPROMType);
+
+   {
+      char eepromfile[1024];
+      strncpy(eepromfile, gamefile,1024-10);
+      strcat(eepromfile,".eeprom");
+      mEEPROM->SetFilename(eepromfile);
+      printf("filename %d %s %s\n",mCart->mEEPROMType,gamefile,eepromfile);
+      mEEPROM->Load();
+   }
+}
+
+void CSystem::SaveEEPROM(void)
+{
+   if(mEEPROM!=NULL) mEEPROM->Save();
 }
 
 CSystem::~CSystem()
@@ -366,7 +381,6 @@ void CSystem::HLE_BIOS_FE4A(void)
       {
          buff[i] = mCart->Peek0();
       }
-        printf("\n");
 
       lynx_decrypt(res, buff, 51);
 
@@ -381,7 +395,7 @@ void CSystem::HLE_BIOS_FE4A(void)
    C6502_REGS regs;
    mCpu->GetRegs(regs);
    regs.PC=0x0200;
-   mCpu->SetRegs(regs);    
+   mCpu->SetRegs(regs);
 }
 
 void CSystem::HLE_BIOS_FF80(void)

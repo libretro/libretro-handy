@@ -6,6 +6,13 @@
 #ifndef EEPROM_H
 #define EEPROM_H
 
+#ifndef __min
+#define __min(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a > _b ? _b : _a; })
+#endif
+
 enum {EE_NONE=0, EE_START, EE_DATA, EE_BUSY, EE_WAIT};
 
 class CEEPROM : public CLynxBase
@@ -29,7 +36,7 @@ public:
    };
    void SetEEPROMType(UBYTE b);
    int Size(void);
-   int InitFrom(char *data,int count){ memcpy(romdata,data,min(count,Size()));};
+   int InitFrom(char *data,int count){ memcpy(romdata,data,__min(count,Size()));};
 
    void	Poke(ULONG addr,UBYTE data) { };
    UBYTE	Peek(ULONG addr)

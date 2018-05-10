@@ -189,8 +189,9 @@ class CSystem;
 class CSystem : public CSystemBase
 {
    public:
-      CSystem(const char* gamefile, const char* romfile);
+      CSystem(const char* gamefile, const char* romfile,bool useEmu);
       ~CSystem();
+    void SaveEEPROM(void);
 
    public:
       void HLE_BIOS_FE00(void);
