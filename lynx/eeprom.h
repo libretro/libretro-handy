@@ -19,6 +19,7 @@ public:
 
    void	Reset(void);
 
+   bool Available(void){ return type!=0;};
    void ProcessEepromIO(UBYTE iodir,UBYTE iodat);
    void ProcessEepromCounter(UWORD cnt);
    void ProcessEepromBusy(void);
@@ -27,6 +28,8 @@ public:
       return mAUDIN_ext;
    };
    void SetEEPROMType(UBYTE b);
+   int Size(void);
+   int InitFrom(char *data,int count){ memcpy(romdata,data,min(count,Size()));};
 
    void	Poke(ULONG addr,UBYTE data) { };
    UBYTE	Peek(ULONG addr)
@@ -34,8 +37,17 @@ public:
       return(0);
    };
 
+   void SetFilename(char* f){strcpy(filename,f);};
+   char* GetFilename(void){ return filename;};
+   
+   void Load(void);
+   void Save(void);
+
 private:
+    char filename[1024];
+    
    void UpdateEeprom(UWORD cnt);
+   UBYTE type; // 0 ... no eeprom
 
    UWORD ADDR_MASK;
    UBYTE CMD_BITS;

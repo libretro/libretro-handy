@@ -12,6 +12,8 @@
 
 CEEPROM::CEEPROM()
 {
+   type=0;
+   *filename=0;
    Reset();
 }
 
@@ -36,10 +38,32 @@ CEEPROM::~CEEPROM()
 {
 }
 
+void CEEPROM::Load(void)
+{
+    if(!Available()) return;
+    FILE *fe;
+    if((fe=fopen(filename,"rb"))!=NULL){
+        printf("EEPROM LOAD %s\n",filename);
+        fread(romdata,1,1024,fe);
+        fclose(fe);
+    }
+}
+
+void CEEPROM::Save(void)
+{
+    if(!Available()) return;
+    FILE *fe;
+    if((fe=fopen(filename,"wb+"))!=NULL){
+        printf("EEPROM SAVE %s\n",filename);
+        fwrite(romdata,1,Size(),fe);
+        fclose(fe);
+    }
+}
+
 void CEEPROM::SetEEPROMType(UBYTE b)
 {
-   UBYTE t=b&0x7;
-   switch(t) {
+   type=b;
+   switch(b&0x7) {
       case 1: // 93C46 , 8 bit mode
          ADDR_MASK =  0x7F;
          CMD_BITS  =  10;
@@ -82,6 +106,12 @@ void CEEPROM::SetEEPROMType(UBYTE b)
    }
 }
 
+int CEEPROM::Size(void)
+{
+    int m=ADDR_MASK+1;
+    if(type&0x80) return m; else return m*2;
+}
+
 void CEEPROM::ProcessEepromBusy(void)
 {
    if(state==EE_BUSY || state==EE_NONE) {
@@ -94,7 +124,7 @@ void CEEPROM::ProcessEepromBusy(void)
          mAUDIN_ext=1;
          state=EE_WAIT;
       }
-      printf("(%d)",busy_count);
+//       printf("(%d)",busy_count);
    }
 }
 
@@ -155,48 +185,48 @@ void CEEPROM::UpdateEeprom(UWORD cnt)
             if( sendbits>0) break;
 
             state=EE_NONE;
-            if(data!=(0xFFFF&((ADDR_MASK<<2)|0x3))) printf("EE Byte $%02X .. ",(int)data);
+            // if(data!=(0xFFFF&((ADDR_MASK<<2)|0x3))) printf("EE Byte $%02X .. ",(int)data);
             addr=data&ADDR_MASK;
             switch(data>>ADDR_BITS) {
                case 0x3:
                   if(!readonly) {
-                     printf("ERASE ADD $%02X RO %d\n",(int)addr,readonly);
+//                      printf("ERASE ADD $%02X RO %d\n",(int)addr,readonly);
                      romdata[addr]=0xFFFF;
                   }
                   break;
                case 0x2:
                   readdata=romdata[addr];
                   mAUDIN_ext=0;
-                  printf("Read ADD $%02X $%04X\n",(int)addr,readdata);
+//                   printf("Read ADD $%02X $%04X\n",(int)addr,readdata);
                   state=EE_WAIT;
                   break;
                case 0x1:
-                  printf("Write ADD $%02X RO %d\n",(int)addr,readonly);
+//                   printf("Write ADD $%02X RO %d\n",(int)addr,readonly);
                   data=0x1;
                   state=EE_DATA;
                   break;
                case 0x00:
                   if((data>>(ADDR_BITS-2))==0x0) {
-                     printf("EWDS\n");
+//                      printf("EWDS\n");
                      readonly=true;
                      break;
                   };
                   if((data>>(ADDR_BITS-2))==0x3) {
-                     printf("EWEN\n");
+//                      printf("EWEN\n");
                      readonly=false;
                      break;
                   };
                   if((data>>(ADDR_BITS-2))==0x1) {
-                     printf("WRAL\n");
+//                      printf("WRAL\n");
                      break;
                   };
                   if((data>>(ADDR_BITS-2))==0x2) {
-                     printf("ERAL\n");
+//                      printf("ERAL\n");
                      break;
                   };
                // falltrhou
                default:
-                  printf("Unknown $%03X\n",(int)data);
+//                   printf("Unknown $%03X\n",(int)data);
                   break;
             }
             break;
@@ -205,12 +235,12 @@ void CEEPROM::UpdateEeprom(UWORD cnt)
             if(DI) data++;
             if(data&DONE_MASK) {
                state=EE_NONE;
-               printf("EE Written Data $%04X ",(unsigned int)data&0xFFFF);
+//                printf("EE Written Data $%04X ",(unsigned int)data&0xFFFF);
                if(readonly) {
-                  printf("WRITE PROT!\n");
+//                   printf("WRITE PROT!\n");
                } else {
                   romdata[addr]=(data&0xFFFF);
-                  printf("done\n");
+//                   printf("done\n");
                }
                busy_count=0;
                readdata=0x0000;// RDY
@@ -219,7 +249,7 @@ void CEEPROM::UpdateEeprom(UWORD cnt)
             }
             break;
          case EE_WAIT:
-            printf(".%d.",mAUDIN_ext);
+//             printf(".%d.",mAUDIN_ext);
             break;
       }
    }
