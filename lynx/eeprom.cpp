@@ -63,46 +63,55 @@ void CEEPROM::Save(void)
 void CEEPROM::SetEEPROMType(UBYTE b)
 {
    type=b;
+   printf("\nEEPROM: ");
    switch(b&0x7) {
       case 1: // 93C46 , 8 bit mode
          ADDR_MASK =  0x7F;
          CMD_BITS  =  10;
          ADDR_BITS =  7;
+         printf("93C46 ");
          break;
       case 2: // 93C56 , 8 bit mode
          ADDR_MASK =  0xFF;
          CMD_BITS  =  12;
          ADDR_BITS =  9;
+         printf("93C56 ");
          break;
       case 3: // 93C66 , 8 bit mode
          ADDR_MASK =  0x1FF;
          CMD_BITS  =  12;
          ADDR_BITS =  9;
+         printf("93C66 ");
          break;
       case 4: // 93C76 , 8 bit mode
          ADDR_MASK =  0x3FF;
          CMD_BITS  =  14;
          ADDR_BITS =  11;
+         printf("93C76 ");
          break;
       case 5: // 93C86 , 8 bit mode
          ADDR_MASK =  0x7FF;
          CMD_BITS  =  14;
          ADDR_BITS =  11;
+         printf("93C86 ");
          break;
       case 0: // NONE, fallthrou
       default:
          ADDR_MASK =  0;
          CMD_BITS  =  1;
          ADDR_BITS =  1;
+         printf("none ");
          break;
    }
    if(b&0x80) { // 8 bit access
       DONE_MASK =  0x100;
+      printf("8 bit\n");
    } else { // 16 bit access
       ADDR_MASK>>=1;
       CMD_BITS--;
       ADDR_BITS--;
       DONE_MASK = 0x10000;
+      printf("16 bit\n");
    }
 }
 
@@ -195,7 +204,7 @@ void CEEPROM::UpdateEeprom(UWORD cnt)
                   }
                   break;
                case 0x2:
-                  readdata=romdata[addr];
+                  if(type&0x80) readdata=((unsigned char *)romdata)[addr]; else readdata=romdata[addr];
                   mAUDIN_ext=0;
 //                   printf("Read ADD $%02X $%04X\n",(int)addr,readdata);
                   state=EE_WAIT;
@@ -207,7 +216,6 @@ void CEEPROM::UpdateEeprom(UWORD cnt)
                   break;
                case 0x00:
                   if((data>>(ADDR_BITS-2))==0x0) {
-
 //                      printf("EWDS\n");
                      readonly=true;
                      break;
@@ -240,7 +248,11 @@ void CEEPROM::UpdateEeprom(UWORD cnt)
                if(readonly) {
 //                   printf("WRITE PROT!\n");
                } else {
+                  if(type &0x80){
+                     ((unsigned char *)romdata)[addr]=(data&0xFF);
+               } else {
                   romdata[addr]=(data&0xFFFF);
+                  }
 //                   printf("done\n");
                }
                busy_count=0;
