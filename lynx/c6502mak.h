@@ -203,6 +203,10 @@
 	}\
 }
 
+// This version of bit, not setting N and V status flags in immediate, seems to be correct.
+// The same behaviour is reported on the 65C02 used in old Apple computers, at least.
+// (From a pragmatic sense, using the normal version of bit for immediate
+// mode breaks the title screen of "California Games" in a subtle way.)
 #define	xBIT()\
 {\
 	int value=CPU_PEEK(mOperand);\

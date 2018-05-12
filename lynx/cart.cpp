@@ -65,6 +65,7 @@ CCart::CCart(UBYTE *gamedata,ULONG gamesize)
    mWriteEnableBank1=FALSE;
    mCartRAM=FALSE;
    mHeaderLess=0;
+   mEEPROMType=0;
    mCRC32=0;
    mCRC32=crc32(mCRC32,gamedata,gamesize);
 
@@ -103,6 +104,7 @@ CCart::CCart(UBYTE *gamedata,ULONG gamesize)
       mRotation=header.rotation;
       if(mRotation!=CART_NO_ROTATE && mRotation!=CART_ROTATE_LEFT && mRotation!=CART_ROTATE_RIGHT) mRotation=CART_NO_ROTATE;
       mAudinFlag=(header.aud_bits&0x01) ;
+      mEEPROMType=header.eeprom;
    }
    else
    {
@@ -260,12 +262,19 @@ CCart::CCart(UBYTE *gamedata,ULONG gamesize)
       gCPUBootAddress=0;
 
       //
-      // Check if this is a headerless cart
-      // Headerless used for Howie type... but this cannot work...
-      mHeaderLess=TRUE;
-      for(int loop=0;loop<32;loop++)
-      {
-         if(mCartBank0[loop&mMaskBank0]!=0x00) mHeaderLess=FALSE;
+      // Check if this is a headerless cart, either 410 (EPYX_HEADER_NEW) or 512 (EPYX_HEADER_OLD) zeros
+      //
+      mHeaderLess=EPYX_HEADER_OLD;// old EPYX Type
+      for(int loop=0; loop<EPYX_HEADER_OLD; loop++) {
+         if(mCartBank0[loop&mMaskBank0]!=0x00) {
+            if(loop<EPYX_HEADER_NEW) {
+               mHeaderLess=0;// less than 410 zeros -> invalid
+               break;
+            } else {
+               mHeaderLess=EPYX_HEADER_NEW;// at least 410 -> new EPYX type
+               break;
+            }
+         }
       }
       TRACE_CART1("CCart() - mHeaderLess=%d",mHeaderLess);
    }

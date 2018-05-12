@@ -274,7 +274,7 @@ void CMikie::Reset(void)
    mAUDIO_3_INTEGRATE_ENABLE=0;
    mAUDIO_3_WAVESHAPER=0;
 
-	mSTEREO=0xff;	// xored! All channels enabled
+	mSTEREO=0x00;	// xored! All channels enabled
 	mPAN=0x00;      // all channels panning OFF
         mAUDIO_ATTEN[0]=0xff; // Full volume
         mAUDIO_ATTEN[1]=0xff;
@@ -856,7 +856,6 @@ void CMikie::ComLynxTxCallback(void (*function)(int data,ULONG objref),ULONG obj
 
 void CMikie::DisplaySetAttributes(ULONG Rotate,ULONG Format,ULONG Pitch,UBYTE* (*RenderCallback)(ULONG objref),ULONG objref)
 {
-   fprintf(stderr, "[DisplaySetAttributes 1]\n");
    mDisplayRotate=Rotate;
    mDisplayFormat=Format;
    mDisplayPitch=Pitch;
@@ -873,8 +872,6 @@ void CMikie::DisplaySetAttributes(ULONG Rotate,ULONG Format,ULONG Pitch,UBYTE* (
    {
       mpDisplayBits=NULL;
    }
-
-   fprintf(stderr, "[DisplaySetAttributes 2]\n");
 
    //
    // Calculate the colour lookup tabes for the relevant mode
@@ -1929,7 +1926,6 @@ void CMikie::Poke(ULONG addr,UBYTE data)
 
       case (MSTEREO&0xff):
 			TRACE_MIKIE2("Poke(MSTEREO,%02x) at PC=%04x",data,mSystem.mCpu->GetPC());
-         data^=0xff; // TODO warum kein XOR in libretto?
 			mSTEREO=data;
          //			if(!(mSTEREO&0x11) && (data&0x11))
          //			{
@@ -1985,6 +1981,7 @@ void CMikie::Poke(ULONG addr,UBYTE data)
             gSystemHalt=TRUE;
          }
          mSystem.CartAddressStrobe((data&0x01)?TRUE:FALSE);
+         if(mSystem.mEEPROM->Available()) mSystem.mEEPROM->ProcessEepromCounter(mSystem.mCart->GetCounterValue());
          break;
 
       case (MIKEYSREV&0xff):
@@ -1994,6 +1991,7 @@ void CMikie::Poke(ULONG addr,UBYTE data)
       case (IODIR&0xff):
          TRACE_MIKIE2("Poke(IODIR   ,%02x) at PC=%04x",data,mSystem.mCpu->GetPC());
          mIODIR=data;
+         if(mSystem.mEEPROM->Available()) mSystem.mEEPROM->ProcessEepromIO(mIODIR,mIODAT);
          break;
 
       case (IODAT&0xff):
@@ -2001,7 +1999,8 @@ void CMikie::Poke(ULONG addr,UBYTE data)
          mIODAT=data;
          mSystem.CartAddressData((mIODAT&0x02)?TRUE:FALSE);
          // Enable cart writes to BANK1 on AUDIN if AUDIN is set to output
-         if(mIODIR&0x10) mSystem.mCart->mWriteEnableBank1=(mIODAT&0x10)?TRUE:FALSE;
+         if(mIODIR&0x10) mSystem.mCart->mWriteEnableBank1=(mIODAT&0x10)?TRUE:FALSE;// there is no reason to use AUDIN as Write Enable or latch. private patch??? TODO
+         if(mSystem.mEEPROM->Available()) mSystem.mEEPROM->ProcessEepromIO(mIODIR,mIODAT);
          break;
 
       case (SERCTL&0xff):
@@ -2601,7 +2600,7 @@ UBYTE CMikie::Peek(ULONG addr)
 
       case (MSTEREO&0xff):
          TRACE_MIKIE2("Peek(MSTEREO,%02x) at PC=%04x",(UBYTE)mSTEREO^0xff,mSystem.mCpu->GetPC());
-         return (UBYTE) mSTEREO^0xff;
+         return (UBYTE) mSTEREO;
 
          // Miscellaneous registers
 
@@ -2626,7 +2625,13 @@ UBYTE CMikie::Peek(ULONG addr)
       case (IODAT&0xff):
          {
             ULONG retval=0;
-            retval|=(mIODIR&0x10)?mIODAT&0x10:0x10;									// IODIR  = output bit : input high (eeprom write done)
+            // IODIR  = output bit : input high (eeprom write done)
+            if(mSystem.mEEPROM->Available()){
+               mSystem.mEEPROM->ProcessEepromBusy();
+               retval|=(mIODIR&0x10)?mIODAT&0x10:(mSystem.mEEPROM->OutputBit()?0x10:0x00);
+            }else{
+               retval|=mIODAT&0x10;
+            }
             retval|=(mIODIR&0x08)?(((mIODAT&0x08)&&mIODAT_REST_SIGNAL)?0x00:0x08):0x00;									// REST   = output bit : input low
             retval|=(mIODIR&0x04)?mIODAT&0x04:((mUART_CABLE_PRESENT)?0x04:0x00);	// NOEXP  = output bit : input low
             retval|=(mIODIR&0x02)?mIODAT&0x02:0x00;									// CARTAD = output bit : input low
@@ -4018,14 +4023,14 @@ inline void CMikie::UpdateSound(void)
               /// the values stored in mSTEREO are bit-inverted ...
               /// mSTEREO was found to be set like that already (why?), but unused
 
-              if(mSTEREO & (0x10 << x))
+              if(!(mSTEREO & (0x10 << x)))
               {
                 if(mPAN & (0x10 << x))
                   cur_lsample += (mAUDIO_OUTPUT[x]*(mAUDIO_ATTEN[x]&0xF0))/(16*16); /// NOT /15*16 see remark above
                 else
                   cur_lsample += mAUDIO_OUTPUT[x];
               }
-              if(mSTEREO & (0x01 << x))
+              if(!(mSTEREO & (0x01 << x)))
               {
                 if(mPAN & (0x01 << x))
                   cur_rsample += (mAUDIO_OUTPUT[x]*(mAUDIO_ATTEN[x]&0x0F))/16; /// NOT /15 see remark above

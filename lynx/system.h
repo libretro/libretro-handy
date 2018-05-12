@@ -171,6 +171,7 @@ class CSystem;
 #include "rom.h"
 #include "memmap.h"
 #include "cart.h"
+#include "eeprom.h"
 #include "susie.h"
 #include "mikie.h"
 #include "c65c02.h"
@@ -188,8 +189,9 @@ class CSystem;
 class CSystem : public CSystemBase
 {
    public:
-      CSystem(const char* gamefile, const char* romfile);
+      CSystem(const char* gamefile, const char* romfile,bool useEmu);
       ~CSystem();
+    void SaveEEPROM(void);
 
    public:
       void HLE_BIOS_FE00(void);
@@ -331,6 +333,7 @@ class CSystem : public CSystemBase
       C65C02			*mCpu;
       CMikie			*mMikie;
       CSusie			*mSusie;
+      CEEPROM			*mEEPROM;
 
       ULONG			mFileType;
 };

@@ -12,14 +12,17 @@ static retro_input_state_t input_state_cb;
 
 static CSystem *lynx = NULL;
 
-//static unsigned char *snd_buffer8;
 static unsigned char *snd_buffer16s;
 static unsigned short soundBuffer[4096 * 8];
 
 static uint8_t lynx_width = 160;
 static uint8_t lynx_height = 102;
 
-static uint16_t framebuffer[160*102*2];
+#define VIDEO_CORE_PIXELSIZE	2 // MIKIE_PIXEL_FORMAT_16BPP_565
+//#define VIDEO_CORE_PIXELSIZE	4 // MIKIE_PIXEL_FORMAT_32BPP
+
+
+static uint16_t framebuffer[160*102*VIDEO_CORE_PIXELSIZE];
 
 static bool newFrame = false;
 static bool initialized = false;
@@ -38,7 +41,7 @@ static map btn_map_no_rot[] = {
    { RETRO_DEVICE_ID_JOYPAD_START, BUTTON_PAUSE },
 };
 
-static map btn_map_rot_240[] = {
+static map btn_map_rot_270[] = {
    { RETRO_DEVICE_ID_JOYPAD_A, BUTTON_A },
    { RETRO_DEVICE_ID_JOYPAD_B, BUTTON_B },
    { RETRO_DEVICE_ID_JOYPAD_RIGHT, BUTTON_UP },
@@ -78,10 +81,21 @@ void retro_init(void)
 
    btn_map = btn_map_no_rot;
 
+#if VIDEO_CORE_PIXELSIZE==2
    enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
+#endif
+#if VIDEO_CORE_PIXELSIZE==4
+   enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_XRGB8888;
+#endif
 
-   if(!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt) && log_cb)
+   if(!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt) && log_cb){
+#if VIDEO_CORE_PIXELSIZE==2
       log_cb(RETRO_LOG_ERROR, "[could not set RGB565]\n");
+#endif
+#if VIDEO_CORE_PIXELSIZE==4
+      log_cb(RETRO_LOG_ERROR, "[could not set RGB8888]\n");
+#endif
+   }
 
    uint64_t serialization_quirks = RETRO_SERIALIZATION_QUIRK_SINGLE_SESSION;
    environ_cb(RETRO_ENVIRONMENT_SET_SERIALIZATION_QUIRKS, &serialization_quirks);
@@ -89,8 +103,10 @@ void retro_init(void)
 
 void retro_reset(void)
 {
-   if(lynx)
+   if(lynx){
+       lynx->SaveEEPROM();
       lynx->Reset();
+   }
 }
 
 void retro_deinit(void)
@@ -98,14 +114,17 @@ void retro_deinit(void)
    retro_reset();
    initialized = false;
 
-   if(lynx)
+   if(lynx){
+       lynx->SaveEEPROM();
       delete lynx;
+       lynx=0;
+   }
 }
 
 void retro_set_environment(retro_environment_t cb)
 {
    static const struct retro_variable vars[] = {
-      { "handy_rot", "Display rotation; None|90|240" },
+      { "handy_rot", "Display rotation; None|90|270" },
       { NULL, NULL },
    };
 
@@ -260,7 +279,7 @@ static bool lynx_romfilename(char *dest)
 
 inline static void lynx_sound_stream_update(unsigned short *buffer, int buf_length)
 {
-    memcpy(buffer, snd_buffer16s, buf_length);
+   memcpy(buffer, snd_buffer16s, buf_length);
    gAudioBufferPointer = 0;
 }
 
@@ -269,7 +288,7 @@ static UBYTE* lynx_display_callback(ULONG objref)
    if(!initialized)
       return (UBYTE*)framebuffer;
 
-   video_cb(framebuffer, lynx_width, lynx_height, 160*2);
+   video_cb(framebuffer, lynx_width, lynx_height, 160*VIDEO_CORE_PIXELSIZE);
 
    if(gAudioBufferPointer > 0)
    {
@@ -287,12 +306,15 @@ static bool lynx_initialize_system(const char* gamepath)
    ULONG rot;
    char romfilename[1024];
    struct retro_variable var = {0};
-   if(lynx)
-      delete(lynx);
+   if(lynx){
+       lynx->SaveEEPROM();
+      delete lynx;
+      lynx=0;
+   }
 
    lynx_romfilename(romfilename);
 
-   lynx = new CSystem(gamepath, romfilename);
+   lynx = new CSystem(gamepath, romfilename, true);
 
    rot = MIKIE_NO_ROTATE;
    lynx_width = 160;
@@ -310,17 +332,21 @@ static bool lynx_initialize_system(const char* gamepath)
          lynx_height = 160;
          btn_map = btn_map_rot_90;
       }
-      else if (strcmp(var.value, "240") == 0)
+      else if (strcmp(var.value, "270") == 0)
       {
          rot = MIKIE_ROTATE_L;
          lynx_width = 102;
          lynx_height = 160;
-         btn_map = btn_map_rot_240;
+         btn_map = btn_map_rot_270;
       }
    }
 
-   lynx->DisplaySetAttributes(rot, MIKIE_PIXEL_FORMAT_16BPP_565, 320, lynx_display_callback, (ULONG)0);
-
+#if VIDEO_CORE_PIXELSIZE==2
+   lynx->DisplaySetAttributes(rot, MIKIE_PIXEL_FORMAT_16BPP_565, 160*VIDEO_CORE_PIXELSIZE, lynx_display_callback, (ULONG)0);
+#endif
+#if VIDEO_CORE_PIXELSIZE==4
+   lynx->DisplaySetAttributes(rot, MIKIE_PIXEL_FORMAT_32BPP, 160*VIDEO_CORE_PIXELSIZE, lynx_display_callback, (ULONG)0);
+#endif
    return true;
 }
 
@@ -362,6 +388,12 @@ bool retro_load_game_special(unsigned, const struct retro_game_info*, size_t)
 
 void retro_unload_game(void)
 {
+// TODO should be save EEPROM here, too?
+//    if(lynx){
+//        lynx->SaveEEPROM();
+//        delete lynx;
+//        lynx=0;
+//    }
    initialized = false;
 }
 

@@ -15,4 +15,5 @@ SOURCES_CXX := $(CORE_DIR)/lynx/lynxdec.cpp \
 	$(CORE_DIR)/lynx/rom.cpp \
 	$(CORE_DIR)/lynx/susie.cpp \
 	$(CORE_DIR)/lynx/system.cpp \
+	$(CORE_DIR)/lynx/eeprom.cpp \
 	$(CORE_DIR)/libretro/libretro.cpp

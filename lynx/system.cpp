@@ -121,14 +121,15 @@ void _splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
    }
 }
 
-   CSystem::CSystem(const char* gamefile, const char* romfile)
+   CSystem::CSystem(const char* gamefile, const char* romfile, bool useEmu)
 :mCart(NULL),
    mRom(NULL),
    mMemMap(NULL),
    mRam(NULL),
    mCpu(NULL),
    mMikie(NULL),
-   mSusie(NULL)
+    mSusie(NULL),
+    mEEPROM(NULL)
 {
 
 #ifdef _LYNXDBG
@@ -202,9 +203,10 @@ void _splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
 
    // Attempt to load the cartridge errors caught above here...
 
-   mRom = new CRom(romfile);
+   mRom = new CRom(romfile,useEmu);
 
    // An exception from this will be caught by the level above
+   mEEPROM = new CEEPROM();
 
    switch(mFileType)
    {
@@ -294,12 +296,28 @@ void _splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
    }
    if(filesize) delete filememory;
    if(howardsize) delete howardmemory;
+   mEEPROM->SetEEPROMType(mCart->mEEPROMType);
+
+   {
+      char eepromfile[1024];
+      strncpy(eepromfile, gamefile,1024-10);
+      strcat(eepromfile,".eeprom");
+      mEEPROM->SetFilename(eepromfile);
+      printf("filename %d %s %s\n",mCart->mEEPROMType,gamefile,eepromfile);
+      mEEPROM->Load();
+   }
+}
+
+void CSystem::SaveEEPROM(void)
+{
+   if(mEEPROM!=NULL) mEEPROM->Save();
 }
 
 CSystem::~CSystem()
 {
    // Cleanup all our objects
 
+   if(mEEPROM!=NULL) delete mEEPROM;
    if(mCart!=NULL) delete mCart;
    if(mRom!=NULL) delete mRom;
    if(mRam!=NULL) delete mRam;
@@ -363,7 +381,6 @@ void CSystem::HLE_BIOS_FE4A(void)
       {
          buff[i] = mCart->Peek0();
       }
-        printf("\n");
 
       lynx_decrypt(res, buff, 51);
 
@@ -378,7 +395,7 @@ void CSystem::HLE_BIOS_FE4A(void)
    C6502_REGS regs;
    mCpu->GetRegs(regs);
    regs.PC=0x0200;
-   mCpu->SetRegs(regs);    
+   mCpu->SetRegs(regs);
 }
 
 void CSystem::HLE_BIOS_FF80(void)
@@ -416,6 +433,7 @@ void CSystem::Reset(void)
 
    mMemMap->Reset();
    mCart->Reset();
+   mEEPROM->Reset();
    mRom->Reset();
    mRam->Reset();
    mMikie->Reset();
@@ -502,6 +520,7 @@ bool CSystem::ContextSave(const char *context)
    // Save other device contexts
    if(!mMemMap->ContextSave(fp)) status=0;
    if(!mCart->ContextSave(fp)) status=0;
+   if(!mEEPROM->ContextSave(fp)) status=0;
    //	if(!mRom->ContextSave(fp)) status=0; We no longer save the system ROM
    if(!mRam->ContextSave(fp)) status=0;
    if(!mMikie->ContextSave(fp)) status=0;
