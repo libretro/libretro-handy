@@ -333,7 +333,7 @@ typedef struct
 class CSusie : public CLynxBase
 {
    public:
-      CSusie(CSystem& parent);
+      explicit CSusie(CSystem& parent);
       ~CSusie();
 
       void	Reset(void);

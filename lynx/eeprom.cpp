@@ -14,6 +14,11 @@ CEEPROM::CEEPROM()
 {
    type=0;
    *filename=0;
+   ADDR_MASK=0;
+   CMD_BITS=0;
+   ADDR_BITS=0;
+   DONE_MASK=0;
+   mAUDIN_ext=0;
    Reset();
 }
 

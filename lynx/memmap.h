@@ -69,7 +69,7 @@ class CMemMap : public CLynxBase
    // Function members
 
    public:
-      CMemMap(CSystem& parent);
+      explicit CMemMap(CSystem& parent);
 
    public:
       bool	ContextSave(FILE *fp);

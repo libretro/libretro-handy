@@ -95,7 +95,7 @@ CRom::CRom(const char *romfile,bool useEmu)
             fprintf(stdout, "The Lynx Boot ROM image couldn't be loaded! Using built-in replacement\n");
             mValid = FALSE;
          }
-         if(fp) fclose(fp);
+         fclose(fp);
       }
 
       // Check the code that has been loaded and report an error if its a

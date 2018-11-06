@@ -183,7 +183,7 @@ enum
 class CMikie : public CLynxBase
 {
    public:
-      CMikie(CSystem& parent);
+      explicit CMikie(CSystem& parent);
       ~CMikie();
 
       bool	ContextSave(FILE *fp);

@@ -104,7 +104,7 @@ void retro_init(void)
 void retro_reset(void)
 {
    if(lynx){
-       lynx->SaveEEPROM();
+      lynx->SaveEEPROM();
       lynx->Reset();
    }
 }
@@ -115,9 +115,8 @@ void retro_deinit(void)
    initialized = false;
 
    if(lynx){
-       lynx->SaveEEPROM();
       delete lynx;
-       lynx=0;
+      lynx=0;
    }
 }
 
@@ -207,11 +206,21 @@ void retro_run(void)
    newFrame = false;
 }
 
-static void gettempfilename(char *dest)
+static void gettempfilename(char *dest, size_t len)
 {
+#if 0
    const char *dir = 0;
    environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &dir);
    sprintf(dest, "%s%chandy.tmp", dir, SLASH_STR);
+#endif
+
+#ifdef WIN32
+   GetTempFileName(GetTempPath(), "hnd", 0, dest);
+#else
+   char *tmp = tempnam(0, "handy");
+   strncpy(dest, tmp, len);
+   free(tmp);
+#endif
 }
 
 size_t retro_serialize_size(void)
@@ -220,7 +229,7 @@ size_t retro_serialize_size(void)
    if(!lynx)
       return 0;
 
-   gettempfilename(tempfilename);
+   gettempfilename(tempfilename,1024);
    return lynx->MemoryContextSave(tempfilename, NULL);
 }
 
@@ -230,7 +239,7 @@ bool retro_serialize(void *data, size_t size)
    if(!lynx)
       return false;
 
-   gettempfilename(tempfilename);
+   gettempfilename(tempfilename,1024);
    return lynx->MemoryContextSave(tempfilename, (char*)data) > 0;
 }
 
@@ -306,14 +315,9 @@ static bool lynx_initialize_system(const char* gamepath)
    ULONG rot;
    char romfilename[1024];
    struct retro_variable var = {0};
-   if(lynx){
-       lynx->SaveEEPROM();
-      delete lynx;
-      lynx=0;
-   }
 
+   retro_deinit();
    lynx_romfilename(romfilename);
-
    lynx = new CSystem(gamepath, romfilename, true);
 
    rot = MIKIE_NO_ROTATE;
@@ -388,13 +392,7 @@ bool retro_load_game_special(unsigned, const struct retro_game_info*, size_t)
 
 void retro_unload_game(void)
 {
-// TODO should be save EEPROM here, too?
-//    if(lynx){
-//        lynx->SaveEEPROM();
-//        delete lynx;
-//        lynx=0;
-//    }
-   initialized = false;
+   retro_deinit();
 }
 
 void retro_cheat_reset(void)

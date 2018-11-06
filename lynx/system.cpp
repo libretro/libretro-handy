@@ -121,15 +121,15 @@ void _splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
    }
 }
 
-   CSystem::CSystem(const char* gamefile, const char* romfile, bool useEmu)
-:mCart(NULL),
+CSystem::CSystem(const char* gamefile, const char* romfile, bool useEmu)
+  :mCart(NULL),
    mRom(NULL),
    mMemMap(NULL),
    mRam(NULL),
    mCpu(NULL),
    mMikie(NULL),
-    mSusie(NULL),
-    mEEPROM(NULL)
+   mSusie(NULL),
+   mEEPROM(NULL)
 {
 
 #ifdef _LYNXDBG
@@ -147,8 +147,6 @@ void _splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
    if(strcmp(gamefile,"")==0)
    {
       // No file
-      filesize=0;
-      filememory=NULL;
    }
    else
    {
@@ -165,19 +163,19 @@ void _splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
       fseek(fp,0,SEEK_END);
       filesize=ftell(fp);
       fseek(fp,0,SEEK_SET);
-      filememory=(UBYTE*) new UBYTE[filesize];
+      filememory=new UBYTE[filesize];
 
       if(fread(filememory,sizeof(char),filesize,fp)!=filesize)
       {
          fprintf(stderr, "Invalid Cart (filesize).\n");
-         delete filememory;
+         filesize=0;
       }
 
       fclose(fp);
    }
 
    // Now try and determine the filetype we have opened
-   if(filesize)
+   if(filesize>10)
    {
       char clip[11];
       memcpy(clip,filememory,11);
@@ -191,9 +189,9 @@ void _splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
       {
          fprintf(stderr, "Invalid Cart (type). but 128/256/512k size -> set to RAW and try to load raw rom image\n");
          mFileType=HANDY_FILETYPE_RAW;
-         //delete filememory;// WHY????? -> crash!
       }else{
          fprintf(stderr, "Invalid Cart (type). -> set to RAW and try to load raw rom image\n");
+         mFileType=HANDY_FILETYPE_RAW;
       }
    }
 
@@ -228,20 +226,18 @@ void _splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
             if((fp=fopen(cartgo,"rb"))==NULL)
             {
                fprintf(stderr, "Invalid Cart.\n");
-               delete filememory;
             }
 
             // How big is the file ??
             fseek(fp,0,SEEK_END);
             howardsize=ftell(fp);
             fseek(fp,0,SEEK_SET);
-            howardmemory=(UBYTE*) new UBYTE[filesize];
+            howardmemory=new UBYTE[filesize];
 
             if(fread(howardmemory,sizeof(char),howardsize,fp)!=howardsize)
             {
-               delete howardmemory;
                fprintf(stderr, "Invalid Cart.\n");
-               delete filememory;
+               howardsize=0;
             }
 
             fclose(fp);
@@ -294,8 +290,8 @@ void _splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
          fprintf(stderr, "Invalid Snapshot.\n");
       }
    }
-   if(filesize) delete filememory;
-   if(howardsize) delete howardmemory;
+   if(filememory) delete[] filememory;
+   if(howardmemory) delete[] howardmemory;
    mEEPROM->SetEEPROMType(mCart->mEEPROMType);
 
    {
@@ -415,7 +411,6 @@ void CSystem::Reset(void)
    gSystemIRQ=FALSE;
    gSystemNMI=FALSE;
    gSystemCPUSleep=FALSE;
-   gSystemHalt=FALSE;
 
    gThrottleLastTimerCount=0;
    gThrottleNextCycleCheckpoint=0;
@@ -429,6 +424,8 @@ void CSystem::Reset(void)
 
 #ifdef _LYNXDBG
    gSystemHalt=TRUE;
+#else
+   gSystemHalt=FALSE;
 #endif
 
    mMemMap->Reset();
@@ -520,8 +517,8 @@ bool CSystem::ContextSave(const char *context)
    // Save other device contexts
    if(!mMemMap->ContextSave(fp)) status=0;
    if(!mCart->ContextSave(fp)) status=0;
-   if(!mEEPROM->ContextSave(fp)) status=0;
-   //	if(!mRom->ContextSave(fp)) status=0; We no longer save the system ROM
+   //if(!mEEPROM->ContextSave(fp)) status=0;
+   //if(!mRom->ContextSave(fp)) status=0; We no longer save the system ROM
    if(!mRam->ContextSave(fp)) status=0;
    if(!mMikie->ContextSave(fp)) status=0;
    if(!mSusie->ContextSave(fp)) status=0;
@@ -537,6 +534,7 @@ size_t	CSystem::MemoryContextSave(const char* tmpfilename, char *context)
 
    if(!ContextSave(tmpfilename))
    {
+      remove(tmpfilename);
       return 0;
    }
 
@@ -555,7 +553,7 @@ size_t	CSystem::MemoryContextSave(const char* tmpfilename, char *context)
 
    if(NULL == context)
    {
-      filememory = (UBYTE*) new UBYTE[filesize];
+      filememory = new UBYTE[filesize];
    }
    else
    {
@@ -571,11 +569,10 @@ size_t	CSystem::MemoryContextSave(const char* tmpfilename, char *context)
 
    if(NULL == context)
    {
-      delete filememory;
+      delete[] filememory;
    }
 
    remove(tmpfilename);
-
    return ret;
 }
 
@@ -683,17 +680,19 @@ bool CSystem::ContextLoad(const char *context)
    {
       FILE *fp;
       // Just open an read into memory
-      if((fp=fopen(context,"rb"))==NULL) status=0;
+      if((fp=fopen(context,"rb"))==NULL)
+         return 0;
 
       fseek(fp,0,SEEK_END);
       filesize=ftell(fp);
       fseek(fp,0,SEEK_SET);
-      filememory=(UBYTE*) new UBYTE[filesize];
+      filememory=new UBYTE[filesize];
 
       if(fread(filememory,sizeof(char),filesize,fp)!=filesize)
       {
          fclose(fp);
-         return 1;
+         delete[] filememory;
+         return 0;
       }
       fclose(fp);
    }
@@ -724,7 +723,7 @@ bool CSystem::ContextLoad(const char *context)
          if(mCart->CRC32()!=checksum)
          {
             delete fp;
-            delete filememory;
+            delete[] filememory;
             fprintf(stderr, "[handy]LSS Snapshot CRC does not match the loaded cartridge image, aborting load.\n");
             return 0;
          }
@@ -782,7 +781,7 @@ bool CSystem::ContextLoad(const char *context)
    }
 
    delete fp;
-   delete filememory;
+   delete[] filememory;
 
    return status;
 }
@@ -794,7 +793,7 @@ void CSystem::DebugTrace(int address)
    char message[1024+1];
    int count=0;
 
-   sprintf(message,"%08x - DebugTrace(): ",gSystemCycleCount);
+   sprintf(message,"%08lx - DebugTrace(): ",gSystemCycleCount);
    count=strlen(message);
 
    if(address)

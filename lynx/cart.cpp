@@ -68,6 +68,10 @@ CCart::CCart(UBYTE *gamedata,ULONG gamesize)
    mEEPROMType=0;
    mCRC32=0;
    mCRC32=crc32(mCRC32,gamedata,gamesize);
+   mCounter=0;
+   mShifter=0;
+   mAddrData=0;
+   mStrobe=0;
 
    // Open up the file
 
