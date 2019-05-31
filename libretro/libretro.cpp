@@ -15,11 +15,12 @@ static CSystem *lynx = NULL;
 static unsigned char *snd_buffer16s;
 static unsigned short soundBuffer[4096 * 8];
 
+static uint8_t lynx_rot = MIKIE_NO_ROTATE;
 static uint8_t lynx_width = 160;
 static uint8_t lynx_height = 102;
 
-#define VIDEO_CORE_PIXELSIZE	2 // MIKIE_PIXEL_FORMAT_16BPP_565
-//#define VIDEO_CORE_PIXELSIZE	4 // MIKIE_PIXEL_FORMAT_32BPP
+#define VIDEO_CORE_PIXELSIZE    2 // MIKIE_PIXEL_FORMAT_16BPP_565
+//#define VIDEO_CORE_PIXELSIZE  4 // MIKIE_PIXEL_FORMAT_32BPP
 
 
 static uint16_t framebuffer[160*102*VIDEO_CORE_PIXELSIZE];
@@ -171,77 +172,6 @@ static void lynx_input(void)
    lynx->SetButtonData(get_lynx_input());
 }
 
-void retro_set_controller_port_device(unsigned, unsigned)
-{
-}
-
-void retro_get_system_info(struct retro_system_info *info)
-{
-   memset(info, 0, sizeof(*info));
-   info->library_name     = "Handy";
-#ifndef GIT_VERSION
-#define GIT_VERSION ""
-#endif
-   info->library_version  = HANDYVER GIT_VERSION;
-   info->need_fullpath    = true;
-   info->valid_extensions = "lnx";
-   info->block_extract = 0;
-}
-
-void retro_get_system_av_info(struct retro_system_av_info *info)
-{
-   struct retro_game_geometry geom = { lynx_width, lynx_height, lynx_width, lynx_height };
-   struct retro_system_timing timing = { 75.0, 22050.0 };
-
-   info->geometry = geom;
-   info->timing   = timing;
-}
-
-void retro_run(void)
-{
-   lynx_input();
-
-   while (!newFrame)
-      lynx->Update();
-
-   newFrame = false;
-}
-
-static void gettempfilename(char *dest)
-{
-   const char *dir = 0;
-   environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &dir);
-   sprintf(dest, "%s%chandy.tmp", dir, SLASH_STR);
-}
-
-size_t retro_serialize_size(void)
-{
-   char tempfilename[1024];
-   if(!lynx)
-      return 0;
-
-   gettempfilename(tempfilename);
-   return lynx->MemoryContextSave(tempfilename, NULL);
-}
-
-bool retro_serialize(void *data, size_t size)
-{
-   char tempfilename[1024];
-   if(!lynx)
-      return false;
-
-   gettempfilename(tempfilename);
-   return lynx->MemoryContextSave(tempfilename, (char*)data) > 0;
-}
-
-bool retro_unserialize(const void *data, size_t size)
-{
-   if(!lynx)
-      return false;
-
-   return lynx->MemoryContextLoad((const char*)data, size);
-}
-
 static bool lynx_initialize_sound(void)
 {
    gAudioEnabled = true;
@@ -301,13 +231,65 @@ static UBYTE* lynx_display_callback(ULONG objref)
    return (UBYTE*)framebuffer;
 }
 
+static void update_geometry()
+{
+   struct retro_system_av_info info;
+
+   retro_get_system_av_info(&info);
+   environ_cb(RETRO_ENVIRONMENT_SET_GEOMETRY, &info);
+}
+
+static void check_variables(void)
+{
+   struct retro_variable var = {0};
+
+   var.key = "handy_rot";
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      unsigned old_rotate = lynx_rot;
+
+      if (strcmp(var.value, "None") == 0)
+      {
+         lynx_rot = MIKIE_NO_ROTATE;
+         lynx_width = 160;
+         lynx_height = 102;
+         btn_map = btn_map_no_rot;
+      }
+      else if (strcmp(var.value, "90") == 0)
+      {
+         lynx_rot = MIKIE_ROTATE_R; 
+         lynx_width = 102;
+         lynx_height = 160;
+         btn_map = btn_map_rot_90;
+      }
+      else if (strcmp(var.value, "270") == 0)
+      {
+         lynx_rot = MIKIE_ROTATE_L;
+         lynx_width = 102;
+         lynx_height = 160;
+         btn_map = btn_map_rot_270;
+      }
+
+      if (old_rotate != lynx_rot)
+      {
+      #if VIDEO_CORE_PIXELSIZE==2
+         lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_16BPP_565, 160*VIDEO_CORE_PIXELSIZE, lynx_display_callback, (ULONG)0);
+      #elif VIDEO_CORE_PIXELSIZE==4
+         lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_32BPP, 160*VIDEO_CORE_PIXELSIZE, lynx_display_callback, (ULONG)0);
+      #endif
+
+         update_geometry();
+      }
+   }
+}
+
 static bool lynx_initialize_system(const char* gamepath)
 {
-   ULONG rot;
    char romfilename[1024];
-   struct retro_variable var = {0};
+
    if(lynx){
-       lynx->SaveEEPROM();
+      lynx->SaveEEPROM();
       delete lynx;
       lynx=0;
    }
@@ -316,43 +298,95 @@ static bool lynx_initialize_system(const char* gamepath)
 
    lynx = new CSystem(gamepath, romfilename, true);
 
-   rot = MIKIE_NO_ROTATE;
-   lynx_width = 160;
-   lynx_height = 102;
-   btn_map = btn_map_no_rot;
-
-   var.key = "handy_rot";
-
-   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-   {
-      if (strcmp(var.value, "90") == 0)
-      {
-         rot = MIKIE_ROTATE_R; 
-         lynx_width = 102;
-         lynx_height = 160;
-         btn_map = btn_map_rot_90;
-      }
-      else if (strcmp(var.value, "270") == 0)
-      {
-         rot = MIKIE_ROTATE_L;
-         lynx_width = 102;
-         lynx_height = 160;
-         btn_map = btn_map_rot_270;
-      }
-   }
-
 #if VIDEO_CORE_PIXELSIZE==2
-   lynx->DisplaySetAttributes(rot, MIKIE_PIXEL_FORMAT_16BPP_565, 160*VIDEO_CORE_PIXELSIZE, lynx_display_callback, (ULONG)0);
+   lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_16BPP_565, 160*VIDEO_CORE_PIXELSIZE, lynx_display_callback, (ULONG)0);
+#elif VIDEO_CORE_PIXELSIZE==4
+   lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_32BPP, 160*VIDEO_CORE_PIXELSIZE, lynx_display_callback, (ULONG)0);
 #endif
-#if VIDEO_CORE_PIXELSIZE==4
-   lynx->DisplaySetAttributes(rot, MIKIE_PIXEL_FORMAT_32BPP, 160*VIDEO_CORE_PIXELSIZE, lynx_display_callback, (ULONG)0);
-#endif
+
    return true;
+}
+
+void retro_set_controller_port_device(unsigned, unsigned)
+{
+}
+
+void retro_get_system_info(struct retro_system_info *info)
+{
+   memset(info, 0, sizeof(*info));
+   info->library_name     = "Handy";
+#ifndef GIT_VERSION
+#define GIT_VERSION ""
+#endif
+   info->library_version  = HANDYVER GIT_VERSION;
+   info->need_fullpath    = true;
+   info->valid_extensions = "lnx";
+   info->block_extract = 0;
+}
+
+void retro_get_system_av_info(struct retro_system_av_info *info)
+{
+   struct retro_game_geometry geom = { lynx_width, lynx_height, 160, 160, (float) lynx_width / (float) lynx_height };
+   struct retro_system_timing timing = { 75.0, 22050.0 };
+
+   memset(info, 0, sizeof(*info));
+   info->geometry = geom;
+   info->timing   = timing;
+}
+
+void retro_run(void)
+{
+   lynx_input();
+
+   while (!newFrame)
+      lynx->Update();
+
+   newFrame = false;
+
+
+   bool updated = false;
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
+      check_variables();
+}
+
+static void gettempfilename(char *dest)
+{
+   const char *dir = 0;
+   environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &dir);
+   sprintf(dest, "%s%chandy.tmp", dir, SLASH_STR);
+}
+
+size_t retro_serialize_size(void)
+{
+   char tempfilename[1024];
+   if(!lynx)
+      return 0;
+
+   gettempfilename(tempfilename);
+   return lynx->MemoryContextSave(tempfilename, NULL);
+}
+
+bool retro_serialize(void *data, size_t size)
+{
+   char tempfilename[1024];
+   if(!lynx)
+      return false;
+
+   gettempfilename(tempfilename);
+   return lynx->MemoryContextSave(tempfilename, (char*)data) > 0;
+}
+
+bool retro_unserialize(const void *data, size_t size)
+{
+   if(!lynx)
+      return false;
+
+   return lynx->MemoryContextLoad((const char*)data, size);
 }
 
 bool retro_load_game(const struct retro_game_info *info)
 {
-   struct retro_input_descriptor desc[] = {
+   static struct retro_input_descriptor desc[] = {
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "D-Pad Left" },
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,    "D-Pad Up" },
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,  "D-Pad Down" },
@@ -376,6 +410,8 @@ bool retro_load_game(const struct retro_game_info *info)
 
    if (!lynx_initialize_sound())
       return false;
+
+   check_variables();
 
    initialized = true;
    return true;
