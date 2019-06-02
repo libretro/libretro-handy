@@ -72,7 +72,7 @@ class CMemMap : public CLynxBase
       CMemMap(CSystem& parent);
 
    public:
-      bool	ContextSave(FILE *fp);
+      bool	ContextSave(LSS_FILE *fp);
       bool	ContextLoad(LSS_FILE *fp);
       void	Reset(void);
 

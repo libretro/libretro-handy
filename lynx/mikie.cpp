@@ -355,216 +355,207 @@ ULONG CMikie::GetLfsrNext(ULONG current)
    return next;
 }
 
-bool CMikie::ContextSave(FILE *fp)
+bool CMikie::ContextSave(LSS_FILE *fp)
 {
    TRACE_MIKIE0("ContextSave()");
 
-   if(!fprintf(fp,"CMikie::ContextSave"))
-      return 0;
+   if(!lss_printf(fp,"CMikie::ContextSave")) return 0;
 
-   if(!fwrite(&mDisplayAddress,sizeof(ULONG),1,fp))
-      return 0;
-   if(!fwrite(&mAudioInputComparator,sizeof(ULONG),1,fp))
-      return 0;
-   if(!fwrite(&mTimerStatusFlags,sizeof(ULONG),1,fp))
-      return 0;
-   if(!fwrite(&mTimerInterruptMask,sizeof(ULONG),1,fp))
-      return 0;
+   if(!lss_write(&mDisplayAddress,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAudioInputComparator,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTimerStatusFlags,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTimerInterruptMask,sizeof(ULONG),1,fp)) return 0;
+   
+   if(!lss_write(mPalette,sizeof(TPALETTE),16,fp)) return 0;
+   if(!lss_write(mColourMap,sizeof(ULONG),4096,fp)) return 0;
+   
+   if(!lss_write(&mIODAT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mIODAT_REST_SIGNAL,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mIODIR,sizeof(ULONG),1,fp)) return 0;
+   
+   if(!lss_write(&mDISPCTL_DMAEnable,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mDISPCTL_Flip,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mDISPCTL_FourColour,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mDISPCTL_Colour,sizeof(ULONG),1,fp)) return 0;
 
-   if(!fwrite(mPalette,sizeof(TPALETTE),16,fp))
-      return 0;
-   if(!fwrite(mColourMap,sizeof(ULONG),4096,fp))
-      return 0;
+   if(!lss_write(&mTIM_0_BKUP,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_0_ENABLE_RELOAD,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_0_ENABLE_COUNT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_0_LINKING,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_0_CURRENT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_0_TIMER_DONE,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_0_LAST_CLOCK,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_0_BORROW_IN,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_0_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_0_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_0_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
 
-   if(!fwrite(&mIODAT,sizeof(ULONG),1,fp))
-      return 0;
-   if(!fwrite(&mIODAT_REST_SIGNAL,sizeof(ULONG),1,fp))
-      return 0;
-   if(!fwrite(&mIODIR,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_1_BKUP,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_1_ENABLE_RELOAD,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_1_ENABLE_COUNT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_1_LINKING,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_1_CURRENT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_1_TIMER_DONE,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_1_LAST_CLOCK,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_1_BORROW_IN,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_1_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_1_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_1_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
 
-   if(!fwrite(&mDISPCTL_DMAEnable,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mDISPCTL_Flip,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mDISPCTL_FourColour,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mDISPCTL_Colour,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_2_BKUP,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_2_ENABLE_RELOAD,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_2_ENABLE_COUNT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_2_LINKING,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_2_CURRENT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_2_TIMER_DONE,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_2_LAST_CLOCK,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_2_BORROW_IN,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_2_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_2_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_2_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
 
-   if(!fwrite(&mTIM_0_BKUP,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_0_ENABLE_RELOAD,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_0_ENABLE_COUNT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_0_LINKING,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_0_CURRENT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_0_TIMER_DONE,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_0_LAST_CLOCK,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_0_BORROW_IN,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_0_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_0_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_0_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_3_BKUP,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_3_ENABLE_RELOAD,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_3_ENABLE_COUNT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_3_LINKING,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_3_CURRENT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_3_TIMER_DONE,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_3_LAST_CLOCK,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_3_BORROW_IN,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_3_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_3_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_3_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
 
-   if(!fwrite(&mTIM_1_BKUP,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_1_ENABLE_RELOAD,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_1_ENABLE_COUNT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_1_LINKING,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_1_CURRENT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_1_TIMER_DONE,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_1_LAST_CLOCK,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_1_BORROW_IN,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_1_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_1_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_1_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_4_BKUP,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_4_ENABLE_RELOAD,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_4_ENABLE_COUNT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_4_LINKING,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_4_CURRENT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_4_TIMER_DONE,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_4_LAST_CLOCK,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_4_BORROW_IN,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_4_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_4_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_4_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
 
-   if(!fwrite(&mTIM_2_BKUP,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_2_ENABLE_RELOAD,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_2_ENABLE_COUNT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_2_LINKING,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_2_CURRENT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_2_TIMER_DONE,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_2_LAST_CLOCK,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_2_BORROW_IN,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_2_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_2_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_2_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_5_BKUP,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_5_ENABLE_RELOAD,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_5_ENABLE_COUNT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_5_LINKING,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_5_CURRENT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_5_TIMER_DONE,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_5_LAST_CLOCK,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_5_BORROW_IN,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_5_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_5_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_5_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
 
-   if(!fwrite(&mTIM_3_BKUP,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_3_ENABLE_RELOAD,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_3_ENABLE_COUNT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_3_LINKING,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_3_CURRENT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_3_TIMER_DONE,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_3_LAST_CLOCK,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_3_BORROW_IN,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_3_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_3_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_3_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_6_BKUP,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_6_ENABLE_RELOAD,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_6_ENABLE_COUNT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_6_LINKING,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_6_CURRENT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_6_TIMER_DONE,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_6_LAST_CLOCK,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_6_BORROW_IN,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_6_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_6_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_6_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
 
-   if(!fwrite(&mTIM_4_BKUP,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_4_ENABLE_RELOAD,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_4_ENABLE_COUNT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_4_LINKING,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_4_CURRENT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_4_TIMER_DONE,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_4_LAST_CLOCK,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_4_BORROW_IN,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_4_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_4_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_4_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_7_BKUP,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_7_ENABLE_RELOAD,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_7_ENABLE_COUNT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_7_LINKING,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_7_CURRENT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_7_TIMER_DONE,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_7_LAST_CLOCK,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_7_BORROW_IN,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_7_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_7_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mTIM_7_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
 
-   if(!fwrite(&mTIM_5_BKUP,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_5_ENABLE_RELOAD,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_5_ENABLE_COUNT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_5_LINKING,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_5_CURRENT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_5_TIMER_DONE,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_5_LAST_CLOCK,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_5_BORROW_IN,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_5_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_5_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_5_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_0_BKUP,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_0_ENABLE_RELOAD,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_0_ENABLE_COUNT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_0_LINKING,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_0_CURRENT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_0_TIMER_DONE,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_0_LAST_CLOCK,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_0_BORROW_IN,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_0_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_0_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_0_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_0_VOLUME,sizeof(SBYTE),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_OUTPUT[0],sizeof(SBYTE),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_0_INTEGRATE_ENABLE,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_0_WAVESHAPER,sizeof(ULONG),1,fp)) return 0;
 
-   if(!fwrite(&mTIM_6_BKUP,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_6_ENABLE_RELOAD,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_6_ENABLE_COUNT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_6_LINKING,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_6_CURRENT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_6_TIMER_DONE,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_6_LAST_CLOCK,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_6_BORROW_IN,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_6_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_6_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_6_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_1_BKUP,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_1_ENABLE_RELOAD,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_1_ENABLE_COUNT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_1_LINKING,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_1_CURRENT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_1_TIMER_DONE,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_1_LAST_CLOCK,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_1_BORROW_IN,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_1_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_1_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_1_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_1_VOLUME,sizeof(SBYTE),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_OUTPUT[1],sizeof(SBYTE),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_1_INTEGRATE_ENABLE,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_1_WAVESHAPER,sizeof(ULONG),1,fp)) return 0;
 
-   if(!fwrite(&mTIM_7_BKUP,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_7_ENABLE_RELOAD,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_7_ENABLE_COUNT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_7_LINKING,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_7_CURRENT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_7_TIMER_DONE,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_7_LAST_CLOCK,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_7_BORROW_IN,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_7_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_7_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mTIM_7_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_2_BKUP,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_2_ENABLE_RELOAD,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_2_ENABLE_COUNT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_2_LINKING,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_2_CURRENT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_2_TIMER_DONE,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_2_LAST_CLOCK,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_2_BORROW_IN,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_2_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_2_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_2_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_2_VOLUME,sizeof(SBYTE),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_OUTPUT[2],sizeof(SBYTE),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_2_INTEGRATE_ENABLE,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_2_WAVESHAPER,sizeof(ULONG),1,fp)) return 0;
 
-   if(!fwrite(&mAUDIO_0_BKUP,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_0_ENABLE_RELOAD,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_0_ENABLE_COUNT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_0_LINKING,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_0_CURRENT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_0_TIMER_DONE,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_0_LAST_CLOCK,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_0_BORROW_IN,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_0_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_0_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_0_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_0_VOLUME,sizeof(SBYTE),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_OUTPUT[0],sizeof(SBYTE),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_0_INTEGRATE_ENABLE,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_0_WAVESHAPER,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_3_BKUP,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_3_ENABLE_RELOAD,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_3_ENABLE_COUNT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_3_LINKING,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_3_CURRENT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_3_TIMER_DONE,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_3_LAST_CLOCK,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_3_BORROW_IN,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_3_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_3_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_3_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_3_VOLUME,sizeof(SBYTE),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_OUTPUT[3],sizeof(SBYTE),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_3_INTEGRATE_ENABLE,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_3_WAVESHAPER,sizeof(ULONG),1,fp)) return 0;
 
-   if(!fwrite(&mAUDIO_1_BKUP,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_1_ENABLE_RELOAD,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_1_ENABLE_COUNT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_1_LINKING,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_1_CURRENT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_1_TIMER_DONE,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_1_LAST_CLOCK,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_1_BORROW_IN,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_1_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_1_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_1_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_1_VOLUME,sizeof(SBYTE),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_OUTPUT[1],sizeof(SBYTE),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_1_INTEGRATE_ENABLE,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_1_WAVESHAPER,sizeof(ULONG),1,fp)) return 0;
-
-   if(!fwrite(&mAUDIO_2_BKUP,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_2_ENABLE_RELOAD,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_2_ENABLE_COUNT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_2_LINKING,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_2_CURRENT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_2_TIMER_DONE,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_2_LAST_CLOCK,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_2_BORROW_IN,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_2_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_2_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_2_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_2_VOLUME,sizeof(SBYTE),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_OUTPUT[2],sizeof(SBYTE),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_2_INTEGRATE_ENABLE,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_2_WAVESHAPER,sizeof(ULONG),1,fp)) return 0;
-
-   if(!fwrite(&mAUDIO_3_BKUP,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_3_ENABLE_RELOAD,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_3_ENABLE_COUNT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_3_LINKING,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_3_CURRENT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_3_TIMER_DONE,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_3_LAST_CLOCK,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_3_BORROW_IN,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_3_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_3_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_3_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_3_VOLUME,sizeof(SBYTE),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_OUTPUT[3],sizeof(SBYTE),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_3_INTEGRATE_ENABLE,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAUDIO_3_WAVESHAPER,sizeof(ULONG),1,fp)) return 0;
-
-   if(!fwrite(&mSTEREO,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSTEREO,sizeof(ULONG),1,fp)) return 0;
 
    //
    // Serial related variables
    //
-   if(!fwrite(&mUART_RX_IRQ_ENABLE,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mUART_TX_IRQ_ENABLE,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mUART_RX_IRQ_ENABLE,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mUART_TX_IRQ_ENABLE,sizeof(ULONG),1,fp)) return 0;
 
-   if(!fwrite(&mUART_TX_COUNTDOWN,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mUART_RX_COUNTDOWN,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mUART_TX_COUNTDOWN,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mUART_RX_COUNTDOWN,sizeof(ULONG),1,fp)) return 0;
 
-   if(!fwrite(&mUART_SENDBREAK,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mUART_TX_DATA,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mUART_RX_DATA,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mUART_RX_READY,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mUART_SENDBREAK,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mUART_TX_DATA,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mUART_RX_DATA,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mUART_RX_READY,sizeof(ULONG),1,fp)) return 0;
 
-   if(!fwrite(&mUART_PARITY_ENABLE,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mUART_PARITY_EVEN,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mUART_PARITY_ENABLE,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mUART_PARITY_EVEN,sizeof(ULONG),1,fp)) return 0;
 
    return 1;
 }

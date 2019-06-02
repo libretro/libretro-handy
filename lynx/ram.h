@@ -69,8 +69,8 @@ class CRam : public CLynxBase
    public:
 
       void	Reset(void);
-      void      Clear(void);
-      bool	ContextSave(FILE *fp);
+      void  Clear(void);
+      bool	ContextSave(LSS_FILE *fp);
       bool	ContextLoad(LSS_FILE *fp);
 
       void	Poke(ULONG addr, UBYTE data){ mRamData[addr]=data;};
