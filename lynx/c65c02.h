@@ -188,19 +188,19 @@ class C65C02
       }
 
 
-      inline bool ContextSave(FILE *fp)
+      inline bool ContextSave(LSS_FILE *fp)
       {
          TRACE_CPU0("ContextSave()");
          int mPS;
          mPS=PS();
-         if(!fprintf(fp,"C6502::ContextSave")) return 0;
-         if(!fwrite(&mA,sizeof(ULONG),1,fp)) return 0;
-         if(!fwrite(&mX,sizeof(ULONG),1,fp)) return 0;
-         if(!fwrite(&mY,sizeof(ULONG),1,fp)) return 0;
-         if(!fwrite(&mSP,sizeof(ULONG),1,fp)) return 0;
-         if(!fwrite(&mPS,sizeof(ULONG),1,fp)) return 0;
-         if(!fwrite(&mPC,sizeof(ULONG),1,fp)) return 0;
-         if(!fwrite(&mIRQActive,sizeof(ULONG),1,fp)) return 0;
+         if(!lss_printf(fp,"C6502::ContextSave")) return 0;
+         if(!lss_write(&mA,sizeof(ULONG),1,fp)) return 0;
+         if(!lss_write(&mX,sizeof(ULONG),1,fp)) return 0;
+         if(!lss_write(&mY,sizeof(ULONG),1,fp)) return 0;
+         if(!lss_write(&mSP,sizeof(ULONG),1,fp)) return 0;
+         if(!lss_write(&mPS,sizeof(ULONG),1,fp)) return 0;
+         if(!lss_write(&mPC,sizeof(ULONG),1,fp)) return 0;
+         if(!lss_write(&mIRQActive,sizeof(ULONG),1,fp)) return 0;
          return 1;
       }
 

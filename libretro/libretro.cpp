@@ -358,22 +358,18 @@ static void gettempfilename(char *dest)
 
 size_t retro_serialize_size(void)
 {
-   char tempfilename[1024];
    if(!lynx)
       return 0;
 
-   gettempfilename(tempfilename);
-   return lynx->MemoryContextSave(tempfilename, NULL);
+   return lynx->MemoryContextSave(NULL, 0);
 }
 
 bool retro_serialize(void *data, size_t size)
 {
-   char tempfilename[1024];
    if(!lynx)
       return false;
 
-   gettempfilename(tempfilename);
-   return lynx->MemoryContextSave(tempfilename, (char*)data) > 0;
+   return lynx->MemoryContextSave((char*)data, size) > 0;
 }
 
 bool retro_unserialize(const void *data, size_t size)

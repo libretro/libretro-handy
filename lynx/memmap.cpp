@@ -102,13 +102,13 @@ void CMemMap::Reset(void)
 
 }
 
-bool CMemMap::ContextSave(FILE *fp)
+bool CMemMap::ContextSave(LSS_FILE *fp)
 {	
-   if(!fprintf(fp,"CMemMap::ContextSave")) return 0;
-   if(!fwrite(&mMikieEnabled,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mSusieEnabled,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mRomEnabled,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mVectorsEnabled,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_printf(fp,"CMemMap::ContextSave")) return 0;
+   if(!lss_write(&mMikieEnabled,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSusieEnabled,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mRomEnabled,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mVectorsEnabled,sizeof(ULONG),1,fp)) return 0;
    return 1;
 }
 

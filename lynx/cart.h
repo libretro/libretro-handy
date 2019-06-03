@@ -115,7 +115,7 @@ class CCart : public CLynxBase
       // Access for sensible members of the clan
 
       void	Reset(void);
-      bool	ContextSave(FILE *fp);
+      bool	ContextSave(LSS_FILE *fp);
       bool	ContextLoad(LSS_FILE *fp);
       bool	ContextLoadLegacy(LSS_FILE *fp);
 
