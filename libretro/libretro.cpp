@@ -105,7 +105,7 @@ void retro_init(void)
 void retro_reset(void)
 {
    if(lynx){
-       lynx->SaveEEPROM();
+      lynx->SaveEEPROM();
       lynx->Reset();
    }
 }
@@ -116,9 +116,8 @@ void retro_deinit(void)
    initialized = false;
 
    if(lynx){
-       lynx->SaveEEPROM();
       delete lynx;
-       lynx=0;
+      lynx=0;
    }
 }
 
@@ -288,12 +287,7 @@ static bool lynx_initialize_system(const char* gamepath)
 {
    char romfilename[1024];
 
-   if(lynx){
-      lynx->SaveEEPROM();
-      delete lynx;
-      lynx=0;
-   }
-
+   retro_deinit();
    lynx_romfilename(romfilename);
 
    lynx = new CSystem(gamepath, romfilename, true);
@@ -347,13 +341,6 @@ void retro_run(void)
    bool updated = false;
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
       check_variables();
-}
-
-static void gettempfilename(char *dest)
-{
-   const char *dir = 0;
-   environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &dir);
-   sprintf(dest, "%s%chandy.tmp", dir, SLASH_STR);
 }
 
 size_t retro_serialize_size(void)
@@ -420,13 +407,8 @@ bool retro_load_game_special(unsigned, const struct retro_game_info*, size_t)
 
 void retro_unload_game(void)
 {
-// TODO should be save EEPROM here, too?
-//    if(lynx){
-//        lynx->SaveEEPROM();
-//        delete lynx;
-//        lynx=0;
-//    }
    initialized = false;
+   retro_deinit();
 }
 
 void retro_cheat_reset(void)

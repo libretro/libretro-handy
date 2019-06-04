@@ -74,6 +74,15 @@ ULONG cycles_used=0;
 CSusie::CSusie(CSystem& parent) :mSystem(parent)
 {
    TRACE_SUSIE0("CSusie()");
+   mLineType=0;
+   mLineShiftRegCount=0;
+   mLineShiftReg=0;
+   mLineRepeatCount=0;
+   mLinePixel=0;
+   mLinePacketBitsLeft=0;
+   mCollision=0;
+   mLineBaseAddress=0;
+   mLineCollisionAddress=0;
    Reset();
 }
 

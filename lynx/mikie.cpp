@@ -69,8 +69,8 @@ void CMikie::BlowOut(void)
 }
 
 
-   CMikie::CMikie(CSystem& parent)
-:mSystem(parent)
+CMikie::CMikie(CSystem& parent)
+  :mSystem(parent)
 {
    TRACE_MIKIE0("CMikie()");
 
@@ -89,6 +89,10 @@ void CMikie::BlowOut(void)
    int loop;
    for(loop=0;loop<16;loop++) mPalette[loop].Index=loop;
    for(loop=0;loop<4096;loop++) mColourMap[loop]=0;
+
+   mUART_TX_CALLBACK_OBJECT=0;
+   memset(mUART_Rx_input_queue,0,sizeof(mUART_Rx_input_queue));
+   mDisplayPitch=0;
 
    Reset();
 }
@@ -2781,7 +2785,7 @@ inline void CMikie::Update(void)
             }
             else
             {
-               if(gCPUWakeupTime>gSystemCycleCount) gNextTimerEvent=gCPUWakeupTime;
+               gNextTimerEvent=gCPUWakeupTime;
             }
          }
 
