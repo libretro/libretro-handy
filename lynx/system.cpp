@@ -78,7 +78,7 @@ int lss_write(void* src,int varsize, int varcount,LSS_FILE *fp)
    return copysize;
 }
 
-int lss_printf(LSS_FILE *fp, char *str)
+int lss_printf(LSS_FILE *fp, const char *str)
 {
    ULONG copysize;
    copysize=strlen(str);

@@ -153,7 +153,7 @@ typedef struct lssfile
 
 int lss_read(void* dest,int varsize, int varcount,LSS_FILE *fp);
 int lss_write(void* src,int varsize, int varcount,LSS_FILE *fp);
-int lss_printf(LSS_FILE *fp, char *str);
+int lss_printf(LSS_FILE *fp, const char *str);
 
 //
 // Define the interfaces before we start pulling in the classes
