@@ -127,10 +127,10 @@ void CRam::Clear(void)
    memset(mRamData, 0, RAM_SIZE);
 }
 
-bool CRam::ContextSave(FILE *fp)
+bool CRam::ContextSave(LSS_FILE *fp)
 {
-   if(!fprintf(fp,"CRam::ContextSave")) return 0;
-   if(!fwrite(mRamData,sizeof(UBYTE),RAM_SIZE,fp)) return 0;
+   if(!lss_printf(fp,"CRam::ContextSave")) return 0;
+   if(!lss_write(mRamData,sizeof(UBYTE),RAM_SIZE,fp)) return 0;
    return 1;
 }
 

@@ -320,27 +320,27 @@ void CCart::Reset(void)
    mStrobe=0;
 }
 
-bool CCart::ContextSave(FILE *fp)
+bool CCart::ContextSave(LSS_FILE *fp)
 {
    TRACE_CART0("ContextSave()");
-   if(!fprintf(fp,"CCart::ContextSave")) return 0;
-   if(!fwrite(&mCounter,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mShifter,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mAddrData,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mStrobe,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mShiftCount0,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mCountMask0,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mShiftCount1,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mCountMask1,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mBank,sizeof(EMMODE),1,fp)) return 0;
-   if(!fwrite(&mWriteEnableBank0,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mWriteEnableBank1,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_printf(fp,"CCart::ContextSave")) return 0;
+   if(!lss_write(&mCounter,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mShifter,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mAddrData,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mStrobe,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mShiftCount0,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mCountMask0,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mShiftCount1,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mCountMask1,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mBank,sizeof(EMMODE),1,fp)) return 0;
+   if(!lss_write(&mWriteEnableBank0,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mWriteEnableBank1,sizeof(ULONG),1,fp)) return 0;
 
-   if(!fwrite(&mCartRAM,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mCartRAM,sizeof(ULONG),1,fp)) return 0;
    if(mCartRAM)
    {
-      if(!fwrite(&mMaskBank1,sizeof(ULONG),1,fp)) return 0;
-      if(!fwrite(mCartBank1,sizeof(UBYTE),mMaskBank1+1,fp)) return 0;
+      if(!lss_write(&mMaskBank1,sizeof(ULONG),1,fp)) return 0;
+      if(!lss_write(mCartBank1,sizeof(UBYTE),mMaskBank1+1,fp)) return 0;
    }
    return 1;
 }

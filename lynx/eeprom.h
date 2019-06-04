@@ -24,6 +24,8 @@ public:
    CEEPROM();
    ~CEEPROM();
 
+   bool ContextSave(LSS_FILE *fp) { return true; }
+   bool ContextLoad(LSS_FILE *fp) { return true; }
    void	Reset(void);
 
    bool Available(void){ return type!=0;};

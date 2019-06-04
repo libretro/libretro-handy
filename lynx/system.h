@@ -63,7 +63,7 @@
 
 #define HANDY_SYSTEM_FREQ						16000000
 #define HANDY_TIMER_FREQ						20
-#define HANDY_AUDIO_SAMPLE_FREQ					22050
+#define HANDY_AUDIO_SAMPLE_FREQ					48000
 #define HANDY_AUDIO_SAMPLE_PERIOD				(HANDY_SYSTEM_FREQ/HANDY_AUDIO_SAMPLE_FREQ)
 #define HANDY_AUDIO_WAVESHAPER_TABLE_LENGTH		0x200000
 
@@ -152,6 +152,8 @@ typedef struct lssfile
 } LSS_FILE;
 
 int lss_read(void* dest,int varsize, int varcount,LSS_FILE *fp);
+int lss_write(void* src,int varsize, int varcount,LSS_FILE *fp);
+int lss_printf(LSS_FILE *fp, char *str);
 
 //
 // Define the interfaces before we start pulling in the classes
@@ -199,7 +201,7 @@ class CSystem : public CSystemBase
       void HLE_BIOS_FE4A(void);
       void HLE_BIOS_FF80(void);
       void	Reset(void);
-      size_t	MemoryContextSave(const char* tmpfilename, char *context);
+      size_t MemoryContextSave(char *context, size_t size);
       bool	MemoryContextLoad(const char *context, size_t size);
       bool	ContextSave(const char *context);
       bool	ContextLoad(const char *context);

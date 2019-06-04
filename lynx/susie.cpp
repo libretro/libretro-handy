@@ -181,94 +181,94 @@ void CSusie::Reset(void)
    mSWITCHES.Byte=0;
 }
 
-bool CSusie::ContextSave(FILE *fp)
+bool CSusie::ContextSave(LSS_FILE *fp)
 {
    TRACE_SUSIE0("ContextSave()");
 
-   if(!fprintf(fp,"CSusie::ContextSave")) return 0;
+   if(!lss_printf(fp,"CSusie::ContextSave")) return 0;
 
-   if(!fwrite(&mTMPADR,sizeof(UUWORD),1,fp)) return 0;
-   if(!fwrite(&mTILTACUM,sizeof(UUWORD),1,fp)) return 0;
-   if(!fwrite(&mHOFF,sizeof(UUWORD),1,fp)) return 0;
-   if(!fwrite(&mVOFF,sizeof(UUWORD),1,fp)) return 0;
-   if(!fwrite(&mVIDBAS,sizeof(UUWORD),1,fp)) return 0;
-   if(!fwrite(&mCOLLBAS,sizeof(UUWORD),1,fp)) return 0;
-   if(!fwrite(&mVIDADR,sizeof(UUWORD),1,fp)) return 0;
-   if(!fwrite(&mCOLLADR,sizeof(UUWORD),1,fp)) return 0;
-   if(!fwrite(&mSCBNEXT,sizeof(UUWORD),1,fp)) return 0;
-   if(!fwrite(&mSPRDLINE,sizeof(UUWORD),1,fp)) return 0;
-   if(!fwrite(&mHPOSSTRT,sizeof(UUWORD),1,fp)) return 0;
-   if(!fwrite(&mVPOSSTRT,sizeof(UUWORD),1,fp)) return 0;
-   if(!fwrite(&mSPRHSIZ,sizeof(UUWORD),1,fp)) return 0;
-   if(!fwrite(&mSPRVSIZ,sizeof(UUWORD),1,fp)) return 0;
-   if(!fwrite(&mSTRETCH,sizeof(UUWORD),1,fp)) return 0;
-   if(!fwrite(&mTILT,sizeof(UUWORD),1,fp)) return 0;
-   if(!fwrite(&mSPRDOFF,sizeof(UUWORD),1,fp)) return 0;
-   if(!fwrite(&mSPRVPOS,sizeof(UUWORD),1,fp)) return 0;
-   if(!fwrite(&mCOLLOFF,sizeof(UUWORD),1,fp)) return 0;
-   if(!fwrite(&mVSIZACUM,sizeof(UUWORD),1,fp)) return 0;
-   if(!fwrite(&mHSIZACUM,sizeof(UUWORD),1,fp)) return 0;
-   if(!fwrite(&mHSIZOFF,sizeof(UUWORD),1,fp)) return 0;
-   if(!fwrite(&mVSIZOFF,sizeof(UUWORD),1,fp)) return 0;
-   if(!fwrite(&mSCBADR,sizeof(UUWORD),1,fp)) return 0;
-   if(!fwrite(&mPROCADR,sizeof(UUWORD),1,fp)) return 0;
+   if(!lss_write(&mTMPADR,sizeof(UUWORD),1,fp)) return 0;
+   if(!lss_write(&mTILTACUM,sizeof(UUWORD),1,fp)) return 0;
+   if(!lss_write(&mHOFF,sizeof(UUWORD),1,fp)) return 0;
+   if(!lss_write(&mVOFF,sizeof(UUWORD),1,fp)) return 0;
+   if(!lss_write(&mVIDBAS,sizeof(UUWORD),1,fp)) return 0;
+   if(!lss_write(&mCOLLBAS,sizeof(UUWORD),1,fp)) return 0;
+   if(!lss_write(&mVIDADR,sizeof(UUWORD),1,fp)) return 0;
+   if(!lss_write(&mCOLLADR,sizeof(UUWORD),1,fp)) return 0;
+   if(!lss_write(&mSCBNEXT,sizeof(UUWORD),1,fp)) return 0;
+   if(!lss_write(&mSPRDLINE,sizeof(UUWORD),1,fp)) return 0;
+   if(!lss_write(&mHPOSSTRT,sizeof(UUWORD),1,fp)) return 0;
+   if(!lss_write(&mVPOSSTRT,sizeof(UUWORD),1,fp)) return 0;
+   if(!lss_write(&mSPRHSIZ,sizeof(UUWORD),1,fp)) return 0;
+   if(!lss_write(&mSPRVSIZ,sizeof(UUWORD),1,fp)) return 0;
+   if(!lss_write(&mSTRETCH,sizeof(UUWORD),1,fp)) return 0;
+   if(!lss_write(&mTILT,sizeof(UUWORD),1,fp)) return 0;
+   if(!lss_write(&mSPRDOFF,sizeof(UUWORD),1,fp)) return 0;
+   if(!lss_write(&mSPRVPOS,sizeof(UUWORD),1,fp)) return 0;
+   if(!lss_write(&mCOLLOFF,sizeof(UUWORD),1,fp)) return 0;
+   if(!lss_write(&mVSIZACUM,sizeof(UUWORD),1,fp)) return 0;
+   if(!lss_write(&mHSIZACUM,sizeof(UUWORD),1,fp)) return 0;
+   if(!lss_write(&mHSIZOFF,sizeof(UUWORD),1,fp)) return 0;
+   if(!lss_write(&mVSIZOFF,sizeof(UUWORD),1,fp)) return 0;
+   if(!lss_write(&mSCBADR,sizeof(UUWORD),1,fp)) return 0;
+   if(!lss_write(&mPROCADR,sizeof(UUWORD),1,fp)) return 0;
 
-   if(!fwrite(&mMATHABCD,sizeof(TMATHABCD),1,fp)) return 0;
-   if(!fwrite(&mMATHEFGH,sizeof(TMATHEFGH),1,fp)) return 0;
-   if(!fwrite(&mMATHJKLM,sizeof(TMATHJKLM),1,fp)) return 0;
-   if(!fwrite(&mMATHNP,sizeof(TMATHNP),1,fp)) return 0;
+   if(!lss_write(&mMATHABCD,sizeof(TMATHABCD),1,fp)) return 0;
+   if(!lss_write(&mMATHEFGH,sizeof(TMATHEFGH),1,fp)) return 0;
+   if(!lss_write(&mMATHJKLM,sizeof(TMATHJKLM),1,fp)) return 0;
+   if(!lss_write(&mMATHNP,sizeof(TMATHNP),1,fp)) return 0;
 
-   if(!fwrite(&mSPRCTL0_Type,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mSPRCTL0_Vflip,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mSPRCTL0_Hflip,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mSPRCTL0_PixelBits,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSPRCTL0_Type,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSPRCTL0_Vflip,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSPRCTL0_Hflip,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSPRCTL0_PixelBits,sizeof(ULONG),1,fp)) return 0;
 
-   if(!fwrite(&mSPRCTL1_StartLeft,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mSPRCTL1_StartUp,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mSPRCTL1_SkipSprite,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mSPRCTL1_ReloadPalette,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mSPRCTL1_ReloadDepth,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mSPRCTL1_Sizing,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mSPRCTL1_Literal,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSPRCTL1_StartLeft,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSPRCTL1_StartUp,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSPRCTL1_SkipSprite,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSPRCTL1_ReloadPalette,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSPRCTL1_ReloadDepth,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSPRCTL1_Sizing,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSPRCTL1_Literal,sizeof(ULONG),1,fp)) return 0;
 
-   if(!fwrite(&mSPRCOLL_Number,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mSPRCOLL_Collide,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSPRCOLL_Number,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSPRCOLL_Collide,sizeof(ULONG),1,fp)) return 0;
 
-   if(!fwrite(&mSPRSYS_StopOnCurrent,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mSPRSYS_LeftHand,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mSPRSYS_VStretch,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mSPRSYS_NoCollide,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mSPRSYS_Accumulate,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mSPRSYS_SignedMath,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mSPRSYS_Status,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mSPRSYS_UnsafeAccess,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mSPRSYS_LastCarry,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mSPRSYS_Mathbit,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mSPRSYS_MathInProgress,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSPRSYS_StopOnCurrent,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSPRSYS_LeftHand,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSPRSYS_VStretch,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSPRSYS_NoCollide,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSPRSYS_Accumulate,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSPRSYS_SignedMath,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSPRSYS_Status,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSPRSYS_UnsafeAccess,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSPRSYS_LastCarry,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSPRSYS_Mathbit,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSPRSYS_MathInProgress,sizeof(ULONG),1,fp)) return 0;
 
-   if(!fwrite(&mSUZYBUSEN,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSUZYBUSEN,sizeof(ULONG),1,fp)) return 0;
 
-   if(!fwrite(&mSPRINIT,sizeof(TSPRINIT),1,fp)) return 0;
+   if(!lss_write(&mSPRINIT,sizeof(TSPRINIT),1,fp)) return 0;
 
-   if(!fwrite(&mSPRGO,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mEVERON,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mSPRGO,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mEVERON,sizeof(ULONG),1,fp)) return 0;
 
-   if(!fwrite(mPenIndex,sizeof(UBYTE),16,fp)) return 0;
+   if(!lss_write(mPenIndex,sizeof(UBYTE),16,fp)) return 0;
 
-   if(!fwrite(&mLineType,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mLineShiftRegCount,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mLineShiftReg,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mLineRepeatCount,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mLinePixel,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mLinePacketBitsLeft,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mLineType,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mLineShiftRegCount,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mLineShiftReg,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mLineRepeatCount,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mLinePixel,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mLinePacketBitsLeft,sizeof(ULONG),1,fp)) return 0;
 
-   if(!fwrite(&mCollision,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mCollision,sizeof(ULONG),1,fp)) return 0;
 
-   if(!fwrite(&mLineBaseAddress,sizeof(ULONG),1,fp)) return 0;
-   if(!fwrite(&mLineCollisionAddress,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mLineBaseAddress,sizeof(ULONG),1,fp)) return 0;
+   if(!lss_write(&mLineCollisionAddress,sizeof(ULONG),1,fp)) return 0;
 
-   if(!fwrite(&mJOYSTICK,sizeof(TJOYSTICK),1,fp)) return 0;
-   if(!fwrite(&mSWITCHES,sizeof(TSWITCHES),1,fp)) return 0;
+   if(!lss_write(&mJOYSTICK,sizeof(TJOYSTICK),1,fp)) return 0;
+   if(!lss_write(&mSWITCHES,sizeof(TSWITCHES),1,fp)) return 0;
 
    return 1;
 }

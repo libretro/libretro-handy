@@ -68,6 +68,25 @@ int lss_read(void* dest,int varsize, int varcount,LSS_FILE *fp)
    return copysize;
 }
 
+int lss_write(void* src,int varsize, int varcount,LSS_FILE *fp)
+{
+   ULONG copysize;
+   copysize=varsize*varcount;
+   //if((fp->index + copysize) > fp->index_limit) copysize=fp->index_limit - fp->index;
+   memcpy(fp->memptr+fp->index,src,copysize);
+   fp->index+=copysize;
+   return copysize;
+}
+
+int lss_printf(LSS_FILE *fp, char *str)
+{
+   ULONG copysize;
+   copysize=strlen(str);
+   memcpy(fp->memptr+fp->index,str,copysize);
+   fp->index+=copysize;
+   return copysize;
+}
+
 void _splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
 {
    const char* end; /* end of processed string */
@@ -477,6 +496,7 @@ void CSystem::Reset(void)
 
 bool CSystem::ContextSave(const char *context)
 {
+	/*
    FILE *fp;
    bool status=1;
 
@@ -526,10 +546,13 @@ bool CSystem::ContextSave(const char *context)
 
    fclose(fp);
    return status;
+   */
+   return 0;
 }
 
-size_t	CSystem::MemoryContextSave(const char* tmpfilename, char *context)
+size_t CSystem::MemoryContextSave(char *context, size_t size)
 {
+
    size_t ret = 0;
 
    if(!ContextSave(tmpfilename))
@@ -541,31 +564,58 @@ size_t	CSystem::MemoryContextSave(const char* tmpfilename, char *context)
    FILE *fp;
    UBYTE *filememory = NULL;
    ULONG filesize = 0;
+=======
+   LSS_FILE *fp;
+   
+   fp = new LSS_FILE;
+   fp->index = 0;
 
-   if((fp = fopen(tmpfilename,"rb")) == NULL)
+
+   if(context == NULL)
    {
-      return 0;
-   }
+      static UBYTE tempbuf[0x40000];
 
-   fseek(fp,0,SEEK_END);
-   filesize = ftell(fp);
-   fseek(fp,0,SEEK_SET);
 
    if(NULL == context)
    {
       filememory = new UBYTE[filesize];
+=======
+	  fp->memptr = (UBYTE *) &tempbuf;
+	  fp->index_limit = 0x40000;
+
    }
    else
    {
-      filememory = (UBYTE*) context;
+	  fp->memptr = (UBYTE *) context;
+	  fp->index_limit = size;
    }
 
-   if(fread(filememory,sizeof(char),filesize,fp) == filesize)
-   {
-      ret = filesize;
-   }
+   bool status=1;
+   if(!lss_printf(fp, LSS_VERSION)) status=0;
 
-   fclose(fp);
+   // Save ROM CRC
+   ULONG checksum=mCart->CRC32();
+   if(!lss_write(&checksum,sizeof(ULONG),1,fp)) status=0;
+
+   if(!lss_printf(fp, "CSystem::ContextSave")) status=0;
+
+   if(!lss_write(&mCycleCountBreakpoint,sizeof(ULONG),1,fp)) status=0;
+   if(!lss_write(&gSystemCycleCount,sizeof(ULONG),1,fp)) status=0;
+   if(!lss_write(&gNextTimerEvent,sizeof(ULONG),1,fp)) status=0;
+   if(!lss_write(&gCPUWakeupTime,sizeof(ULONG),1,fp)) status=0;
+   if(!lss_write(&gCPUBootAddress,sizeof(ULONG),1,fp)) status=0;
+   if(!lss_write(&gIRQEntryCycle,sizeof(ULONG),1,fp)) status=0;
+   if(!lss_write(&gBreakpointHit,sizeof(ULONG),1,fp)) status=0;
+   if(!lss_write(&gSingleStepMode,sizeof(ULONG),1,fp)) status=0;
+   if(!lss_write(&gSystemIRQ,sizeof(ULONG),1,fp)) status=0;
+   if(!lss_write(&gSystemNMI,sizeof(ULONG),1,fp)) status=0;
+   if(!lss_write(&gSystemCPUSleep,sizeof(ULONG),1,fp)) status=0;
+   if(!lss_write(&gSystemCPUSleep_Saved,sizeof(ULONG),1,fp)) status=0;
+   if(!lss_write(&gSystemHalt,sizeof(ULONG),1,fp)) status=0;
+   if(!lss_write(&gThrottleMaxPercentage,sizeof(ULONG),1,fp)) status=0;
+   if(!lss_write(&gThrottleLastTimerCount,sizeof(ULONG),1,fp)) status=0;
+   if(!lss_write(&gThrottleNextCycleCheckpoint,sizeof(ULONG),1,fp)) status=0;
+
 
    if(NULL == context)
    {
@@ -573,6 +623,28 @@ size_t	CSystem::MemoryContextSave(const char* tmpfilename, char *context)
    }
 
    remove(tmpfilename);
+=======
+   ULONG tmp=gTimerCount;
+   if(!lss_write(&tmp,sizeof(ULONG),1,fp)) status=0;
+
+   if(!lss_write(gAudioBuffer,sizeof(UBYTE),HANDY_AUDIO_BUFFER_SIZE,fp)) status=0;
+   if(!lss_write(&gAudioBufferPointer,sizeof(ULONG),1,fp)) status=0;
+   if(!lss_write(&gAudioLastUpdateCycle,sizeof(ULONG),1,fp)) status=0;
+
+   // Save other device contexts
+   if(!mMemMap->ContextSave(fp)) status=0;
+   if(!mCart->ContextSave(fp)) status=0;
+   if(!mEEPROM->ContextSave(fp)) status=0;
+   //	if(!mRom->ContextSave(fp)) status=0; We no longer save the system ROM
+   if(!mRam->ContextSave(fp)) status=0;
+   if(!mMikie->ContextSave(fp)) status=0;
+   if(!mSusie->ContextSave(fp)) status=0;
+   if(!mCpu->ContextSave(fp)) status=0;
+
+   size_t ret = fp->index;
+   delete fp;
+
+
    return ret;
 }
 
