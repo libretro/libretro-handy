@@ -77,7 +77,7 @@ CRam::CRam(UBYTE *filememory,ULONG filesize)
    }
    else
    {
-      filememory=NULL;
+      mFileData=NULL;
    }
    // Reset will cause the loadup
 
@@ -86,10 +86,9 @@ CRam::CRam(UBYTE *filememory,ULONG filesize)
 
 CRam::~CRam()
 {
-   if(mFileSize)
+   if(mFileData)
    {
       delete[] mFileData;
-      mFileData=NULL;
    }
 }
 
