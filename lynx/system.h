@@ -61,85 +61,85 @@
 
 #include "machine.h"
 
-#define HANDY_SYSTEM_FREQ						16000000
-#define HANDY_TIMER_FREQ						20
-#define HANDY_AUDIO_SAMPLE_FREQ					48000
-#define HANDY_AUDIO_SAMPLE_PERIOD				(HANDY_SYSTEM_FREQ/HANDY_AUDIO_SAMPLE_FREQ)
-#define HANDY_AUDIO_WAVESHAPER_TABLE_LENGTH		0x200000
+#define HANDY_SYSTEM_FREQ                       16000000
+#define HANDY_TIMER_FREQ                        20
+#define HANDY_AUDIO_SAMPLE_FREQ                 48000
+#define HANDY_AUDIO_SAMPLE_PERIOD               (HANDY_SYSTEM_FREQ/HANDY_AUDIO_SAMPLE_FREQ)
+#define HANDY_AUDIO_WAVESHAPER_TABLE_LENGTH     0x200000
 
 #ifdef SDL_PATCH
-//#define HANDY_AUDIO_BUFFER_SIZE					4096	// Needed for SDL 8bit MONO
-//#define HANDY_AUDIO_BUFFER_SIZE					8192	// Needed for SDL STEREO 8bit
-#define HANDY_AUDIO_BUFFER_SIZE					16384	// Needed for SDL STEREO 16bit
+//#define HANDY_AUDIO_BUFFER_SIZE               4096    // Needed for SDL 8bit MONO
+//#define HANDY_AUDIO_BUFFER_SIZE               8192    // Needed for SDL STEREO 8bit
+#define HANDY_AUDIO_BUFFER_SIZE                 16384   // Needed for SDL STEREO 16bit
 #else
-//#define HANDY_AUDIO_BUFFER_SIZE					(HANDY_AUDIO_SAMPLE_FREQ/4)
-#define HANDY_AUDIO_BUFFER_SIZE					(HANDY_AUDIO_SAMPLE_FREQ)
+//#define HANDY_AUDIO_BUFFER_SIZE               (HANDY_AUDIO_SAMPLE_FREQ/4)
+#define HANDY_AUDIO_BUFFER_SIZE                 (HANDY_AUDIO_SAMPLE_FREQ)
 #endif
 
 
-#define HANDY_FILETYPE_LNX		0
-#define HANDY_FILETYPE_HOMEBREW	1
-#define HANDY_FILETYPE_SNAPSHOT	2
-#define HANDY_FILETYPE_ILLEGAL	3
-#define HANDY_FILETYPE_RAW	4
+#define HANDY_FILETYPE_LNX      0
+#define HANDY_FILETYPE_HOMEBREW 1
+#define HANDY_FILETYPE_SNAPSHOT 2
+#define HANDY_FILETYPE_ILLEGAL  3
+#define HANDY_FILETYPE_RAW      4
 
-#define HANDY_SCREEN_WIDTH	160
-#define HANDY_SCREEN_HEIGHT	102
+#define HANDY_SCREEN_WIDTH   160
+#define HANDY_SCREEN_HEIGHT  102
 //
 // Define the global variable list
 //
 
 #ifdef SYSTEM_CPP
-ULONG	gSystemCycleCount=0;
-ULONG	gNextTimerEvent=0;
-ULONG	gCPUWakeupTime=0;
-ULONG	gIRQEntryCycle=0;
-ULONG	gCPUBootAddress=0;
-ULONG	gBreakpointHit=FALSE;
-ULONG	gSingleStepMode=FALSE;
-ULONG	gSingleStepModeSprites=FALSE;
-ULONG	gSystemIRQ=FALSE;
-ULONG	gSystemNMI=FALSE;
-ULONG	gSystemCPUSleep=FALSE;
-ULONG	gSystemCPUSleep_Saved=FALSE;
-ULONG	gSystemHalt=FALSE;
-ULONG	gThrottleMaxPercentage=100;
-ULONG	gThrottleLastTimerCount=0;
-ULONG	gThrottleNextCycleCheckpoint=0;
+ULONG   gSystemCycleCount=0;
+ULONG   gNextTimerEvent=0;
+ULONG   gCPUWakeupTime=0;
+ULONG   gIRQEntryCycle=0;
+ULONG   gCPUBootAddress=0;
+ULONG   gBreakpointHit=FALSE;
+ULONG   gSingleStepMode=FALSE;
+ULONG   gSingleStepModeSprites=FALSE;
+ULONG   gSystemIRQ=FALSE;
+ULONG   gSystemNMI=FALSE;
+ULONG   gSystemCPUSleep=FALSE;
+ULONG   gSystemCPUSleep_Saved=FALSE;
+ULONG   gSystemHalt=FALSE;
+ULONG   gThrottleMaxPercentage=100;
+ULONG   gThrottleLastTimerCount=0;
+ULONG   gThrottleNextCycleCheckpoint=0;
 
 volatile ULONG gTimerCount=0;
 
-ULONG	gAudioEnabled=FALSE;
-UBYTE	gAudioBuffer[HANDY_AUDIO_BUFFER_SIZE];
-ULONG	gAudioBufferPointer=0;
-ULONG	gAudioLastUpdateCycle=0;
+ULONG   gAudioEnabled=FALSE;
+UBYTE   gAudioBuffer[HANDY_AUDIO_BUFFER_SIZE];
+ULONG   gAudioBufferPointer=0;
+ULONG   gAudioLastUpdateCycle=0;
 
 CErrorInterface *gError=NULL;
 #else
 
-extern ULONG	gSystemCycleCount;
-extern ULONG	gNextTimerEvent;
-extern ULONG	gCPUWakeupTime;
-extern ULONG	gIRQEntryCycle;
-extern ULONG	gCPUBootAddress;
-extern ULONG	gBreakpointHit;
-extern ULONG	gSingleStepMode;
-extern ULONG	gSingleStepModeSprites;
-extern ULONG	gSystemIRQ;
-extern ULONG	gSystemNMI;
-extern ULONG	gSystemCPUSleep;
-extern ULONG	gSystemCPUSleep_Saved;
-extern ULONG	gSystemHalt;
-extern ULONG	gThrottleMaxPercentage;
-extern ULONG	gThrottleLastTimerCount;
-extern ULONG	gThrottleNextCycleCheckpoint;
+extern ULONG    gSystemCycleCount;
+extern ULONG    gNextTimerEvent;
+extern ULONG    gCPUWakeupTime;
+extern ULONG    gIRQEntryCycle;
+extern ULONG    gCPUBootAddress;
+extern ULONG    gBreakpointHit;
+extern ULONG    gSingleStepMode;
+extern ULONG    gSingleStepModeSprites;
+extern ULONG    gSystemIRQ;
+extern ULONG    gSystemNMI;
+extern ULONG    gSystemCPUSleep;
+extern ULONG    gSystemCPUSleep_Saved;
+extern ULONG    gSystemHalt;
+extern ULONG    gThrottleMaxPercentage;
+extern ULONG    gThrottleLastTimerCount;
+extern ULONG    gThrottleNextCycleCheckpoint;
 
 extern volatile ULONG gTimerCount;
 
-extern ULONG	gAudioEnabled;
-extern UBYTE	gAudioBuffer[HANDY_AUDIO_BUFFER_SIZE];
-extern ULONG	gAudioBufferPointer;
-extern ULONG	gAudioLastUpdateCycle;
+extern ULONG    gAudioEnabled;
+extern UBYTE    gAudioBuffer[HANDY_AUDIO_BUFFER_SIZE];
+extern ULONG    gAudioBufferPointer;
+extern ULONG    gAudioLastUpdateCycle;
 
 extern CErrorInterface *gError;
 #endif
@@ -151,9 +151,9 @@ typedef struct lssfile
    ULONG index_limit;
 } LSS_FILE;
 
-int lss_read(void* dest,int varsize, int varcount,LSS_FILE *fp);
-int lss_write(void* src,int varsize, int varcount,LSS_FILE *fp);
-int lss_printf(LSS_FILE *fp, char *str);
+int lss_read(void* dest, int varsize, int varcount, LSS_FILE *fp);
+int lss_write(void* src, int varsize, int varcount, LSS_FILE *fp);
+int lss_printf(LSS_FILE *fp, const char *str);
 
 //
 // Define the interfaces before we start pulling in the classes
@@ -180,13 +180,13 @@ class CSystem;
 
 #include <stdint.h>
 
-#define TOP_START	0xfc00
-#define TOP_MASK	0x03ff
-#define TOP_SIZE	0x400
-#define SYSTEM_SIZE	65536
+#define TOP_START   0xfc00
+#define TOP_MASK    0x03ff
+#define TOP_SIZE    0x400
+#define SYSTEM_SIZE 65536
 
-#define LSS_VERSION_OLD	"LSS2"
-#define LSS_VERSION	"LSS3"
+#define LSS_VERSION_OLD "LSS2"
+#define LSS_VERSION     "LSS3"
 
 class CSystem : public CSystemBase
 {
@@ -200,16 +200,15 @@ class CSystem : public CSystemBase
       void HLE_BIOS_FE19(void);
       void HLE_BIOS_FE4A(void);
       void HLE_BIOS_FF80(void);
-      void	Reset(void);
-      size_t MemoryContextSave(char *context, size_t size);
-      bool	MemoryContextLoad(const char *context, size_t size);
-      bool	ContextSave(const char *context);
-      bool	ContextLoad(const char *context);
-      bool	IsZip(char *filename);
+      void Reset(void);
+      size_t ContextSize(void);
+      bool ContextSave(LSS_FILE *fp);
+      bool ContextLoad(LSS_FILE *fp);
+      bool IsZip(char *filename);
 
       inline void Update(void)
       {
-         //		    fprintf(stderr, "sys update\n");
+         //         fprintf(stderr, "sys update\n");
          //
          // Only update if there is a predicted timer event
          //
@@ -221,7 +220,7 @@ class CSystem : public CSystemBase
          // Step the processor through 1 instruction
          //
          mCpu->Update();
-         //			fprintf(stderr, "end cpu update\n");
+         //         fprintf(stderr, "end cpu update\n");
 
 #ifdef _LYNXDBG
          // Check breakpoint
@@ -241,7 +240,7 @@ class CSystem : public CSystemBase
             gSystemCycleCount=gNextTimerEvent;
          }
 
-         //			fprintf(stderr, "end sys update\n");
+         //         fprintf(stderr, "end sys update\n");
       }
 
       //
@@ -295,49 +294,49 @@ class CSystem : public CSystemBase
 
       // Low level CPU access
 
-      void	SetRegs(C6502_REGS &regs) {mCpu->SetRegs(regs);};
-      void	GetRegs(C6502_REGS &regs) {mCpu->GetRegs(regs);};
+      void   SetRegs(C6502_REGS &regs) {mCpu->SetRegs(regs);};
+      void   GetRegs(C6502_REGS &regs) {mCpu->GetRegs(regs);};
 
       // Mikey system interfacing
 
-      void	DisplaySetAttributes(ULONG Rotate,ULONG Format,ULONG Pitch,UBYTE* (*DisplayCallback)(ULONG objref),ULONG objref) { mMikie->DisplaySetAttributes(Rotate,Format,Pitch,DisplayCallback,objref); };
+      void   DisplaySetAttributes(ULONG Rotate,ULONG Format,ULONG Pitch,UBYTE* (*DisplayCallback)(ULONG objref),ULONG objref) { mMikie->DisplaySetAttributes(Rotate,Format,Pitch,DisplayCallback,objref); };
 
-      void	ComLynxCable(int status) { mMikie->ComLynxCable(status); };
-      void	ComLynxRxData(int data)  { mMikie->ComLynxRxData(data); };
-      void	ComLynxTxCallback(void (*function)(int data,ULONG objref),ULONG objref) { mMikie->ComLynxTxCallback(function,objref); };
+      void   ComLynxCable(int status) { mMikie->ComLynxCable(status); };
+      void   ComLynxRxData(int data)  { mMikie->ComLynxRxData(data); };
+      void   ComLynxTxCallback(void (*function)(int data,ULONG objref),ULONG objref) { mMikie->ComLynxTxCallback(function,objref); };
 
       // Suzy system interfacing
 
-      ULONG	PaintSprites(void) {return mSusie->PaintSprites();};
+      ULONG  PaintSprites(void) {return mSusie->PaintSprites();};
 
       // Miscellaneous
 
-      void	SetButtonData(ULONG data) {mSusie->SetButtonData(data);};
-      ULONG	GetButtonData(void) {return mSusie->GetButtonData();};
-      void	SetCycleBreakpoint(ULONG breakpoint) {mCycleCountBreakpoint=breakpoint;};
-      UBYTE*	GetRamPointer(void) {return mRam->GetRamPointer();};
+      void   SetButtonData(ULONG data) {mSusie->SetButtonData(data);};
+      ULONG  GetButtonData(void) {return mSusie->GetButtonData();};
+      void   SetCycleBreakpoint(ULONG breakpoint) {mCycleCountBreakpoint=breakpoint;};
+      UBYTE* GetRamPointer(void) {return mRam->GetRamPointer();};
 #ifdef _LYNXDBG
-      void	DebugTrace(int address);
+      void   DebugTrace(int address);
 
-      void	DebugSetCallback(void (*function)(ULONG objref, char *message),ULONG objref);
+      void   DebugSetCallback(void (*function)(ULONG objref, char *message),ULONG objref);
 
-      void	(*mpDebugCallback)(ULONG objref, char *message);
-      ULONG	mDebugCallbackObject;
+      void   (*mpDebugCallback)(ULONG objref, char *message);
+      ULONG  mDebugCallbackObject;
 #endif
 
    public:
-      ULONG			mCycleCountBreakpoint;
-      CLynxBase		*mMemoryHandlers[SYSTEM_SIZE];
-      CCart			*mCart;
-      CRom			*mRom;
-      CMemMap			*mMemMap;
-      CRam			*mRam;
-      C65C02			*mCpu;
-      CMikie			*mMikie;
-      CSusie			*mSusie;
-      CEEPROM			*mEEPROM;
+      ULONG         mCycleCountBreakpoint;
+      CLynxBase     *mMemoryHandlers[SYSTEM_SIZE];
+      CCart         *mCart;
+      CRom          *mRom;
+      CMemMap       *mMemMap;
+      CRam          *mRam;
+      C65C02        *mCpu;
+      CMikie        *mMikie;
+      CSusie        *mSusie;
+      CEEPROM       *mEEPROM;
 
-      ULONG			mFileType;
+      ULONG         mFileType;
 };
 
 #endif

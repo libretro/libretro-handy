@@ -23,7 +23,7 @@ static uint8_t lynx_height = 102;
 //#define VIDEO_CORE_PIXELSIZE  4 // MIKIE_PIXEL_FORMAT_32BPP
 
 
-static uint16_t framebuffer[160*102*VIDEO_CORE_PIXELSIZE];
+static uint8_t framebuffer[160*102*VIDEO_CORE_PIXELSIZE];
 
 static bool newFrame = false;
 static bool initialized = false;
@@ -105,20 +105,19 @@ void retro_init(void)
 void retro_reset(void)
 {
    if(lynx){
-       lynx->SaveEEPROM();
+      lynx->SaveEEPROM();
       lynx->Reset();
    }
 }
 
 void retro_deinit(void)
 {
-   retro_reset();
    initialized = false;
 
    if(lynx){
-       lynx->SaveEEPROM();
+      lynx->SaveEEPROM();
       delete lynx;
-       lynx=0;
+      lynx=0;
    }
 }
 
@@ -349,19 +348,12 @@ void retro_run(void)
       check_variables();
 }
 
-static void gettempfilename(char *dest)
-{
-   const char *dir = 0;
-   environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &dir);
-   sprintf(dest, "%s%chandy.tmp", dir, SLASH_STR);
-}
-
 size_t retro_serialize_size(void)
 {
    if(!lynx)
       return 0;
 
-   return lynx->MemoryContextSave(NULL, 0);
+   return lynx->ContextSize();
 }
 
 bool retro_serialize(void *data, size_t size)
@@ -369,7 +361,12 @@ bool retro_serialize(void *data, size_t size)
    if(!lynx)
       return false;
 
-   return lynx->MemoryContextSave((char*)data, size) > 0;
+   LSS_FILE fp;
+   fp.memptr = (UBYTE *) data;
+   fp.index = 0;
+   fp.index_limit = size;
+
+   return lynx->ContextSave(&fp);
 }
 
 bool retro_unserialize(const void *data, size_t size)
@@ -377,7 +374,12 @@ bool retro_unserialize(const void *data, size_t size)
    if(!lynx)
       return false;
 
-   return lynx->MemoryContextLoad((const char*)data, size);
+   LSS_FILE fp;
+   fp.memptr = (UBYTE *) data;
+   fp.index = 0;
+   fp.index_limit = size;
+
+   return lynx->ContextLoad(&fp);
 }
 
 bool retro_load_game(const struct retro_game_info *info)
@@ -420,12 +422,6 @@ bool retro_load_game_special(unsigned, const struct retro_game_info*, size_t)
 
 void retro_unload_game(void)
 {
-// TODO should be save EEPROM here, too?
-//    if(lynx){
-//        lynx->SaveEEPROM();
-//        delete lynx;
-//        lynx=0;
-//    }
    initialized = false;
 }
 
