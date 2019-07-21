@@ -17,16 +17,15 @@ enum {EE_NONE=0, EE_START, EE_DATA, EE_BUSY, EE_WAIT};
 
 class CEEPROM : public CLynxBase
 {
-
    // Function members
 
 public:
    CEEPROM();
    ~CEEPROM();
 
-   bool ContextSave(LSS_FILE *fp) { return true; }
-   bool ContextLoad(LSS_FILE *fp) { return true; }
-   void	Reset(void);
+   bool ContextSave(LSS_FILE *fp);
+   bool ContextLoad(LSS_FILE *fp);
+   void Reset(void);
 
    bool Available(void){ return type!=0;};
    void ProcessEepromIO(UBYTE iodir,UBYTE iodat);
@@ -38,10 +37,10 @@ public:
    };
    void SetEEPROMType(UBYTE b);
    int Size(void);
-   int InitFrom(char *data,int count){ memcpy(romdata,data,__min(count,Size()));};
+   void InitFrom(char *data,int count){ memcpy(romdata,data,__min(count,Size()));};
 
-   void	Poke(ULONG addr,UBYTE data) { };
-   UBYTE	Peek(ULONG addr)
+   void Poke(ULONG addr,UBYTE data) { };
+   UBYTE Peek(ULONG addr)
    {
       return(0);
    };
@@ -53,7 +52,7 @@ public:
    void Save(void);
 
 private:
-    char filename[1024];
+   char filename[1024];
     
    void UpdateEeprom(UWORD cnt);
    UBYTE type; // 0 ... no eeprom
