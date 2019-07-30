@@ -737,7 +737,7 @@ ULONG CSusie::PaintSprites(void)
             // line, BUT on superclip we draw all the way to the end of any
             // given line checking each pixel is on screen.
 
-            if(superclip)
+            if(superclip & 0)
             {
                // Check on the basis of each quad, we only render the quad
                // IF the screen is in the quad, relative to the centre of
