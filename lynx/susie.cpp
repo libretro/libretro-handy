@@ -737,7 +737,7 @@ ULONG CSusie::PaintSprites(void)
             // line, BUT on superclip we draw all the way to the end of any
             // given line checking each pixel is on screen.
 
-            if(superclip)
+            if(superclip & 0)
             {
                // Check on the basis of each quad, we only render the quad
                // IF the screen is in the quad, relative to the centre of
@@ -1257,7 +1257,7 @@ inline void CSusie::WritePixel(ULONG hoff,ULONG pixel)
    RAM_POKE(scr_addr,dest);
 
    // Increment cycle count for the read/modify/write
-   cycles_used+=2*SPR_RDWR_CYC;
+   //cycles_used+=2*SPR_RDWR_CYC;
 }
 
 inline ULONG CSusie::ReadPixel(ULONG hoff)
@@ -1302,7 +1302,7 @@ inline void CSusie::WriteCollision(ULONG hoff,ULONG pixel)
    RAM_POKE(col_addr,dest);
 
    // Increment cycle count for the read/modify/write
-   cycles_used+=2*SPR_RDWR_CYC;
+   //cycles_used+=2*SPR_RDWR_CYC;
 }
 
 inline ULONG CSusie::ReadCollision(ULONG hoff)
