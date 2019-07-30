@@ -975,7 +975,7 @@ ULONG CMikie::DisplayRenderLine(void)
       mLynxLineDMACounter--;
 
       // Cycle hit for a 80 RAM access in rendering a line
-      work_done+=80*DMA_RDWR_CYC;
+      work_done+=(80+100)*DMA_RDWR_CYC;
 
       // Mikie screen DMA can only see the system RAM....
       // (Step through bitmap, line at a time)
@@ -1324,6 +1324,11 @@ ULONG CMikie::DisplayEndOfFrame(void)
    mLynxLineDMACounter=0;
    mLynxLine=mTIM_2_BKUP;
 
+   if(gCPUWakeupTime) {
+      gCPUWakeupTime = 0;
+      ClearCPUSleep();   
+   }
+	
    // Set the timer status flag
    if(mTimerInterruptMask&0x04)
    {
