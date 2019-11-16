@@ -14,7 +14,7 @@ CEEPROM::CEEPROM()
 {
    type=0;
    *filename=0;
-   memset(romdata, 0xff, sizeof(romdata));
+   memset(romdata, 0, sizeof(romdata));
 
    Reset();
 }
