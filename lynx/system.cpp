@@ -163,20 +163,17 @@ CSystem::CSystem(const char* gamefile, const char* romfile, bool useEmu)
    ULONG howardsize=0;
 
    mFileType=HANDY_FILETYPE_ILLEGAL;
-   if(strcmp(gamefile,"")==0)
-   {
+   if(strcmp(gamefile,"")==0) {
       // No file
       filesize=0;
       filememory=NULL;
    }
-   else
-   {
+   else {
       // Open the file and load the file
       FILE *fp;
 
       // Open the cartridge file for reading
-      if((fp=fopen(gamefile,"rb"))==NULL)
-      {
+      if((fp=fopen(gamefile,"rb"))==NULL) {
          fprintf(stderr, "Invalid Cart.\n");
       }
 
@@ -186,8 +183,7 @@ CSystem::CSystem(const char* gamefile, const char* romfile, bool useEmu)
       fseek(fp,0,SEEK_SET);
       filememory=(UBYTE*) new UBYTE[filesize];
 
-      if(fread(filememory,sizeof(char),filesize,fp)!=filesize)
-      {
+      if(fread(filememory,sizeof(char),filesize,fp)!=filesize) {
          fprintf(stderr, "Invalid Cart (filesize).\n");
       }
 
@@ -195,8 +191,7 @@ CSystem::CSystem(const char* gamefile, const char* romfile, bool useEmu)
    }
 
    // Now try and determine the filetype we have opened
-   if(filesize)
-   {
+   if(filesize) {
       char clip[11];
       memcpy(clip,filememory,11);
       clip[4]=0;
@@ -205,8 +200,7 @@ CSystem::CSystem(const char* gamefile, const char* romfile, bool useEmu)
       if(!strcmp(&clip[6],"BS93")) mFileType=HANDY_FILETYPE_HOMEBREW;
       else if(!strcmp(&clip[0],"LYNX")) mFileType=HANDY_FILETYPE_LNX;
       else if(!strcmp(&clip[0],LSS_VERSION_OLD)) mFileType=HANDY_FILETYPE_SNAPSHOT;
-      else if(filesize==128*1024 || filesize==256*1024 || filesize==512*1024)
-      {
+      else if(filesize==128*1024 || filesize==256*1024 || filesize==512*1024) {
          fprintf(stderr, "Invalid Cart (type). but 128/256/512k size -> set to RAW and try to load raw rom image\n");
          mFileType=HANDY_FILETYPE_RAW;
       } else {
@@ -226,14 +220,13 @@ CSystem::CSystem(const char* gamefile, const char* romfile, bool useEmu)
    // An exception from this will be caught by the level above
    mEEPROM = new CEEPROM();
 
-   switch(mFileType)
-   {
+   switch(mFileType) {
       case HANDY_FILETYPE_RAW:
       case HANDY_FILETYPE_LNX:
          mCart = new CCart(filememory,filesize);
-         if(mCart->CartHeaderLess())
-         {// veryvery strange Howard Check CANNOT work, as there are two different loader-less card types...
-          // unclear HOW this should do anything useful...
+         if(mCart->CartHeaderLess()) {
+            // veryvery strange Howard Check CANNOT work, as there are two different loader-less card types...
+            // unclear HOW this should do anything useful...
             FILE *fp;
             char drive[3],dir[256],cartgo[256];
             mFileType=HANDY_FILETYPE_HOMEBREW;
@@ -243,8 +236,7 @@ CSystem::CSystem(const char* gamefile, const char* romfile, bool useEmu)
             strcat(cartgo,"howard.o");
 
             // Open the howard file for reading
-            if((fp=fopen(cartgo,"rb"))==NULL)
-            {
+            if((fp=fopen(cartgo,"rb"))==NULL) {
                fprintf(stderr, "Invalid Cart.\n");
             }
 
@@ -254,8 +246,7 @@ CSystem::CSystem(const char* gamefile, const char* romfile, bool useEmu)
             fseek(fp,0,SEEK_SET);
             howardmemory=(UBYTE*) new UBYTE[filesize];
 
-            if(fread(howardmemory,sizeof(char),howardsize,fp)!=howardsize)
-            {
+            if(fread(howardmemory,sizeof(char),howardsize,fp)!=howardsize) {
                fprintf(stderr, "Invalid Cart.\n");
             }
 
@@ -263,9 +254,7 @@ CSystem::CSystem(const char* gamefile, const char* romfile, bool useEmu)
 
             // Pass it to RAM to load
             mRam = new CRam(howardmemory,howardsize);
-         }
-         else
-         {
+         } else {
             mRam = new CRam(0,0);
          }
          break;
@@ -337,8 +326,7 @@ bool CSystem::IsZip(char *filename)
    UBYTE buf[2];
    FILE *fp;
 
-   if((fp=fopen(filename,"rb"))!=NULL)
-   {
+   if((fp=fopen(filename,"rb"))!=NULL) {
       fread(buf, 2, 1, fp);
       fclose(fp);
       return(memcmp(buf,"PK",2)==0);
@@ -358,44 +346,42 @@ void CSystem::HLE_BIOS_FE00(void)
 
 void CSystem::HLE_BIOS_FE19(void)
 {
-    // (not) initial jump from reset vector
-    // Clear full 64k memory!
-    mRam->Clear();
+   // (not) initial jump from reset vector
+   // Clear full 64k memory!
+   mRam->Clear();
 
-    // Set Load adresse to $200 ($05,$06)
-    mRam->Poke(0x0005,0x00);
-    mRam->Poke(0x0006,0x02);
-    // Call to $FE00
-    mCart->SetShifterValue(0);
-    // Fallthrou $FE4A
-    HLE_BIOS_FE4A();
+   // Set Load adresse to $200 ($05,$06)
+   mRam->Poke(0x0005,0x00);
+   mRam->Poke(0x0006,0x02);
+   // Call to $FE00
+   mCart->SetShifterValue(0);
+   // Fallthrou $FE4A
+   HLE_BIOS_FE4A();
 }
 
 void CSystem::HLE_BIOS_FE4A(void)
 {
-    UWORD addr=mRam->Peek(0x0005) | (mRam->Peek(0x0006)<<8);
+   UWORD addr=mRam->Peek(0x0005) | (mRam->Peek(0x0006)<<8);
 
    // Load from Cart (loader blocks)
-      unsigned char buff[256];// maximum 5 blocks
-      unsigned char res[256];
+   unsigned char buff[256];// maximum 5 blocks
+   unsigned char res[256];
 
-        buff[0]=mCart->Peek0();
-        int blockcount = 0x100 -  buff[0];
+   buff[0]=mCart->Peek0();
+   int blockcount = 0x100 -  buff[0];
 
-        for (int i = 1; i < 1+51*blockcount; ++i) // first encrypted loader
-      {
-         buff[i] = mCart->Peek0();
-      }
+   for (int i = 1; i < 1+51*blockcount; ++i) { // first encrypted loader
+      buff[i] = mCart->Peek0();
+   }
 
-      lynx_decrypt(res, buff, 51);
+   lynx_decrypt(res, buff, 51);
 
-        for (int i = 0; i < 50*blockcount; ++i)
-      {
-          Poke_CPU(addr++, res[i]);
-      }
+   for (int i = 0; i < 50*blockcount; ++i) {
+      Poke_CPU(addr++, res[i]);
+   }
 
-    // Load Block(s), decode to ($05,$06)
-    // jmp $200
+   // Load Block(s), decode to ($05,$06)
+   // jmp $200
 
    C6502_REGS regs;
    mCpu->GetRegs(regs);
@@ -447,38 +433,36 @@ void CSystem::Reset(void)
 
    // Homebrew hashup
 
-   if(mFileType==HANDY_FILETYPE_HOMEBREW)
-   {
+   if(mFileType==HANDY_FILETYPE_HOMEBREW) {
       mMikie->PresetForHomebrew();
 
       C6502_REGS regs;
       mCpu->GetRegs(regs);
       regs.PC=(UWORD)gCPUBootAddress;
       mCpu->SetRegs(regs);
-   }else{
-      if(!mRom->mValid)
-      {
-	  mMikie->PresetForHomebrew();
-          mRom->mWriteEnable=true;
+   } else {
+      if(!mRom->mValid) {
+	     mMikie->PresetForHomebrew();
+         mRom->mWriteEnable=true;
 
-          mRom->Poke(0xFE00+0,0x8d);
-          mRom->Poke(0xFE00+1,0x97);
-          mRom->Poke(0xFE00+2,0xfd);
-          mRom->Poke(0xFE00+3,0x60);// RTS
+         mRom->Poke(0xFE00+0,0x8d);
+         mRom->Poke(0xFE00+1,0x97);
+         mRom->Poke(0xFE00+2,0xfd);
+         mRom->Poke(0xFE00+3,0x60);// RTS
 
-          mRom->Poke(0xFE19+0,0x8d);
-          mRom->Poke(0xFE19+1,0x97);
-          mRom->Poke(0xFE19+2,0xfd);
+         mRom->Poke(0xFE19+0,0x8d);
+         mRom->Poke(0xFE19+1,0x97);
+         mRom->Poke(0xFE19+2,0xfd);
           
-          mRom->Poke(0xFE4A+0,0x8d);
-          mRom->Poke(0xFE4A+1,0x97);
-          mRom->Poke(0xFE4A+2,0xfd);          
+         mRom->Poke(0xFE4A+0,0x8d);
+         mRom->Poke(0xFE4A+1,0x97);
+         mRom->Poke(0xFE4A+2,0xfd);          
 
-          mRom->Poke(0xFF80+0,0x8d);
-          mRom->Poke(0xFF80+1,0x97);
-          mRom->Poke(0xFF80+2,0xfd);          
+         mRom->Poke(0xFF80+0,0x8d);
+         mRom->Poke(0xFF80+1,0x97);
+         mRom->Poke(0xFF80+2,0xfd);          
 
-          mRom->mWriteEnable=false;
+         mRom->mWriteEnable=false;
       }
    }
 }
@@ -558,20 +542,15 @@ bool CSystem::ContextLoad(LSS_FILE *fp)
    if(!lss_read(teststr,sizeof(char),4,fp)) status=0;
    teststr[4]=0;
 
-   if(strcmp(teststr,LSS_VERSION)==0 || strcmp(teststr,LSS_VERSION_OLD)==0)
-   {
+   if(strcmp(teststr,LSS_VERSION)==0 || strcmp(teststr,LSS_VERSION_OLD)==0) {
       bool legacy=FALSE;
-      if(strcmp(teststr,LSS_VERSION_OLD)==0)
-      {
+      if(strcmp(teststr,LSS_VERSION_OLD)==0) {
          legacy=TRUE;
-      }
-      else
-      {
+      } else {
          ULONG checksum;
          // Read CRC32 and check against the CART for a match
          lss_read(&checksum,sizeof(ULONG),1,fp);
-         if(mCart->CRC32()!=checksum)
-         {
+         if(mCart->CRC32()!=checksum) {
             fprintf(stderr, "[handy]LSS Snapshot CRC does not match the loaded cartridge image, aborting load.\n");
             return 0;
          }
@@ -609,13 +588,10 @@ bool CSystem::ContextLoad(LSS_FILE *fp)
 
       if(!mMemMap->ContextLoad(fp)) status=0;
       // Legacy support
-      if(legacy)
-      {
+      if(legacy) {
          if(!mCart->ContextLoadLegacy(fp)) status=0;
          if(!mRom->ContextLoad(fp)) status=0;
-      }
-      else
-      {
+      } else {
          if(!mCart->ContextLoad(fp)) status=0;
       }
       if(!mRam->ContextLoad(fp)) status=0;
@@ -623,9 +599,7 @@ bool CSystem::ContextLoad(LSS_FILE *fp)
       if(!mSusie->ContextLoad(fp)) status=0;
       if(!mCpu->ContextLoad(fp)) status=0;
       if(!mEEPROM->ContextLoad(fp)) status=0;
-   }
-   else
-   {
+   } else {
       fprintf(stderr, "[handy]Not a recognised LSS file\n");
    }
 
@@ -642,10 +616,8 @@ void CSystem::DebugTrace(int address)
    sprintf(message,"%08x - DebugTrace(): ",gSystemCycleCount);
    count=strlen(message);
 
-   if(address)
-   {
-      if(address==0xffff)
-      {
+   if(address) {
+      if(address==0xffff) {
          C6502_REGS regs;
          char linetext[1024];
          // Register dump
@@ -653,27 +625,20 @@ void CSystem::DebugTrace(int address)
          sprintf(linetext,"PC=$%04x SP=$%02x PS=0x%02x A=0x%02x X=0x%02x Y=0x%02x",regs.PC,regs.SP, regs.PS,regs.A,regs.X,regs.Y);
          strcat(message,linetext);
          count=strlen(message);
-      }
-      else
-      {
+      } else {
          // The RAM address contents should be dumped to an open debug file in this function
-         do
-         {
+         do {
             message[count++]=Peek_RAM(address);
-         }
-         while(count<1024 && Peek_RAM(address++)!=0);
+         } while(count<1024 && Peek_RAM(address++)!=0);
       }
-   }
-   else
-   {
+   } else {
       strcat(message,"CPU Breakpoint");
       count=strlen(message);
    }
    message[count]=0;
 
    // Callback to dump the message
-   if(mpDebugCallback)
-   {
+   if(mpDebugCallback) {
       (*mpDebugCallback)(mDebugCallbackObject,message);
    }
 }

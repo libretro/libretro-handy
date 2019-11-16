@@ -82,16 +82,14 @@ CRom::CRom(const char *romfile,bool useEmu)
 
       FILE	*fp;
 
-      if((fp=fopen(mFileName,"rb"))==NULL)
-      {
+      if((fp=fopen(mFileName,"rb"))==NULL) {
         fprintf(stdout, "The Lynx Boot ROM image couldn't be located! Using built-in replacement\n");
         mValid = FALSE;
-      }else{
+      } else {
          // Read in the 512 bytes
          fprintf(stdout, "Read Lynx Boot ROM image\n");
 
-         if(fread(mRomData,sizeof(char),ROM_SIZE,fp)!=ROM_SIZE)
-         {
+         if(fread(mRomData,sizeof(char),ROM_SIZE,fp)!=ROM_SIZE) {
             fprintf(stdout, "The Lynx Boot ROM image couldn't be loaded! Using built-in replacement\n");
             mValid = FALSE;
          }

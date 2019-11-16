@@ -61,8 +61,7 @@ CRam::CRam(UBYTE *filememory,ULONG filesize)
    // Take a copy into the backup buffer for restore on reset
    mFileSize=filesize;
 
-   if(filesize)
-   {
+   if(filesize) {
       // Take a copy of the ram data
       mFileData = new UBYTE[mFileSize];
       memcpy(mFileData,filememory,mFileSize);
@@ -70,13 +69,10 @@ CRam::CRam(UBYTE *filememory,ULONG filesize)
       // Sanity checks on the header
       memcpy(&header,mFileData,sizeof(HOME_HEADER));
 
-      if(header.magic[0]!='B' || header.magic[1]!='S' || header.magic[2]!='9' || header.magic[3]!='3')
-      {
+      if(header.magic[0]!='B' || header.magic[1]!='S' || header.magic[2]!='9' || header.magic[3]!='3') {
          fprintf(stderr, "Invalid cart.\n");
       }
-   }
-   else
-   {
+   } else {
       filememory=NULL;
    }
    // Reset will cause the loadup
@@ -86,8 +82,7 @@ CRam::CRam(UBYTE *filememory,ULONG filesize)
 
 CRam::~CRam()
 {
-   if(mFileSize)
-   {
+   if(mFileSize) {
       delete[] mFileData;
       mFileData=NULL;
    }
@@ -97,8 +92,7 @@ void CRam::Reset(void)
 {
    // Open up the file
 
-   if(mFileSize >= sizeof(HOME_HEADER))
-   {
+   if(mFileSize >= sizeof(HOME_HEADER)) {
       HOME_HEADER	header;
       UBYTE tmp;
       int data_size;
