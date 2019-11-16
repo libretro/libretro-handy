@@ -23,7 +23,7 @@ static uint8_t lynx_height = 102;
 //#define VIDEO_CORE_PIXELSIZE  4 // MIKIE_PIXEL_FORMAT_32BPP
 
 
-static uint8_t framebuffer[160*102*VIDEO_CORE_PIXELSIZE];
+static uint8_t framebuffer[160*160*VIDEO_CORE_PIXELSIZE];
 
 static bool newFrame = false;
 static bool initialized = false;
@@ -165,10 +165,91 @@ static unsigned get_lynx_input(void)
    return res;
 }
 
+inline static void lynx_sound_stream_update(unsigned short *buffer, int buf_length)
+{
+   memcpy(buffer, snd_buffer16s, buf_length);
+   gAudioBufferPointer = 0;
+}
+
+static UBYTE* lynx_display_callback(ULONG objref)
+{
+   if(!initialized)
+      return (UBYTE*)framebuffer;
+
+   video_cb(framebuffer, lynx_width, lynx_height, 160*VIDEO_CORE_PIXELSIZE);
+
+   if(gAudioBufferPointer > 0)
+   {
+      int f = gAudioBufferPointer / 4; // /1 - 8 bit mono, /2 8 bit stereo, /4 16 bit stereo
+      lynx_sound_stream_update(soundBuffer, gAudioBufferPointer);
+      audio_batch_cb((const int16_t*)soundBuffer, f);
+   }
+
+   newFrame = true;
+   return (UBYTE*)framebuffer;
+}
+
+static void update_geometry()
+{
+   struct retro_system_av_info info;
+
+   retro_get_system_av_info(&info);
+   environ_cb(RETRO_ENVIRONMENT_SET_GEOMETRY, &info);
+}
+
+static void lynx_rotate()
+{
+   switch(lynx_rot)
+   {
+   default:
+      lynx_rot = MIKIE_NO_ROTATE;
+      // intentional fall-through
+
+   case MIKIE_NO_ROTATE:
+      lynx_width = 160;
+      lynx_height = 102;
+      btn_map = btn_map_no_rot;
+      break;
+
+   case MIKIE_ROTATE_R:
+      lynx_width = 102;
+      lynx_height = 160;
+      btn_map = btn_map_rot_90;
+      break;
+
+   case MIKIE_ROTATE_L:
+      lynx_width = 102;
+      lynx_height = 160;
+      btn_map = btn_map_rot_270;
+      break;
+   }
+
+   #if VIDEO_CORE_PIXELSIZE==2
+      lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_16BPP_565, 160*VIDEO_CORE_PIXELSIZE, lynx_display_callback, (ULONG)0);
+   #elif VIDEO_CORE_PIXELSIZE==4
+      lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_32BPP, 160*VIDEO_CORE_PIXELSIZE, lynx_display_callback, (ULONG)0);
+   #endif
+
+   update_geometry();
+}
+
 static void lynx_input(void)
 {
    input_poll_cb();
    lynx->SetButtonData(get_lynx_input());
+
+
+   static bool select_pressed_last_frame = false;
+   bool select_button = input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT);
+
+   if(select_button && !select_pressed_last_frame)
+   {
+      lynx_rot++;
+
+      lynx_rotate();
+   }
+   
+   select_pressed_last_frame = select_button;
 }
 
 static bool lynx_initialize_sound(void)
@@ -206,38 +287,6 @@ static bool lynx_romfilename(char *dest)
    return true;
 }
 
-inline static void lynx_sound_stream_update(unsigned short *buffer, int buf_length)
-{
-   memcpy(buffer, snd_buffer16s, buf_length);
-   gAudioBufferPointer = 0;
-}
-
-static UBYTE* lynx_display_callback(ULONG objref)
-{
-   if(!initialized)
-      return (UBYTE*)framebuffer;
-
-   video_cb(framebuffer, lynx_width, lynx_height, 160*VIDEO_CORE_PIXELSIZE);
-
-   if(gAudioBufferPointer > 0)
-   {
-      int f = gAudioBufferPointer / 4; // /1 - 8 bit mono, /2 8 bit stereo, /4 16 bit stereo
-      lynx_sound_stream_update(soundBuffer, gAudioBufferPointer);
-      audio_batch_cb((const int16_t*)soundBuffer, f);
-   }
-
-   newFrame = true;
-   return (UBYTE*)framebuffer;
-}
-
-static void update_geometry()
-{
-   struct retro_system_av_info info;
-
-   retro_get_system_av_info(&info);
-   environ_cb(RETRO_ENVIRONMENT_SET_GEOMETRY, &info);
-}
-
 static void check_variables(void)
 {
    struct retro_variable var = {0};
@@ -249,37 +298,14 @@ static void check_variables(void)
       unsigned old_rotate = lynx_rot;
 
       if (strcmp(var.value, "None") == 0)
-      {
          lynx_rot = MIKIE_NO_ROTATE;
-         lynx_width = 160;
-         lynx_height = 102;
-         btn_map = btn_map_no_rot;
-      }
       else if (strcmp(var.value, "90") == 0)
-      {
          lynx_rot = MIKIE_ROTATE_R; 
-         lynx_width = 102;
-         lynx_height = 160;
-         btn_map = btn_map_rot_90;
-      }
       else if (strcmp(var.value, "270") == 0)
-      {
          lynx_rot = MIKIE_ROTATE_L;
-         lynx_width = 102;
-         lynx_height = 160;
-         btn_map = btn_map_rot_270;
-      }
 
       if (old_rotate != lynx_rot)
-      {
-      #if VIDEO_CORE_PIXELSIZE==2
-         lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_16BPP_565, 160*VIDEO_CORE_PIXELSIZE, lynx_display_callback, (ULONG)0);
-      #elif VIDEO_CORE_PIXELSIZE==4
-         lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_32BPP, 160*VIDEO_CORE_PIXELSIZE, lynx_display_callback, (ULONG)0);
-      #endif
-
-         update_geometry();
-      }
+         lynx_rotate();
    }
 }
 
@@ -394,6 +420,7 @@ bool retro_load_game(const struct retro_game_info *info)
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L,     "Option 1" },
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R,     "Option 2" },
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START, "Pause" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Rotate screen" },
 
       { 0 },
    };
