@@ -19,9 +19,11 @@ static uint8_t lynx_rot = MIKIE_NO_ROTATE;
 static uint8_t lynx_width = 160;
 static uint8_t lynx_height = 102;
 
-#define VIDEO_CORE_PIXELSIZE    2 // MIKIE_PIXEL_FORMAT_16BPP_565
-//#define VIDEO_CORE_PIXELSIZE  4 // MIKIE_PIXEL_FORMAT_32BPP
-
+#if defined (WANT_16BPP)
+   #define VIDEO_CORE_PIXELSIZE    2 // MIKIE_PIXEL_FORMAT_16BPP_565
+#elif defined (WANT_32BPP)
+   #define VIDEO_CORE_PIXELSIZE    4 // MIKIE_PIXEL_FORMAT_32BPP
+#endif
 
 static uint8_t framebuffer[160*160*VIDEO_CORE_PIXELSIZE];
 

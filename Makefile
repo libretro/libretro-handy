@@ -25,6 +25,8 @@ libdir := $(prefix)/lib
 
 LIBRETRO_INSTALL_DIR := libretro
 
+NEED_BPP := 16
+
 # system platform
 system_platform = unix
 ifeq ($(shell uname -a),)

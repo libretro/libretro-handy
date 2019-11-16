@@ -1,19 +1,28 @@
 LIBRETRO_COMM_DIR  = $(CORE_DIR)/libretro-common
 
 INCFLAGS = -I$(CORE_DIR)/lynx \
-			  -I$(CORE_DIR)/libretro
+           -I$(CORE_DIR)/libretro
 
 ifneq (,$(findstring msvc2003,$(platform)))
-INCFLAGS += -I$(LIBRETRO_COMM_DIR)/include/compat/msvc
+   INCFLAGS += -I$(LIBRETRO_COMM_DIR)/include/compat/msvc
 endif
 
-SOURCES_CXX := $(CORE_DIR)/lynx/lynxdec.cpp \
-	$(CORE_DIR)/lynx/cart.cpp \
-	$(CORE_DIR)/lynx/memmap.cpp \
-	$(CORE_DIR)/lynx/mikie.cpp \
-	$(CORE_DIR)/lynx/ram.cpp \
-	$(CORE_DIR)/lynx/rom.cpp \
-	$(CORE_DIR)/lynx/susie.cpp \
-	$(CORE_DIR)/lynx/system.cpp \
-	$(CORE_DIR)/lynx/eeprom.cpp \
-	$(CORE_DIR)/libretro/libretro.cpp
+ifeq ($(NEED_BPP), 16)
+   FLAGS += -DWANT_16BPP
+endif
+
+ifeq ($(NEED_BPP), 32)
+   FLAGS += -DWANT_32BPP
+endif
+
+SOURCES_CXX := \
+   $(CORE_DIR)/lynx/lynxdec.cpp \
+   $(CORE_DIR)/lynx/cart.cpp \
+   $(CORE_DIR)/lynx/memmap.cpp \
+   $(CORE_DIR)/lynx/mikie.cpp \
+   $(CORE_DIR)/lynx/ram.cpp \
+   $(CORE_DIR)/lynx/rom.cpp \
+   $(CORE_DIR)/lynx/susie.cpp \
+   $(CORE_DIR)/lynx/system.cpp \
+   $(CORE_DIR)/lynx/eeprom.cpp \
+   $(CORE_DIR)/libretro/libretro.cpp
