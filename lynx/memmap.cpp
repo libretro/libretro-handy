@@ -150,64 +150,48 @@ inline void CMemMap::Poke(ULONG addr, UBYTE data)
 
    // FC00-FCFF Susie area
    newstate=(data&0x01)?FALSE:TRUE;
-   if(newstate!=mSusieEnabled)
-   {
+   if(newstate!=mSusieEnabled) {
       mSusieEnabled=newstate;
 
-      if(mSusieEnabled)
-      {
+      if(mSusieEnabled) {
          for(loop=SUSIE_START;loop<SUSIE_START+SUSIE_SIZE;loop++) mSystem.mMemoryHandlers[loop]=mSystem.mSusie;
-      }
-      else
-      {
+      } else {
          for(loop=SUSIE_START;loop<SUSIE_START+SUSIE_SIZE;loop++) mSystem.mMemoryHandlers[loop]=mSystem.mRam;
       }
    }
 
    // FD00-FCFF Mikie area
    newstate=(data&0x02)?FALSE:TRUE;
-   if(newstate!=mMikieEnabled)
-   {
+   if(newstate!=mMikieEnabled) {
       mMikieEnabled=newstate;
 
-      if(mMikieEnabled)
-      {
+      if(mMikieEnabled) {
          for(loop=MIKIE_START;loop<MIKIE_START+MIKIE_SIZE;loop++) mSystem.mMemoryHandlers[loop]=mSystem.mMikie;
-      }
-      else
-      {
+      } else {
          for(loop=MIKIE_START;loop<MIKIE_START+MIKIE_SIZE;loop++) mSystem.mMemoryHandlers[loop]=mSystem.mRam;
       }
    }
 
    // FE00-FFF7 Rom area
    newstate=(data&0x04)?FALSE:TRUE;
-   if(newstate!=mRomEnabled)
-   {
+   if(newstate!=mRomEnabled) {
       mRomEnabled=newstate;
 
-      if(mRomEnabled)
-      {
+      if(mRomEnabled) {
          for(loop=BROM_START;loop<BROM_START+(BROM_SIZE-8);loop++) mSystem.mMemoryHandlers[loop]=mSystem.mRom;
-      }
-      else
-      {
+      } else {
          for(loop=BROM_START;loop<BROM_START+(BROM_SIZE-8);loop++) mSystem.mMemoryHandlers[loop]=mSystem.mRam;
       }
    }
 
    // FFFA-FFFF Vector area - Overload ROM space
    newstate=(data&0x08)?FALSE:TRUE;
-   if(newstate!=mVectorsEnabled)
-   {
+   if(newstate!=mVectorsEnabled) {
       mVectorsEnabled=newstate;
 
-      if(mVectorsEnabled)
-      {
+      if(mVectorsEnabled) {
          for(loop=VECTOR_START;loop<VECTOR_START+VECTOR_SIZE;loop++) mSystem.mMemoryHandlers[loop]=mSystem.mRom;
-      }
-      else
-      {
+      } else {
          for(loop=VECTOR_START;loop<VECTOR_START+VECTOR_SIZE;loop++) mSystem.mMemoryHandlers[loop]=mSystem.mRam;
       }
    }

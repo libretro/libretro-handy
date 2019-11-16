@@ -71,7 +71,8 @@
 
 ULONG cycles_used=0;
 
-CSusie::CSusie(CSystem& parent) :mSystem(parent)
+CSusie::CSusie(CSystem& parent)
+   :mSystem(parent)
 {
    TRACE_SUSIE0("CSusie()");
    Reset();
@@ -373,41 +374,36 @@ void CSusie::DoMathMultiply(void)
    // Accumulate in JKLM         Remainder in (JK)LM
    //
 
+
+   ULONG result;
+
    // Basic multiply is ALWAYS unsigned, sign conversion is done later
-   ULONG result=(ULONG)mMATHABCD.Words.AB*(ULONG)mMATHABCD.Words.CD;
+   result=(ULONG)mMATHABCD.Words.AB*(ULONG)mMATHABCD.Words.CD;
    mMATHEFGH.Long=result;
 
-   if(mSPRSYS_SignedMath)
-   {
+   if(mSPRSYS_SignedMath) {
       TRACE_SUSIE0("DoMathMultiply() - SIGNED");
       // Add the sign bits, only >0 is +ve result
       mMATHEFGH_sign=mMATHAB_sign+mMATHCD_sign;
-      if(!mMATHEFGH_sign)
-      {
+      if(!mMATHEFGH_sign) {
          mMATHEFGH.Long^=0xffffffff;
          mMATHEFGH.Long++;
       }
-   }
-   else
-   {
+   } else {
       TRACE_SUSIE0("DoMathMultiply() - UNSIGNED");
    }
 
    TRACE_SUSIE2("DoMathMultiply() AB=$%04x * CD=$%04x",mMATHABCD.Words.AB,mMATHABCD.Words.CD);
 
    // Check overflow, if B31 has changed from 1->0 then its overflow time
-   if(mSPRSYS_Accumulate)
-   {
+   if(mSPRSYS_Accumulate) {
       TRACE_SUSIE0("DoMathMultiply() - ACCUMULATED JKLM+=EFGH");
       ULONG tmp=mMATHJKLM.Long+mMATHEFGH.Long;
       // Let sign change indicate overflow
-      if((tmp&0x80000000)!=(mMATHJKLM.Long&0x80000000))
-      {
+      if((tmp&0x80000000)!=(mMATHJKLM.Long&0x80000000)) {
          TRACE_SUSIE0("DoMathMultiply() - OVERFLOW DETECTED");
          //			mSPRSYS_Mathbit=TRUE;
-      }
-      else
-      {
+      } else {
          //			mSPRSYS_Mathbit=FALSE;
       }
       // Save accumulated result
@@ -435,14 +431,11 @@ void CSusie::DoMathDivide(void)
    //
 
    // Divide is ALWAYS unsigned arithmetic...
-   if(mMATHNP.Long)
-   {
+   if(mMATHNP.Long) {
       TRACE_SUSIE0("DoMathDivide() - UNSIGNED");
       mMATHABCD.Long=mMATHEFGH.Long/mMATHNP.Long;
       mMATHJKLM.Long=mMATHEFGH.Long%mMATHNP.Long;
-   }
-   else
-   {
+   } else {
       TRACE_SUSIE0("DoMathDivide() - DIVIDE BY ZERO ERROR");
       mMATHABCD.Long=0xffffffff;
       mMATHJKLM.Long=0;
@@ -472,16 +465,14 @@ ULONG CSusie::PaintSprites(void)
    TRACE_SUSIE1("PaintSprites() COLLBAS $%04x",mCOLLBAS.Word);
    TRACE_SUSIE1("PaintSprites() SPRSYS  $%02x",Peek(SPRSYS));
 
-   if(!mSUZYBUSEN || !mSPRGO)
-   {
+   if(!mSUZYBUSEN || !mSPRGO) {
       TRACE_SUSIE0("PaintSprites() Returned !mSUZYBUSEN || !mSPRGO");
       return 0;
    }
 
    cycles_used=0;
 
-   do
-   {
+   do {
       TRACE_SUSIE1("PaintSprites() ************ Rendering Sprite %03d ************",sprcount);
 
       everonscreen=0;// everon has to be reset for every sprite, thus line was moved inside this loop
@@ -490,15 +481,12 @@ ULONG CSusie::PaintSprites(void)
 
       // And thus it is documented that only the top byte of SCBNEXT is used.
       // Its mentioned under the bits that are broke section in the bluebook
-      if(!(mSCBNEXT.Word&0xff00))
-      {
+      if(!(mSCBNEXT.Word&0xff00)) {
          TRACE_SUSIE0("PaintSprites() mSCBNEXT==0 - FINISHED");
          mSPRSYS_Status=0;	// Engine has finished
          mSPRGO=FALSE;
          break;
-      }
-      else
-      {
+      } else {
          mSPRSYS_Status=1;
       }
 
@@ -549,12 +537,7 @@ ULONG CSusie::PaintSprites(void)
 
       // Check if this is a skip sprite
 
-      if(!mSPRCTL1_SkipSprite)
-      {
-         bool enable_sizing  = FALSE;
-         bool enable_stretch = FALSE;
-         bool enable_tilt    = FALSE;
-
+      if(!mSPRCTL1_SkipSprite) {
          mSPRDLINE.Word=RAM_PEEKW(mTMPADR.Word);	// Sprite pack data
          TRACE_SUSIE1("PaintSprites() SPRDLINE $%04x",mSPRDLINE.Word);
          mTMPADR.Word+=2;
@@ -569,11 +552,14 @@ ULONG CSusie::PaintSprites(void)
 
          cycles_used+=6*SPR_RDWR_CYC;
 
-         /* Optional section defined by reload type in Control 1 */
+         bool enable_sizing  = FALSE;
+         bool enable_stretch = FALSE;
+         bool enable_tilt    = FALSE;
+
+         // Optional section defined by reload type in Control 1
 
          TRACE_SUSIE1("PaintSprites() mSPRCTL1.Bits.ReloadDepth=%d",mSPRCTL1_ReloadDepth);
-         switch(mSPRCTL1_ReloadDepth)
-         {
+         switch(mSPRCTL1_ReloadDepth) {
             case 1:
                TRACE_SUSIE0("PaintSprites() Sizing Enabled");
                enable_sizing=TRUE;
@@ -640,11 +626,9 @@ ULONG CSusie::PaintSprites(void)
 
          // Optional Palette reload
 
-         if(!mSPRCTL1_ReloadPalette)
-         {
+         if(!mSPRCTL1_ReloadPalette) {
             TRACE_SUSIE0("PaintSprites() Palette reloaded");
-            for(int loop=0;loop<8;loop++)
-            {
+            for(int loop=0;loop<8;loop++) {
                UBYTE data_tmp=RAM_PEEK(mTMPADR.Word++);
                mPenIndex[loop*2]=(data_tmp>>4)&0x0f;
                mPenIndex[(loop*2)+1]=data_tmp&0x0f;
@@ -676,13 +660,12 @@ ULONG CSusie::PaintSprites(void)
          int quadrant=0;
          int hsign,vsign;
 
-         if(mSPRCTL1_StartLeft)
-         {
-            if(mSPRCTL1_StartUp) quadrant=2; else quadrant=3;
-         }
-         else
-         {
-            if(mSPRCTL1_StartUp) quadrant=1; else quadrant=0;
+         if(mSPRCTL1_StartLeft) {
+            if(mSPRCTL1_StartUp) quadrant=2;
+			else quadrant=3;
+         } else {
+            if(mSPRCTL1_StartUp) quadrant=1;
+			else quadrant=0;
          }
          TRACE_SUSIE1("PaintSprites() Quadrant=%d",quadrant);
 
@@ -707,8 +690,7 @@ ULONG CSusie::PaintSprites(void)
 
          // Loop for 4 quadrants
 
-         for(int loop=0;loop<4;loop++)
-         {
+         for(int loop=0;loop<4;loop++) {
             TRACE_SUSIE1("PaintSprites() -------- Rendering Quadrant %03d --------",quadrant);
 
             int sprite_v=mVPOSSTRT.Word;
@@ -737,8 +719,7 @@ ULONG CSusie::PaintSprites(void)
             // line, BUT on superclip we draw all the way to the end of any
             // given line checking each pixel is on screen.
 
-            if(superclip & 0)
-            {
+            if(superclip & 0) {
                // Check on the basis of each quad, we only render the quad
                // IF the screen is in the quad, relative to the centre of
                // the screen which is calculated below.
@@ -757,8 +738,8 @@ ULONG CSusie::PaintSprites(void)
                // the hflip, vflip bits & negative tilt to be able to work correctly
                //
                int	modquad=quadrant;
-               static int vquadflip[4]={1,0,3,2};
-               static int hquadflip[4]={3,2,1,0};
+               static const int vquadflip[4]={1,0,3,2};
+               static const int hquadflip[4]={3,2,1,0};
 
                if(mSPRCTL0_Vflip) modquad=vquadflip[modquad];
                if(mSPRCTL0_Hflip) modquad=hquadflip[modquad];
@@ -766,8 +747,7 @@ ULONG CSusie::PaintSprites(void)
                // This is causing Eurosoccer to fail!!
                //					if(enable_tilt && mTILT.Word&0x8000) modquad=hquadflip[modquad];
 
-               switch(modquad)
-               {
+               switch(modquad) {
                   case 3:
                      if((sprite_h>=screen_h_start || sprite_h<world_h_mid) && (sprite_v<screen_v_end   || sprite_v>world_v_mid)) render=TRUE;
                      break;
@@ -781,9 +761,7 @@ ULONG CSusie::PaintSprites(void)
                      if((sprite_h<screen_h_end   || sprite_h>world_h_mid) && (sprite_v<screen_v_end   || sprite_v>world_v_mid)) render=TRUE;
                      break;
                }
-            }
-            else
-            {
+            } else {
                render=TRUE;
             }
 
@@ -800,8 +778,7 @@ ULONG CSusie::PaintSprites(void)
             static int vquadoff=0;
             static int hquadoff=0;
 
-            if(render)
-            {
+            if(render) {
                // Set the vertical position & offset
                voff=(SWORD)mVPOSSTRT.Word-screen_v_start;
 
@@ -809,7 +786,8 @@ ULONG CSusie::PaintSprites(void)
                mTILTACUM.Word=0;
 
                // Perform the SIZOFF
-               if(vsign==1) mVSIZACUM.Word=mVSIZOFF.Word; else mVSIZACUM.Word=0;
+               if(vsign==1) mVSIZACUM.Word=mVSIZOFF.Word;
+			   else mVSIZACUM.Word=0;
 
                // Take the sign of the first quad (0) as the basic
                // sign, all other quads drawing in the other direction
@@ -819,8 +797,7 @@ ULONG CSusie::PaintSprites(void)
                if(loop==0)	vquadoff=vsign;
                if(vsign!=vquadoff) voff+=vsign;
 
-               for(;;)
-               {
+               for(;;) {
                   // Vertical scaling is done here
                   mVSIZACUM.Word+=mSPRVSIZ.Word;
                   pixel_height=mVSIZACUM.Byte.High;
@@ -830,35 +807,32 @@ ULONG CSusie::PaintSprites(void)
                   mSPRDOFF.Word=(UWORD)LineInit(0);
 
                   // If 1 == next quad, ==0 end of sprite, anyways its END OF LINE
-                  if(mSPRDOFF.Word==1)		// End of quad
-                  {
+                  if(mSPRDOFF.Word==1) {		// End of quad
                      mSPRDLINE.Word+=mSPRDOFF.Word;
                      break;
                   }
 
-                  if(mSPRDOFF.Word==0)		// End of sprite
-                  {
+                  if(mSPRDOFF.Word==0) {		// End of sprite
                      loop=4;		// Halt the quad loop
                      break;
                   }
 
                   // Draw one horizontal line of the sprite
-                  for(vloop=0;vloop<pixel_height;vloop++)
-                  {
+                  for(vloop=0;vloop<pixel_height;vloop++) {
                      // Early bailout if the sprite has moved off screen, terminate quad
                      if(vsign==1 && voff>=SCREEN_HEIGHT)	break;
                      if(vsign==-1 && voff<0)	break;
 
                      // Only allow the draw to take place if the line is visible
-                     if(voff>=0 && voff<SCREEN_HEIGHT)
-                     {
+                     if(voff>=0 && voff<SCREEN_HEIGHT) {
                         // Work out the horizontal pixel start position, start + tilt
                         mHPOSSTRT.Word+=((SWORD)mTILTACUM.Word>>8);
                         mTILTACUM.Byte.High=0;
                         hoff=(int)((SWORD)mHPOSSTRT.Word)-screen_h_start;
 
                         // Zero/Force the horizontal scaling accumulator
-                        if(hsign==1) mHSIZACUM.Word=mHSIZOFF.Word; else mHSIZACUM.Word=0;
+                        if(hsign==1) mHSIZACUM.Word=mHSIZOFF.Word;
+						else mHSIZACUM.Word=0;
 
                         // Take the sign of the first quad (0) as the basic
                         // sign, all other quads drawing in the other direction
@@ -873,23 +847,19 @@ ULONG CSusie::PaintSprites(void)
                         onscreen=FALSE;
 
                         // Now render an individual destination line
-                        while((pixel=LineGetPixel())!=LINE_END)
-                        {
+                        while((pixel=LineGetPixel())!=LINE_END) {
                            // This is allowed to update every pixel
                            mHSIZACUM.Word+=mSPRHSIZ.Word;
                            pixel_width=mHSIZACUM.Byte.High;
                            mHSIZACUM.Byte.High=0;
 
-                           for(hloop=0;hloop<pixel_width;hloop++)
-                           {
+                           for(hloop=0; hloop<pixel_width; hloop++) {
                               // Draw if onscreen but break loop on transition to offscreen
-                              if(hoff>=0 && hoff<SCREEN_WIDTH)
-                              {
+                              if(hoff>=0 && hoff<SCREEN_WIDTH) {
                                  ProcessPixel(hoff,pixel);
-                                 onscreen=everonscreen=TRUE;
-                              }
-                              else
-                              {
+                                 onscreen = TRUE;
+								 everonscreen=TRUE;
+                              } else {
                                  if(onscreen) break;
                               }
                               hoff+=hsign;
@@ -899,13 +869,11 @@ ULONG CSusie::PaintSprites(void)
                      voff+=vsign;
 
                      // For every destination line we can modify SPRHSIZ & SPRVSIZ & TILTACUM
-                     if(enable_stretch)
-                     {
+                     if(enable_stretch) {
                         mSPRHSIZ.Word+=mSTRETCH.Word;
                         //								if(mSPRSYS_VStretch) mSPRVSIZ.Word+=mSTRETCH.Word;
                      }
-                     if(enable_tilt)
-                     {
+                     if(enable_tilt) {
                         // Manipulate the tilt stuff
                         mTILTACUM.Word+=mTILT.Word;
                      }
@@ -917,12 +885,9 @@ ULONG CSusie::PaintSprites(void)
                   // Update the line start for our next run thru the loop
                   mSPRDLINE.Word+=mSPRDOFF.Word;
                }
-            }
-            else
-            {
+            } else {
                // Skip thru data to next quad
-               for(;;)
-               {
+               for(;;) {
                   // Read the start of line offset
 
                   mSPRDOFF.Word=(UWORD)LineInit(0);
@@ -933,8 +898,7 @@ ULONG CSusie::PaintSprites(void)
                   // If 1 == next quad, ==0 end of sprite, anyways its END OF LINE
 
                   if(mSPRDOFF.Word==1) break;	// End of quad
-                  if(mSPRDOFF.Word==0)		// End of sprite
-                  {
+                  if(mSPRDOFF.Word==0) {		// End of sprite
                      loop=4;		// Halt the quad loop
                      break;
                   }
@@ -949,16 +913,13 @@ ULONG CSusie::PaintSprites(void)
 
          // Write the collision depositary if required
 
-         if(!mSPRCOLL_Collide && !mSPRSYS_NoCollide)
-         {
-            switch(mSPRCTL0_Type)
-            {
+         if(!mSPRCOLL_Collide && !mSPRSYS_NoCollide) {
+            switch(mSPRCTL0_Type) {
                case sprite_xor_shadow:
                case sprite_boundary:
                case sprite_normal:
                case sprite_boundary_shadow:
-               case sprite_shadow:
-                  {
+               case sprite_shadow: {
                      UWORD coldep=mSCBADR.Word+mCOLLOFF.Word;
                      RAM_POKE(coldep,(UBYTE)mCollision);
                      TRACE_SUSIE2("PaintSprites() COLLOFF=$%04x SCBADR=$%04x",mCOLLOFF.Word,mSCBADR.Word);
@@ -970,26 +931,23 @@ ULONG CSusie::PaintSprites(void)
             }
          }
 
-         if(mEVERON)
-         {
+         if(mEVERON) {
             UWORD coldep=mSCBADR.Word+mCOLLOFF.Word;
             UBYTE coldat=RAM_PEEK(coldep);
-            if(!everonscreen) coldat|=0x80; else coldat&=0x7f;
+            if(!everonscreen) coldat|=0x80;
+			else coldat&=0x7f;
             RAM_POKE(coldep,coldat);
             TRACE_SUSIE0("PaintSprites() EVERON IS ACTIVE");
             TRACE_SUSIE2("PaintSprites() Wrote $%02x to SCB collision depositary at $%04x",coldat,coldep);
          }
 
          // Perform Sprite debugging if required, single step on sprite draw
-         if(gSingleStepModeSprites)
-         {
+         if(gSingleStepModeSprites) {
             char message[256];
             sprintf(message,"CSusie:PaintSprites() - Rendered Sprite %03d",sprcount);
             if(!gError->Warning(message)) gSingleStepModeSprites=0;
          }
-      }
-      else
-      {
+      } else {
          TRACE_SUSIE0("PaintSprites() mSPRCTL1.Bits.SkipSprite==TRUE");
       }
 
@@ -1006,8 +964,7 @@ ULONG CSusie::PaintSprites(void)
       //		}
 
       // Check sprcount for looping SCB, random large number chosen
-      if(sprcount>4096)
-      {
+      if(sprcount>4096) {
          // Stop the system, otherwise we may just come straight back in.....
          gSystemHalt=TRUE;
          // Display warning message
@@ -1015,8 +972,7 @@ ULONG CSusie::PaintSprites(void)
          // Signal error to the caller
          return 0;
       }
-   }
-   while(1);
+   } while(1);
 
    // Fudge factor to fix many flickering issues, also the keypress
    // problem with Hard Drivin and the strange pause in Dirty Larry.
@@ -1051,8 +1007,7 @@ ULONG CSusie::PaintSprites(void)
 
 inline void CSusie::ProcessPixel(ULONG hoff,ULONG pixel)
 {
-   switch(mSPRCTL0_Type)
-   {
+   switch(mSPRCTL0_Type) {
       // BACKGROUND SHADOW
       // 1   F is opaque
       // 0   E is collideable
@@ -1062,8 +1017,7 @@ inline void CSusie::ProcessPixel(ULONG hoff,ULONG pixel)
       // 0   exclusive-or the data
       case sprite_background_shadow:
          WritePixel(hoff,pixel);
-         if(!mSPRCOLL_Collide && !mSPRSYS_NoCollide && pixel!=0x0e)
-         {
+         if(!mSPRCOLL_Collide && !mSPRSYS_NoCollide && pixel!=0x0e) {
             WriteCollision(hoff,mSPRCOLL_Number);
          }
          break;
@@ -1098,17 +1052,13 @@ inline void CSusie::ProcessPixel(ULONG hoff,ULONG pixel)
          // 1   allow coll. buffer access
          // 0   exclusive-or the data
       case sprite_boundary:
-         if(pixel!=0x00 && pixel!=0x0f)
-         {
+         if(pixel!=0x00 && pixel!=0x0f) {
             WritePixel(hoff,pixel);
          }
-         if(pixel!=0x00)
-         {
-            if(!mSPRCOLL_Collide && !mSPRSYS_NoCollide)
-            {
+         if(pixel!=0x00) {
+            if(!mSPRCOLL_Collide && !mSPRSYS_NoCollide) {
                int collision=ReadCollision(hoff);
-               if(collision>mCollision)
-               {
+               if(collision>mCollision) {
                   mCollision=collision;
                }
                // 01/05/00 V0.7	if(mSPRCOLL_Number>collision)
@@ -1127,14 +1077,11 @@ inline void CSusie::ProcessPixel(ULONG hoff,ULONG pixel)
          // 1   allow coll. buffer access
          // 0   exclusive-or the data
       case sprite_normal:
-         if(pixel!=0x00)
-         {
+         if(pixel!=0x00) {
             WritePixel(hoff,pixel);
-            if(!mSPRCOLL_Collide && !mSPRSYS_NoCollide)
-            {
+            if(!mSPRCOLL_Collide && !mSPRSYS_NoCollide) {
                int collision=ReadCollision(hoff);
-               if(collision>mCollision)
-               {
+               if(collision>mCollision) {
                   mCollision=collision;
                }
                // 01/05/00 V0.7	if(mSPRCOLL_Number>collision)
@@ -1153,17 +1100,13 @@ inline void CSusie::ProcessPixel(ULONG hoff,ULONG pixel)
          // 1   allow coll. buffer access
          // 0   exclusive-or the data
       case sprite_boundary_shadow:
-         if(pixel!=0x00 && pixel!=0x0e && pixel!=0x0f)
-         {
+         if(pixel!=0x00 && pixel!=0x0e && pixel!=0x0f) {
             WritePixel(hoff,pixel);
          }
-         if(pixel!=0x00 && pixel!=0x0e)
-         {
-            if(!mSPRCOLL_Collide && !mSPRSYS_NoCollide)
-            {
+         if(pixel!=0x00 && pixel!=0x0e) {
+            if(!mSPRCOLL_Collide && !mSPRSYS_NoCollide) {
                int collision=ReadCollision(hoff);
-               if(collision>mCollision)
-               {
+               if(collision>mCollision) {
                   mCollision=collision;
                }
                // 01/05/00 V0.7	if(mSPRCOLL_Number>collision)
@@ -1182,17 +1125,13 @@ inline void CSusie::ProcessPixel(ULONG hoff,ULONG pixel)
          // 1   allow coll. buffer access
          // 0   exclusive-or the data
       case sprite_shadow:
-         if(pixel!=0x00)
-         {
+         if(pixel!=0x00) {
             WritePixel(hoff,pixel);
          }
-         if(pixel!=0x00 && pixel!=0x0e)
-         {
-            if(!mSPRCOLL_Collide && !mSPRSYS_NoCollide)
-            {
+         if(pixel!=0x00 && pixel!=0x0e) {
+            if(!mSPRCOLL_Collide && !mSPRSYS_NoCollide) {
                int collision=ReadCollision(hoff);
-               if(collision>mCollision)
-               {
+               if(collision>mCollision) {
                   mCollision=collision;
                }
                // 01/05/00 V0.7	if(mSPRCOLL_Number>collision)
@@ -1211,17 +1150,13 @@ inline void CSusie::ProcessPixel(ULONG hoff,ULONG pixel)
          // 1   allow coll. buffer access
          // 1   exclusive-or the data
       case sprite_xor_shadow:
-         if(pixel!=0x00)
-         {
+         if(pixel!=0x00) {
             WritePixel(hoff,ReadPixel(hoff)^pixel);
          }
-         if(pixel!=0x00 && pixel!=0x0e)
-         {
-            if(!mSPRCOLL_Collide && !mSPRSYS_NoCollide && pixel!=0x0e)
-            {
+         if(pixel!=0x00 && pixel!=0x0e) {
+            if(!mSPRCOLL_Collide && !mSPRSYS_NoCollide && pixel!=0x0e) {
                int collision=ReadCollision(hoff);
-               if(collision>mCollision)
-               {
+               if(collision>mCollision) {
                   mCollision=collision;
                }
                // 01/05/00 V0.7	if(mSPRCOLL_Number>collision)
@@ -1242,14 +1177,11 @@ inline void CSusie::WritePixel(ULONG hoff,ULONG pixel)
    ULONG scr_addr=mLineBaseAddress+(hoff/2);
 
    UBYTE dest=RAM_PEEK(scr_addr);
-   if(!(hoff&0x01))
-   {
+   if(!(hoff&0x01)) {
       // Upper nibble screen write
       dest&=0x0f;
       dest|=pixel<<4;
-   }
-   else
-   {
+   } else {
       // Lower nibble screen write
       dest&=0xf0;
       dest|=pixel;
@@ -1265,13 +1197,10 @@ inline ULONG CSusie::ReadPixel(ULONG hoff)
    ULONG scr_addr=mLineBaseAddress+(hoff/2);
 
    ULONG data=RAM_PEEK(scr_addr);
-   if(!(hoff&0x01))
-   {
+   if(!(hoff&0x01)) {
       // Upper nibble read
       data>>=4;
-   }
-   else
-   {
+   } else {
       // Lower nibble read
       data&=0x0f;
    }
@@ -1287,14 +1216,11 @@ inline void CSusie::WriteCollision(ULONG hoff,ULONG pixel)
    ULONG col_addr=mLineCollisionAddress+(hoff/2);
 
    UBYTE dest=RAM_PEEK(col_addr);
-   if(!(hoff&0x01))
-   {
+   if(!(hoff&0x01)) {
       // Upper nibble screen write
       dest&=0x0f;
       dest|=pixel<<4;
-   }
-   else
-   {
+   } else {
       // Lower nibble screen write
       dest&=0xf0;
       dest|=pixel;
@@ -1310,13 +1236,10 @@ inline ULONG CSusie::ReadCollision(ULONG hoff)
    ULONG col_addr=mLineCollisionAddress+(hoff/2);
 
    ULONG data=RAM_PEEK(col_addr);
-   if(!(hoff&0x01))
-   {
+   if(!(hoff&0x01)) {
       // Upper nibble read
       data>>=4;
-   }
-   else
-   {
+   } else {
       // Lower nibble read
       data&=0x0f;
    }
@@ -1356,8 +1279,7 @@ inline ULONG CSusie::LineInit(ULONG voff)
 
    // Literals are a special case and get their count set on a line basis
 
-   if(mSPRCTL1_Literal)
-   {
+   if(mSPRCTL1_Literal) {
       mLineType=line_abs_literal;
       mLineRepeatCount=((offset-1)*8)/mSPRCTL0_PixelBits;
       // Why is this necessary, is this compensating for the 1,1 offset bug
@@ -1367,8 +1289,7 @@ inline ULONG CSusie::LineInit(ULONG voff)
 
    // Set the line base address for use in the calls to pixel painting
 
-   if(voff>101)
-   {
+   if(voff>101) {
       gError->Warning("CSusie::LineInit() Out of bounds (voff)");
       voff=0;
    }
@@ -1385,18 +1306,16 @@ inline ULONG CSusie::LineInit(ULONG voff)
 
 inline ULONG CSusie::LineGetPixel()
 {
-   if(!mLineRepeatCount)
-   {
+   if(!mLineRepeatCount) {
       // Normal sprites fetch their counts on a packet basis
-      if(mLineType!=line_abs_literal)
-      {
+      if(mLineType!=line_abs_literal) {
          ULONG literal=LineGetBits(1);
-         if(literal) mLineType=line_literal; else mLineType=line_packed;
+         if(literal) mLineType=line_literal;
+		 else mLineType=line_packed;
       }
 
       // Pixel store is empty what should we do
-      switch(mLineType)
-      {
+      switch(mLineType) {
          case line_abs_literal:
             // This means end of line for us
             mLinePixel=LINE_END;
@@ -1411,10 +1330,11 @@ inline ULONG CSusie::LineGetPixel()
             // a zero size i.e 0b00000 as a header is allowable as a packet end
             //
             mLineRepeatCount=LineGetBits(4);
-            if(!mLineRepeatCount)
+            if(!mLineRepeatCount) {
                mLinePixel=LINE_END;
-            else
+            } else {
                mLinePixel=mPenIndex[LineGetBits(mSPRCTL0_PixelBits)];
+            }
             mLineRepeatCount++;
             break;
          default:
@@ -1423,12 +1343,10 @@ inline ULONG CSusie::LineGetPixel()
 
    }
 
-   if(mLinePixel!=LINE_END)
-   {
+   if(mLinePixel!=LINE_END) {
       mLineRepeatCount--;
 
-      switch(mLineType)
-      {
+      switch(mLineType) {
          case line_abs_literal:
             mLinePixel=LineGetBits(mSPRCTL0_PixelBits);
             // Check the special case of a zero in the last pixel
@@ -1459,12 +1377,11 @@ inline ULONG CSusie::LineGetBits(ULONG bits)
 
    // Only return data IF there is enought bits left in the packet
 
-   if(mLinePacketBitsLeft<=bits) return 0;// <= fixes issues with polygones e.g. "demo006"
+   if(mLinePacketBitsLeft<=bits) return 0;// <= fixes issues with polygones "demo006"
 
    // Make sure shift reg has enough bits to fulfil the request
 
-   if(mLineShiftRegCount<bits)
-   {
+   if(mLineShiftRegCount<bits) {
       // This assumes data comes into LSB and out of MSB
       //		mLineShiftReg&=0x000000ff;	// Has no effect
       mLineShiftReg<<=24;
@@ -1492,8 +1409,7 @@ inline ULONG CSusie::LineGetBits(ULONG bits)
 
 void CSusie::Poke(ULONG addr,UBYTE data)
 {
-   switch(addr&0xff)
-   {
+   switch(addr&0xff) {
       case (TMPADRL&0xff):
          mTMPADR.Byte.Low=data;
          mTMPADR.Byte.High=0;
@@ -1725,20 +1641,16 @@ void CSusie::Poke(ULONG addr,UBYTE data)
          TRACE_SUSIE2("Poke(MATHC,%02x) at PC=$%04x",data,mSystem.mCpu->GetPC());
          mMATHABCD.Bytes.C=data;
          // Perform sign conversion if required
-         if(mSPRSYS_SignedMath)
-         {
+         if(mSPRSYS_SignedMath) {
             // Account for the math bug that 0x8000 is +ve & 0x0000 is -ve by subracting 1
-            if((mMATHABCD.Words.CD-1)&0x8000)
-            {
+            if((mMATHABCD.Words.CD-1)&0x8000) {
                UWORD conv;
                conv=mMATHABCD.Words.CD^0xffff;
                conv++;
                mMATHCD_sign=-1;
                TRACE_SUSIE2("MATH CD signed conversion complete %04x to %04x",mMATHABCD.Words.CD,conv);
                mMATHABCD.Words.CD=conv;
-            }
-            else
-            {
+            } else {
                mMATHCD_sign=1;
             }
          }
@@ -1752,20 +1664,16 @@ void CSusie::Poke(ULONG addr,UBYTE data)
          TRACE_SUSIE2("Poke(MATHA,%02x) at PC=$%04x",data,mSystem.mCpu->GetPC());
          mMATHABCD.Bytes.A=data;
          // Perform sign conversion if required
-         if(mSPRSYS_SignedMath)
-         {
+         if(mSPRSYS_SignedMath) {
             // Account for the math bug that 0x8000 is +ve & 0x0000 is -ve by subracting 1
-            if((mMATHABCD.Words.AB-1)&0x8000)
-            {
+            if((mMATHABCD.Words.AB-1)&0x8000) {
                UWORD conv;
                conv=mMATHABCD.Words.AB^0xffff;
                conv++;
                mMATHAB_sign=-1;
                TRACE_SUSIE2("MATH AB signed conversion complete %04x to %04x",mMATHABCD.Words.AB,conv);
                mMATHABCD.Words.AB=conv;
-            }
-            else
-            {
+            } else {
                mMATHAB_sign=1;
             }
          }
@@ -1917,9 +1825,7 @@ void CSusie::Poke(ULONG addr,UBYTE data)
 UBYTE CSusie::Peek(ULONG addr)
 {
    UBYTE	retval=0;
-
-   switch(addr&0xff)
-   {
+   switch(addr&0xff) {
       case (TMPADRL&0xff):
          retval=mTMPADR.Byte.Low;
          TRACE_SUSIE2("Peek(TMPADRL)=$%02x at PC=$%04x",retval,mSystem.mCpu->GetPC());
@@ -2192,10 +2098,9 @@ UBYTE CSusie::Peek(ULONG addr)
          return retval;
 
       case (JOYSTICK&0xff):
-         if(mSPRSYS_LeftHand)
-         retval= mJOYSTICK.Byte;
-         else
-         {
+         if(mSPRSYS_LeftHand) {
+            retval= mJOYSTICK.Byte;
+         } else {
             TJOYSTICK Modified=mJOYSTICK;
             Modified.Bits.Left=mJOYSTICK.Bits.Right;
             Modified.Bits.Right=mJOYSTICK.Bits.Left;

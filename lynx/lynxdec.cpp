@@ -27,8 +27,7 @@ void double_value(unsigned char *result, const int length)
    int i, x;
 
    x = 0;
-   for (i = length - 1; i >= 0; i--)
-   {
+   for (i = length - 1; i >= 0; i--) {
       x += 2 * result[i];
       result[i] = (unsigned char) (x & 0xFF);
       x >>= 8;
@@ -38,8 +37,8 @@ void double_value(unsigned char *result, const int length)
 
 /* result -= value */
 int minus_equals_value(unsigned char *result,
-      const unsigned char *value,
-      const int length)
+                       const unsigned char *value,
+                       const int length)
 {
    int i, x;
    unsigned char *tmp;
@@ -48,15 +47,13 @@ int minus_equals_value(unsigned char *result,
    tmp = (unsigned char*)calloc(1, length);
 
    x = 0;
-   for (i = length - 1; i >= 0; i--)
-   {
+   for (i = length - 1; i >= 0; i--) {
       x += result[i] - value[i];
       tmp[i] = (unsigned char) (x & 0xFF);
       x >>= 8;
    }
 
-   if (x >= 0)
-   {
+   if (x >= 0) {
       /* move the result back to BB */
       memcpy(result, tmp, length);
 
@@ -76,14 +73,13 @@ int minus_equals_value(unsigned char *result,
 
 /* result += value */
 void plus_equals_value(unsigned char *result,
-      const unsigned char *value,
-      const int length)
+                       const unsigned char *value,
+                       const int length)
 {
    int i, tmp;
    int carry = 0;
 
-   for(i = length - 1; i >= 0; i--)
-   {
+   for(i = length - 1; i >= 0; i--) {
       tmp = result[i] + value[i] + carry;
       if (tmp >= 256)
          carry = 1;
@@ -95,10 +91,10 @@ void plus_equals_value(unsigned char *result,
 
 /* L = M * N mod modulus */
 void lynx_mont(unsigned char *L,            /* result */
-      const unsigned char *M,      /* original chunk of encrypted data */
-      const unsigned char *N,      /* copy of encrypted data */
-      const unsigned char *modulus,/* modulus */
-      const int length)
+               const unsigned char *M,      /* original chunk of encrypted data */
+               const unsigned char *N,      /* copy of encrypted data */
+               const unsigned char *modulus,/* modulus */
+               const int length)
 {
    int i, j;
    int carry;
@@ -108,13 +104,11 @@ void lynx_mont(unsigned char *L,            /* result */
    /* L = 0 */
    memset(L, 0, length);
 
-   for(i = 0; i < length; i++)
-   {
+   for(i = 0; i < length; i++) {
       /* get the next byte from N */
       tmp = N[i];
 
-      for(j = 0; j < 8; j++)
-      {
+      for(j = 0; j < 8; j++) {
          /* L = L * 2 */
          double_value(L, length);
 
@@ -124,8 +118,7 @@ void lynx_mont(unsigned char *L,            /* result */
          /* shift tmp's bits to the left by one */
          tmp <<= 1;
 
-         if(increment != 0)
-         {
+         if(increment != 0) {
             /* increment the result... */
             /* L += M */
             plus_equals_value(L, M, length);
@@ -138,9 +131,7 @@ void lynx_mont(unsigned char *L,            /* result */
             /* L -= modulus */
             if (carry != 0)
                minus_equals_value(L, modulus, length);
-         }
-         else
-         {
+         } else {
             /* instead decrement the result */
 
             /* L -= modulus */
@@ -155,11 +146,11 @@ void lynx_mont(unsigned char *L,            /* result */
  * multiplication method to do modular exponentiation.
  */
 int decrypt_block(int accumulator,
-      unsigned char * result,
-      const unsigned char * encrypted,
-      const unsigned char * public_exp,
-      const unsigned char * public_mod,
-      const int length)
+                  unsigned char * result,
+                  const unsigned char * encrypted,
+                  const unsigned char * public_exp,
+                  const unsigned char * public_mod,
+                  const int length)
 {
    int i;
    unsigned char* rptr = result;
@@ -175,8 +166,7 @@ int decrypt_block(int accumulator,
 
    /* this copies the next length sized block of data from the encrypted
     * data into our temporary memory buffer in reverse order */
-   for(i = length - 1; i >= 0; i--)
-   {
+   for(i = length - 1; i >= 0; i--) {
       B[i] = *eptr;
       eptr++;
    }
@@ -213,8 +203,7 @@ int decrypt_block(int accumulator,
     * this is not part of Montgomery multiplication and is just an obfuscation
     * preprocessing step done on the plaintext data before it gets encrypted.
     */
-   for(i = length - 1; i > 0; i--)
-   {
+   for(i = length - 1; i > 0; i--) {
       accumulator += A[i];
       accumulator &= 0xFF;
       (*rptr) = (unsigned char)(accumulator);
@@ -235,10 +224,10 @@ int decrypt_block(int accumulator,
  * encrypted data.
  */
 int decrypt_frame(unsigned char * result,
-      const unsigned char * encrypted,
-      const unsigned char * public_exp,
-      const unsigned char * public_mod,
-      const int length)
+                  const unsigned char * encrypted,
+                  const unsigned char * public_exp,
+                  const unsigned char * public_mod,
+                  const int length)
 {
    int i, j;
    int blocks;
@@ -255,8 +244,7 @@ int decrypt_frame(unsigned char * result,
    /* move our index to the beginning of the next block */
    eptr++;
 
-   for(i = 0; i < blocks; i++)
-   {
+   for(i = 0; i < blocks; i++) {
       /* decrypt a single block of encrypted data */
       accumulator = decrypt_block(accumulator, rptr, eptr, public_exp, public_mod, length);
 
@@ -276,18 +264,18 @@ int decrypt_frame(unsigned char * result,
  * is much easier to understand.
  */
 void lynx_decrypt(unsigned char * result,
-      const unsigned char * encrypted,
-      const int length)
+                  const unsigned char * encrypted,
+                  const int length)
 {
    int blocks = 0;
    int read_index = 0;
 
    /* decrypt the first frame of encrypted data */
    blocks = decrypt_frame(&result[0],
-         &encrypted[read_index],
-         /* lynx_public_exp */ 0,
-         lynx_public_mod,
-         length);
+                          &encrypted[read_index],
+                          /* lynx_public_exp */ 0,
+                          lynx_public_mod,
+                          length);
 
    ///* adjust the read index */
    //read_index = 1 + (blocks * length);
