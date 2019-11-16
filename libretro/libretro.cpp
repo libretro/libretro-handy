@@ -319,7 +319,7 @@ void retro_get_system_info(struct retro_system_info *info)
 #endif
    info->library_version  = HANDYVER GIT_VERSION;
    info->need_fullpath    = true;
-   info->valid_extensions = "lnx";
+   info->valid_extensions = "lnx|o";
    info->block_extract = 0;
 }
 
