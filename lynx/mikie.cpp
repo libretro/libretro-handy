@@ -3376,7 +3376,8 @@ inline void CMikie::Update(void)
                //
                // Update audio circuitry
                //
-               mAUDIO_0_WAVESHAPER=GetLfsrNext(mAUDIO_0_WAVESHAPER);
+               if(mAUDIO_0_BKUP || mAUDIO_0_LINKING)
+                  mAUDIO_0_WAVESHAPER=GetLfsrNext(mAUDIO_0_WAVESHAPER);
 
                if(mAUDIO_0_INTEGRATE_ENABLE) {
                   SLONG temp=mAUDIO_OUTPUT[0];
@@ -3457,7 +3458,8 @@ inline void CMikie::Update(void)
                //
                // Update audio circuitry
                //
-               mAUDIO_1_WAVESHAPER=GetLfsrNext(mAUDIO_1_WAVESHAPER);
+               if(mAUDIO_1_BKUP || mAUDIO_1_LINKING)
+                  mAUDIO_1_WAVESHAPER=GetLfsrNext(mAUDIO_1_WAVESHAPER);
 
                if(mAUDIO_1_INTEGRATE_ENABLE) {
                   SLONG temp=mAUDIO_OUTPUT[1];
@@ -3538,7 +3540,8 @@ inline void CMikie::Update(void)
                //
                // Update audio circuitry
                //
-               mAUDIO_2_WAVESHAPER=GetLfsrNext(mAUDIO_2_WAVESHAPER);
+               if(mAUDIO_2_BKUP || mAUDIO_2_LINKING)
+                  mAUDIO_2_WAVESHAPER=GetLfsrNext(mAUDIO_2_WAVESHAPER);
 
                if(mAUDIO_2_INTEGRATE_ENABLE) {
                   SLONG temp=mAUDIO_OUTPUT[2];
@@ -3619,7 +3622,8 @@ inline void CMikie::Update(void)
                //
                // Update audio circuitry
                //
-               mAUDIO_3_WAVESHAPER=GetLfsrNext(mAUDIO_3_WAVESHAPER);
+               if(mAUDIO_3_BKUP || mAUDIO_3_LINKING)
+                  mAUDIO_3_WAVESHAPER=GetLfsrNext(mAUDIO_3_WAVESHAPER);
 
                if(mAUDIO_3_INTEGRATE_ENABLE) {
                   SLONG temp=mAUDIO_OUTPUT[3];
