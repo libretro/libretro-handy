@@ -27,6 +27,7 @@ static uint8_t framebuffer[160*102*VIDEO_CORE_PIXELSIZE];
 
 static bool newFrame = false;
 static bool initialized = false;
+bool sleepHack = false;
 
 struct map { unsigned retro; unsigned lynx; };
 
@@ -125,6 +126,7 @@ void retro_set_environment(retro_environment_t cb)
 {
    static const struct retro_variable vars[] = {
       { "handy_rot", "Display rotation; None|90|270" },
+      { "handy_sleephack", "Disable CPU sleep (Hack); disabled|enabled" },
       { NULL, NULL },
    };
 
@@ -280,6 +282,13 @@ static void check_variables(void)
 
          update_geometry();
       }
+   }
+
+   var.key = "handy_sleephack";
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      sleepHack = !strcmp(var.value, "enabled") ? true : false;
    }
 }
 

@@ -276,7 +276,8 @@ class C65C02
          //
          // If the CPU is asleep then skip to the next timer event
          //
-         if(gSystemCPUSleep) return;
+         extern bool sleepHack;
+         if(!sleepHack && gSystemCPUSleep) return;
 
          // Fetch opcode
          mOpcode=CPU_PEEK(mPC);
