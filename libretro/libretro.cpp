@@ -182,7 +182,15 @@ static UBYTE* lynx_display_callback(ULONG objref)
    {
       int f = gAudioBufferPointer / 4; // /1 - 8 bit mono, /2 8 bit stereo, /4 16 bit stereo
       lynx_sound_stream_update(soundBuffer, gAudioBufferPointer);
-      audio_batch_cb((const int16_t*)soundBuffer, f);
+      
+      int audio_total = 0;
+      while(f > 0)
+      {
+         audio_batch_cb((const int16_t*)soundBuffer + audio_total, f < 1024 ? f : 1024);
+
+         f -= 1024;
+         audio_total += 1024 * 2;
+      }
    }
 
    newFrame = true;
@@ -352,7 +360,7 @@ void retro_get_system_info(struct retro_system_info *info)
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
    struct retro_game_geometry geom = { lynx_width, lynx_height, 160, 160, (float) lynx_width / (float) lynx_height };
-   struct retro_system_timing timing = { 75.0, 48000.0 };
+   struct retro_system_timing timing = { 75.0, (float) HANDY_AUDIO_SAMPLE_FREQ };
 
    memset(info, 0, sizeof(*info));
    info->geometry = geom;
