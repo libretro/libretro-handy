@@ -64,7 +64,7 @@ void CMikie::BlowOut(void)
    C6502_REGS regs;
    mSystem.GetRegs(regs);
    sprintf(addr,"Runtime Error - System Halted\nCMikie::Poke() - Read/Write to counter clocks at PC=$%04x.",regs.PC);
-   gError->Warning(addr);
+   if(gError) gError->Warning(addr);
    gSystemHalt=TRUE;
 }
 
@@ -889,7 +889,7 @@ void CMikie::DisplaySetAttributes(ULONG Rotate,ULONG Format,ULONG Pitch,UBYTE* (
          }
          break;
       default:
-         gError->Warning("CMikie::SetScreenAttributes() - Unrecognised display format");
+         if(gError) gError->Warning("CMikie::SetScreenAttributes() - Unrecognised display format");
          for(Spot.Index=0;Spot.Index<4096;Spot.Index++) mColourMap[Spot.Index]=0;
          break;
    }
@@ -1856,7 +1856,7 @@ void CMikie::Poke(ULONG addr,UBYTE data)
             C6502_REGS regs;
             mSystem.GetRegs(regs);
             sprintf(addr,"Runtime Alert - System Halted\nCMikie::Poke(SYSCTL1) - Lynx power down occured at PC=$%04x.\nResetting system.",regs.PC);
-            gError->Warning(addr);
+            if(gError) gError->Warning(addr);
             mSystem.Reset();
             gSystemHalt=TRUE;
          }
@@ -1984,7 +1984,7 @@ void CMikie::Poke(ULONG addr,UBYTE data)
       case (Mtest2&0xff):
          // Test registers are unimplemented
          // lets hope no programs use them.
-         gError->Warning("CMikie::Poke() - Write to MTEST2");
+         if(gError) gError->Warning("CMikie::Poke() - Write to MTEST2");
          TRACE_MIKIE2("Poke(MTEST2,%02x) at PC=%04x",data,mSystem.mCpu->GetPC());
          break;
 
