@@ -469,15 +469,16 @@ void CSystem::Reset(void)
 
 size_t CSystem::ContextSize()
 {
-   static UBYTE tempbuf[0x40000];
    LSS_FILE fp;
+   const int max_size = 0x40000 + HANDY_AUDIO_BUFFER_SIZE;
 
-   fp.memptr = (UBYTE *) &tempbuf;
+   fp.memptr = (UBYTE *) malloc(max_size);
    fp.index = 0;
-   fp.index_limit = 0x40000;
+   fp.index_limit = max_size;
 
    ContextSave(&fp);
 
+   free(fp.memptr);
    return fp.index;
 }
 
