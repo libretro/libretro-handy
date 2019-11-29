@@ -868,24 +868,24 @@ void CMikie::DisplaySetAttributes(ULONG Rotate,ULONG Format,ULONG Pitch,UBYTE* (
          break;
       case MIKIE_PIXEL_FORMAT_16BPP_555:
          for(Spot.Index=0;Spot.Index<4096;Spot.Index++) {
-            mColourMap[Spot.Index]=(Spot.Colours.Red<<11)&0x7c00;
-            mColourMap[Spot.Index]|=(Spot.Colours.Green<<6)&0x03e0;
-            mColourMap[Spot.Index]|=(Spot.Colours.Blue<<1)&0x001f;
+            mColourMap[Spot.Index]=((Spot.Colours.Red<<11)&0x7800) | (Spot.Colours.Red<<7)&0x0400;
+            mColourMap[Spot.Index]|=((Spot.Colours.Green<<6)&0x03c0) | ((Spot.Colours.Green<<2)&0x0020);
+            mColourMap[Spot.Index]|=((Spot.Colours.Blue<<1)&0x001e) | ((Spot.Colours.Blue>>3)&0x0001);
          }
          break;
       case MIKIE_PIXEL_FORMAT_16BPP_565:
          for(Spot.Index=0;Spot.Index<4096;Spot.Index++) {
-            mColourMap[Spot.Index]=(Spot.Colours.Red<<12)&0xf800;
-            mColourMap[Spot.Index]|=(Spot.Colours.Green<<7)&0x07e0;
-            mColourMap[Spot.Index]|=(Spot.Colours.Blue<<1)&0x001f;
+            mColourMap[Spot.Index]=((Spot.Colours.Red<<12)&0xf000) | (Spot.Colours.Red<<8)&0x0800;
+            mColourMap[Spot.Index]|=((Spot.Colours.Green<<7)&0x0780) | ((Spot.Colours.Green<<3)&0x0060);
+            mColourMap[Spot.Index]|=((Spot.Colours.Blue<<1)&0x001e) | ((Spot.Colours.Blue>>3)&0x0001);
          }
          break;
       case MIKIE_PIXEL_FORMAT_24BPP:
       case MIKIE_PIXEL_FORMAT_32BPP:
          for(Spot.Index=0;Spot.Index<4096;Spot.Index++) {
-            mColourMap[Spot.Index]=(Spot.Colours.Red<<20)&0x00ff0000;
-            mColourMap[Spot.Index]|=(Spot.Colours.Green<<12)&0x0000ff00;
-            mColourMap[Spot.Index]|=(Spot.Colours.Blue<<4)&0x000000ff;
+            mColourMap[Spot.Index]=((Spot.Colours.Red<<20)&0x00f00000) | ((Spot.Colours.Red<<16)&0x000f0000);
+            mColourMap[Spot.Index]|=((Spot.Colours.Green<<12)&0x0000f000) | ((Spot.Colours.Green<<8)&0x00000f00);
+            mColourMap[Spot.Index]|=((Spot.Colours.Blue<<4)&0x000000f0) | ((Spot.Colours.Blue<<0)&0x0000000f);
          }
          break;
       default:
