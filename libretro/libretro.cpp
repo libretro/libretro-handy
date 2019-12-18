@@ -12,8 +12,7 @@ static retro_input_state_t input_state_cb;
 
 static CSystem *lynx = NULL;
 
-static unsigned char *snd_buffer16s;
-static unsigned short soundBuffer[4096 * 8];
+static int16_t *soundBuffer = NULL;
 
 static uint8_t lynx_rot = MIKIE_NO_ROTATE;
 static uint8_t lynx_width = 160;
@@ -165,12 +164,6 @@ static unsigned get_lynx_input(void)
    return res;
 }
 
-inline static void lynx_sound_stream_update(unsigned short *buffer, int buf_length)
-{
-   memcpy(buffer, snd_buffer16s, buf_length);
-   gAudioBufferPointer = 0;
-}
-
 static UBYTE* lynx_display_callback(ULONG objref)
 {
    if(!initialized)
@@ -178,20 +171,11 @@ static UBYTE* lynx_display_callback(ULONG objref)
 
    video_cb(framebuffer, lynx_width, lynx_height, 160*VIDEO_CORE_PIXELSIZE);
 
-   if(gAudioBufferPointer > 0)
-   {
-      int f = gAudioBufferPointer / 4; // /1 - 8 bit mono, /2 8 bit stereo, /4 16 bit stereo
-      lynx_sound_stream_update(soundBuffer, gAudioBufferPointer);
-      
-      int audio_total = 0;
-      while(f > 0)
-      {
-         audio_batch_cb((const int16_t*)soundBuffer + audio_total, f < 1024 ? f : 1024);
 
-         f -= 1024;
-         audio_total += 1024 * 2;
-      }
-   }
+   for(int total = 0; total < gAudioBufferPointer/4; )
+      total += audio_batch_cb(soundBuffer + total*2, (gAudioBufferPointer/4) - total);
+   gAudioBufferPointer = 0;
+
 
    newFrame = true;
    return (UBYTE*)framebuffer;
@@ -263,7 +247,7 @@ static void lynx_input(void)
 static bool lynx_initialize_sound(void)
 {
    gAudioEnabled = true;
-   snd_buffer16s = (unsigned char *) (&gAudioBuffer);
+   soundBuffer = (int16_t *) (&gAudioBuffer);
    return true;
 }
 
