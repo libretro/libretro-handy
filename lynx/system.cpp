@@ -515,8 +515,6 @@ bool CSystem::ContextSave(LSS_FILE *fp)
    ULONG tmp=gTimerCount;
    if(!lss_write(&tmp,sizeof(ULONG),1,fp)) status=0;
 
-   if(!lss_write(gAudioBuffer,sizeof(UBYTE),HANDY_AUDIO_BUFFER_SIZE,fp)) status=0;
-   if(!lss_write(&gAudioBufferPointer,sizeof(ULONG),1,fp)) status=0;
    if(!lss_write(&gAudioLastUpdateCycle,sizeof(ULONG),1,fp)) status=0;
 
    // Save other device contexts
@@ -583,8 +581,6 @@ bool CSystem::ContextLoad(LSS_FILE *fp)
       if(!lss_read(&tmp,sizeof(ULONG),1,fp)) status=0;
       gTimerCount=tmp;
 
-      if(!lss_read(gAudioBuffer,sizeof(UBYTE),HANDY_AUDIO_BUFFER_SIZE,fp)) status=0;
-      if(!lss_read(&gAudioBufferPointer,sizeof(ULONG),1,fp)) status=0;
       if(!lss_read(&gAudioLastUpdateCycle,sizeof(ULONG),1,fp)) status=0;
 
       if(!mMemMap->ContextLoad(fp)) status=0;
@@ -600,6 +596,8 @@ bool CSystem::ContextLoad(LSS_FILE *fp)
       if(!mSusie->ContextLoad(fp)) status=0;
       if(!mCpu->ContextLoad(fp)) status=0;
       if(!mEEPROM->ContextLoad(fp)) status=0;
+
+      gAudioBufferPointer = 0;
    } else {
       fprintf(stderr, "[handy]Not a recognised LSS file\n");
    }

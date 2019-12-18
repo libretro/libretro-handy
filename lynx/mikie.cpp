@@ -365,7 +365,6 @@ bool CMikie::ContextSave(LSS_FILE *fp)
    if(!lss_write(&mTimerInterruptMask,sizeof(ULONG),1,fp)) return 0;
    
    if(!lss_write(mPalette,sizeof(TPALETTE),16,fp)) return 0;
-   if(!lss_write(mColourMap,sizeof(ULONG),4096,fp)) return 0;
    
    if(!lss_write(&mIODAT,sizeof(ULONG),1,fp)) return 0;
    if(!lss_write(&mIODAT_REST_SIGNAL,sizeof(ULONG),1,fp)) return 0;
@@ -572,7 +571,6 @@ bool CMikie::ContextLoad(LSS_FILE *fp)
    if(!lss_read(&mTimerInterruptMask,sizeof(ULONG),1,fp)) return 0;
 
    if(!lss_read(mPalette,sizeof(TPALETTE),16,fp)) return 0;
-   if(!lss_read(mColourMap,sizeof(ULONG),4096,fp)) return 0;
 
    if(!lss_read(&mIODAT,sizeof(ULONG),1,fp)) return 0;
    if(!lss_read(&mIODAT_REST_SIGNAL,sizeof(ULONG),1,fp)) return 0;
