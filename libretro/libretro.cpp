@@ -12,18 +12,18 @@ static retro_input_state_t input_state_cb;
 
 static CSystem *lynx = NULL;
 
-static unsigned char *snd_buffer16s;
-static unsigned short soundBuffer[4096 * 8];
+static int16_t *soundBuffer = NULL;
 
+
+// core options
 static uint8_t lynx_rot = MIKIE_NO_ROTATE;
 static uint8_t lynx_width = 160;
 static uint8_t lynx_height = 102;
 
-#define VIDEO_CORE_PIXELSIZE    2 // MIKIE_PIXEL_FORMAT_16BPP_565
-//#define VIDEO_CORE_PIXELSIZE  4 // MIKIE_PIXEL_FORMAT_32BPP
+static int VIDEO_CORE_PIXELSIZE = 2;
 
 
-static uint8_t framebuffer[160*160*VIDEO_CORE_PIXELSIZE];
+static uint8_t framebuffer[160*160*4];
 
 static bool newFrame = false;
 static bool initialized = false;
@@ -73,6 +73,105 @@ unsigned retro_api_version(void)
    return RETRO_API_VERSION;
 }
 
+static void update_geometry()
+{
+   struct retro_system_av_info info;
+
+   retro_get_system_av_info(&info);
+   environ_cb(RETRO_ENVIRONMENT_SET_GEOMETRY, &info);
+}
+
+static UBYTE* lynx_display_callback(ULONG objref)
+{
+   if(!initialized)
+      return (UBYTE*)framebuffer;
+
+   video_cb(framebuffer, lynx_width, lynx_height, 160*VIDEO_CORE_PIXELSIZE);
+
+
+   for(int total = 0; total < gAudioBufferPointer/4; )
+      total += audio_batch_cb(soundBuffer + total*2, (gAudioBufferPointer/4) - total);
+   gAudioBufferPointer = 0;
+
+
+   newFrame = true;
+   return (UBYTE*)framebuffer;
+}
+
+static void lynx_rotate()
+{
+   switch(lynx_rot)
+   {
+   default:
+      lynx_rot = MIKIE_NO_ROTATE;
+      // intentional fall-through
+
+   case MIKIE_NO_ROTATE:
+      lynx_width = 160;
+      lynx_height = 102;
+      btn_map = btn_map_no_rot;
+      break;
+
+   case MIKIE_ROTATE_R:
+      lynx_width = 102;
+      lynx_height = 160;
+      btn_map = btn_map_rot_90;
+      break;
+
+   case MIKIE_ROTATE_L:
+      lynx_width = 102;
+      lynx_height = 160;
+      btn_map = btn_map_rot_270;
+      break;
+   }
+
+   if(VIDEO_CORE_PIXELSIZE == 2) {
+      lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_16BPP_565, 160*2, lynx_display_callback, (ULONG)0);
+   }
+   else if(VIDEO_CORE_PIXELSIZE == 4) {
+      lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_32BPP, 160*4, lynx_display_callback, (ULONG)0);
+   }
+
+   update_geometry();
+}
+
+static void check_variables(void)
+{
+   struct retro_variable var = {0};
+
+   var.key = "handy_rot";
+   var.value = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
+      unsigned old_rotate = lynx_rot;
+
+      if (strcmp(var.value, "None") == 0)
+         lynx_rot = MIKIE_NO_ROTATE;
+      else if (strcmp(var.value, "90") == 0)
+         lynx_rot = MIKIE_ROTATE_R; 
+      else if (strcmp(var.value, "270") == 0)
+         lynx_rot = MIKIE_ROTATE_L;
+
+      if (old_rotate != lynx_rot)
+         lynx_rotate();
+   }
+
+   var.key = "handy_gfx_colors";
+   var.value = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
+      static bool once = false;
+
+      if (!once) {
+         if (strcmp(var.value, "16bit") == 0)
+            VIDEO_CORE_PIXELSIZE = 2;
+         else if (strcmp(var.value, "24bit") == 0)
+            VIDEO_CORE_PIXELSIZE = 4;
+         once = true;
+      }
+   }
+}
+
 void retro_init(void)
 {
    struct retro_log_callback log;
@@ -82,21 +181,25 @@ void retro_init(void)
 
    btn_map = btn_map_no_rot;
 
-#if VIDEO_CORE_PIXELSIZE==2
-   enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
-#endif
-#if VIDEO_CORE_PIXELSIZE==4
-   enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_XRGB8888;
-#endif
 
-   if(!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt) && log_cb){
-#if VIDEO_CORE_PIXELSIZE==2
-      log_cb(RETRO_LOG_ERROR, "[could not set RGB565]\n");
-#endif
-#if VIDEO_CORE_PIXELSIZE==4
-      log_cb(RETRO_LOG_ERROR, "[could not set RGB8888]\n");
-#endif
+   check_variables();
+
+   if(VIDEO_CORE_PIXELSIZE == 4) {
+      enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_XRGB8888;
+      if(!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt)) {
+         if(log_cb)
+            log_cb(RETRO_LOG_ERROR, "[could not set RGB8888]\n");
+         VIDEO_CORE_PIXELSIZE = 2;
+      }
    }
+
+   if(VIDEO_CORE_PIXELSIZE == 2) {
+      enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
+      if(!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt) && log_cb) {
+         log_cb(RETRO_LOG_ERROR, "[could not set RGB565]\n");
+      }
+   }
+
 
    uint64_t serialization_quirks = RETRO_SERIALIZATION_QUIRK_SINGLE_SESSION;
    environ_cb(RETRO_ENVIRONMENT_SET_SERIALIZATION_QUIRKS, &serialization_quirks);
@@ -125,6 +228,7 @@ void retro_set_environment(retro_environment_t cb)
 {
    static const struct retro_variable vars[] = {
       { "handy_rot", "Display rotation; None|90|270" },
+      { "handy_gfx_colors", "Color Depth (Restart); 16bit|24bit" },
       { NULL, NULL },
    };
 
@@ -165,82 +269,6 @@ static unsigned get_lynx_input(void)
    return res;
 }
 
-inline static void lynx_sound_stream_update(unsigned short *buffer, int buf_length)
-{
-   memcpy(buffer, snd_buffer16s, buf_length);
-   gAudioBufferPointer = 0;
-}
-
-static UBYTE* lynx_display_callback(ULONG objref)
-{
-   if(!initialized)
-      return (UBYTE*)framebuffer;
-
-   video_cb(framebuffer, lynx_width, lynx_height, 160*VIDEO_CORE_PIXELSIZE);
-
-   if(gAudioBufferPointer > 0)
-   {
-      int f = gAudioBufferPointer / 4; // /1 - 8 bit mono, /2 8 bit stereo, /4 16 bit stereo
-      lynx_sound_stream_update(soundBuffer, gAudioBufferPointer);
-      
-      int audio_total = 0;
-      while(f > 0)
-      {
-         audio_batch_cb((const int16_t*)soundBuffer + audio_total, f < 1024 ? f : 1024);
-
-         f -= 1024;
-         audio_total += 1024 * 2;
-      }
-   }
-
-   newFrame = true;
-   return (UBYTE*)framebuffer;
-}
-
-static void update_geometry()
-{
-   struct retro_system_av_info info;
-
-   retro_get_system_av_info(&info);
-   environ_cb(RETRO_ENVIRONMENT_SET_GEOMETRY, &info);
-}
-
-static void lynx_rotate()
-{
-   switch(lynx_rot)
-   {
-   default:
-      lynx_rot = MIKIE_NO_ROTATE;
-      // intentional fall-through
-
-   case MIKIE_NO_ROTATE:
-      lynx_width = 160;
-      lynx_height = 102;
-      btn_map = btn_map_no_rot;
-      break;
-
-   case MIKIE_ROTATE_R:
-      lynx_width = 102;
-      lynx_height = 160;
-      btn_map = btn_map_rot_90;
-      break;
-
-   case MIKIE_ROTATE_L:
-      lynx_width = 102;
-      lynx_height = 160;
-      btn_map = btn_map_rot_270;
-      break;
-   }
-
-   #if VIDEO_CORE_PIXELSIZE==2
-      lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_16BPP_565, 160*VIDEO_CORE_PIXELSIZE, lynx_display_callback, (ULONG)0);
-   #elif VIDEO_CORE_PIXELSIZE==4
-      lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_32BPP, 160*VIDEO_CORE_PIXELSIZE, lynx_display_callback, (ULONG)0);
-   #endif
-
-   update_geometry();
-}
-
 static void lynx_input(void)
 {
    input_poll_cb();
@@ -263,7 +291,7 @@ static void lynx_input(void)
 static bool lynx_initialize_sound(void)
 {
    gAudioEnabled = true;
-   snd_buffer16s = (unsigned char *) (&gAudioBuffer);
+   soundBuffer = (int16_t *) (&gAudioBuffer);
    return true;
 }
 
@@ -295,28 +323,6 @@ static bool lynx_romfilename(char *dest)
    return true;
 }
 
-static void check_variables(void)
-{
-   struct retro_variable var = {0};
-
-   var.key = "handy_rot";
-
-   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-   {
-      unsigned old_rotate = lynx_rot;
-
-      if (strcmp(var.value, "None") == 0)
-         lynx_rot = MIKIE_NO_ROTATE;
-      else if (strcmp(var.value, "90") == 0)
-         lynx_rot = MIKIE_ROTATE_R; 
-      else if (strcmp(var.value, "270") == 0)
-         lynx_rot = MIKIE_ROTATE_L;
-
-      if (old_rotate != lynx_rot)
-         lynx_rotate();
-   }
-}
-
 static bool lynx_initialize_system(const char* gamepath)
 {
    char romfilename[1024];
@@ -331,11 +337,12 @@ static bool lynx_initialize_system(const char* gamepath)
 
    lynx = new CSystem(gamepath, romfilename, true);
 
-#if VIDEO_CORE_PIXELSIZE==2
-   lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_16BPP_565, 160*VIDEO_CORE_PIXELSIZE, lynx_display_callback, (ULONG)0);
-#elif VIDEO_CORE_PIXELSIZE==4
-   lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_32BPP, 160*VIDEO_CORE_PIXELSIZE, lynx_display_callback, (ULONG)0);
-#endif
+   if(VIDEO_CORE_PIXELSIZE == 2) {
+      lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_16BPP_565, 160*2, lynx_display_callback, (ULONG)0);
+   }
+   else if(VIDEO_CORE_PIXELSIZE == 4) {
+      lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_32BPP, 160*4, lynx_display_callback, (ULONG)0);
+   }
 
    return true;
 }
