@@ -147,7 +147,8 @@ else ifeq ($(platform),psp1)
 	CC = psp-gcc$(EXE_EXT)
 	CXX = psp-g++$(EXE_EXT)
 	AR = psp-ar$(EXE_EXT)
-	FLAGS += -G0 -DLSB_FIRST
+	FLAGS += -G0 -DPSP 
+	INCFLAGS_PLATFORM += -O3
 	STATIC_LINKING := 1
 	LIBS :=
 
