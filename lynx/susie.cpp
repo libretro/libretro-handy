@@ -1189,7 +1189,7 @@ inline void CSusie::WritePixel(ULONG hoff,ULONG pixel)
    RAM_POKE(scr_addr,dest);
 
    // Increment cycle count for the read/modify/write
-   //cycles_used+=2*SPR_RDWR_CYC;
+   cycles_used+=2*SPR_RDWR_CYC;
 }
 
 inline ULONG CSusie::ReadPixel(ULONG hoff)
@@ -1228,7 +1228,7 @@ inline void CSusie::WriteCollision(ULONG hoff,ULONG pixel)
    RAM_POKE(col_addr,dest);
 
    // Increment cycle count for the read/modify/write
-   //cycles_used+=2*SPR_RDWR_CYC;
+   cycles_used+=2*SPR_RDWR_CYC;
 }
 
 inline ULONG CSusie::ReadCollision(ULONG hoff)
