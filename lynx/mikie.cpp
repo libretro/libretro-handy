@@ -3670,6 +3670,11 @@ inline void CMikie::Update(void)
    //			if(gSystemCycleCount==gNextTimerEvent) gError->Warning("CMikie::Update() - gSystemCycleCount==gNextTimerEvent, system lock likely");
    //			TRACE_MIKIE1("Update() - NextTimerEvent = %012d",gNextTimerEvent);
 
+   // Update system IRQ status as a result of timer activity
+   gSystemIRQ=(mTimerStatusFlags)?true:false;
+   if(gSystemIRQ && gSystemCPUSleep) { ClearCPUSleep(); /*puts("ARLARM"); */ }
+   //else if(gSuzieDoneTime) SetCPUSleep();
+
    // Now all the timer updates are done we can increment the system
    // counter for any work done within the Update() function, gSystemCycleCounter
    // cannot be updated until this point otherwise it screws up the counters.
