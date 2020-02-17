@@ -90,6 +90,12 @@ void CMikie::BlowOut(void)
    for(loop=0;loop<16;loop++) mPalette[loop].Index=loop;
    for(loop=0;loop<4096;loop++) mColourMap[loop]=0;
 
+   mikbuf.set_sample_rate(HANDY_AUDIO_SAMPLE_FREQ, 60);
+   mikbuf.clock_rate(HANDY_SYSTEM_FREQ / 4);
+   mikbuf.bass_freq(60);
+   miksynth.volume(0.50);
+   miksynth.treble_eq(0);
+	
    Reset();
 }
 
@@ -1304,6 +1310,10 @@ ULONG CMikie::DisplayEndOfFrame(void)
          mpDisplayCurrent=mpDisplayBits;
          break;
    }
+
+   mikbuf.end_frame((gSystemCycleCount - gAudioLastUpdateCycle) / 4);
+   gAudioBufferPointer = mikbuf.read_samples((blip_sample_t*) gAudioBuffer, HANDY_AUDIO_BUFFER_SIZE / 2) * 2;
+
    return 0;
 }
 
@@ -2066,6 +2076,9 @@ void CMikie::Poke(ULONG addr,UBYTE data)
          TRACE_MIKIE3("Poke(%04x,%02x) - Poke to illegal location at PC=%04x",addr,data,mSystem.mCpu->GetPC());
          break;
    }
+
+   if(addr >= AUD0VOL && addr <= MSTEREO)
+	  UpdateSound();
 }
 
 
@@ -3336,8 +3349,6 @@ inline void CMikie::Update(void)
    // If sound is enabled then update the sound subsystem
    //
    if(gAudioEnabled) {
-      UpdateSound();
-
       //
       // Audio 0
       //
@@ -3665,6 +3676,8 @@ inline void CMikie::Update(void)
          //					TRACE_MIKIE1("Update() - mAUDIO_3_LASTCNT = %012d",mAUDIO_3_LAST_COUNT);
          //					TRACE_MIKIE1("Update() - mAUDIO_3_LINKING = %012d",mAUDIO_3_LINKING);
       }
+
+      UpdateSound();
    }
 
    //			if(gSystemCycleCount==gNextTimerEvent) gError->Warning("CMikie::Update() - gSystemCycleCount==gNextTimerEvent, system lock likely");
@@ -3710,26 +3723,16 @@ inline void CMikie::UpdateSound(void)
       }
    }
 
-   // Upsample to 16 bit signed
-   SWORD sample_l, sample_r;
-   sample_l= (cur_lsample<<5); // koennte auch 6 sein
-   sample_r= (cur_rsample<<5); // keep cool
-                                
-   for(;gAudioLastUpdateCycle+HANDY_AUDIO_SAMPLE_PERIOD<gSystemCycleCount;gAudioLastUpdateCycle+=HANDY_AUDIO_SAMPLE_PERIOD) {
-      // Output audio sample
-      // Stereo 16 bit signed
-      *(SWORD *) &(gAudioBuffer[gAudioBufferPointer])=sample_l;
-      *(SWORD *) &(gAudioBuffer[gAudioBufferPointer+2])=sample_r;
-      gAudioBufferPointer+=4;
+   static int last_lsample = 0;
+   static int last_rsample = 0;
 
-      // Check buffer overflow condition, stick at the endpoint
-      // teh audio output system will reset the input pointer
-      // when it reads out the data.
+   if(cur_lsample != last_lsample) {
+      miksynth.offset_inline((gSystemCycleCount - gAudioLastUpdateCycle) / 4, cur_lsample - last_lsample, mikbuf.left());
+      last_lsample = cur_lsample;
+   }
 
-      // We should NEVER overflow, this buffer holds 0.25 seconds
-      // of data if this happens the the multimedia system above
-      // has failed so the corruption of the buffer contents wont matter
-
-      gAudioBufferPointer%=HANDY_AUDIO_BUFFER_SIZE;
+   if(cur_rsample != last_rsample) {
+      miksynth.offset_inline((gSystemCycleCount - gAudioLastUpdateCycle) / 4, cur_rsample - last_rsample, mikbuf.right());
+      last_rsample = cur_rsample;
    }
 }

@@ -378,6 +378,8 @@ void retro_run(void)
 {
    lynx_input();
 
+   gAudioLastUpdateCycle = gSystemCycleCount;
+
    while (!newFrame)
       lynx->Update();
 
