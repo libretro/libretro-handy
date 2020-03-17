@@ -1,3 +1,6 @@
+DEBUG = 0
+FRONTEND_SUPPORTS_RGB565 = 1
+
 TARGET_NAME := handy
 GIT_VERSION := " $(shell git rev-parse --short HEAD || echo unknown)"
 ifneq ($(GIT_VERSION)," unknown")

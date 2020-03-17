@@ -180,11 +180,18 @@ enum
    MIKIE_PIXEL_FORMAT_32BPP,
 };
 
+#include <blip/Stereo_Buffer.h>
+
+typedef Blip_Synth<blip_good_quality, 256 * 4> Synth;
+
 class CMikie : public CLynxBase
 {
    public:
       CMikie(CSystem& parent);
       ~CMikie();
+
+      Synth miksynth;
+      Stereo_Buffer mikbuf;
 
       bool	ContextSave(LSS_FILE *fp);
       bool	ContextLoad(LSS_FILE *fp);

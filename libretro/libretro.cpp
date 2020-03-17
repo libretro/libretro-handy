@@ -20,7 +20,8 @@ static uint8_t lynx_rot = MIKIE_NO_ROTATE;
 static uint8_t lynx_width = 160;
 static uint8_t lynx_height = 102;
 
-static int VIDEO_CORE_PIXELSIZE = 2;
+static int RETRO_PIX_BYTES = 2;
+static int RETRO_PIX_DEPTH = 15;
 
 
 static uint8_t framebuffer[160*160*4];
@@ -68,6 +69,47 @@ static map btn_map_rot_90[] = {
 
 static map* btn_map;
 
+static bool update_video = false;
+
+static void check_color_depth(void)
+{
+   if (RETRO_PIX_DEPTH == 24)
+   {
+      enum retro_pixel_format rgb888 = RETRO_PIXEL_FORMAT_XRGB8888;
+
+      if(!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &rgb888))
+      {
+         if(log_cb) log_cb(RETRO_LOG_ERROR, "Pixel format XRGB8888 not supported by platform.\n");
+
+         RETRO_PIX_BYTES = 2;
+         RETRO_PIX_DEPTH = 15;
+      }
+   }
+
+   if (RETRO_PIX_BYTES == 2)
+   {
+#if defined(FRONTEND_SUPPORTS_RGB565)
+      enum retro_pixel_format rgb565 = RETRO_PIXEL_FORMAT_RGB565;
+
+      if (environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &rgb565))
+      {
+         if(log_cb) log_cb(RETRO_LOG_INFO, "Frontend supports RGB565 - will use that instead of XRGB1555.\n");
+
+         RETRO_PIX_DEPTH = 16;
+      }
+#else
+      enum retro_pixel_format rgb555 = RETRO_PIXEL_FORMAT_0RGB1555;
+
+      if (environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &rgb555))
+      {
+         if(log_cb) log_cb(RETRO_LOG_INFO, "Using default 0RGB1555 pixel format.\n");
+
+         RETRO_PIX_DEPTH = 15;
+      }
+#endif
+   }
+}
+
 unsigned retro_api_version(void)
 {
    return RETRO_API_VERSION;
@@ -86,7 +128,7 @@ static UBYTE* lynx_display_callback(ULONG objref)
    if(!initialized)
       return (UBYTE*)framebuffer;
 
-   video_cb(framebuffer, lynx_width, lynx_height, 160*VIDEO_CORE_PIXELSIZE);
+   video_cb(framebuffer, lynx_width, lynx_height, 160*RETRO_PIX_BYTES);
 
 
    for(int total = 0; total < gAudioBufferPointer/4; )
@@ -125,11 +167,12 @@ static void lynx_rotate()
       break;
    }
 
-   if(VIDEO_CORE_PIXELSIZE == 2) {
-      lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_16BPP_565, 160*2, lynx_display_callback, (ULONG)0);
-   }
-   else if(VIDEO_CORE_PIXELSIZE == 4) {
-      lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_32BPP, 160*4, lynx_display_callback, (ULONG)0);
+   switch (RETRO_PIX_DEPTH)
+   {
+      case 15: lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_16BPP_555, 160*2, lynx_display_callback, (ULONG)0); break;
+      case 16: lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_16BPP_565, 160*2, lynx_display_callback, (ULONG)0); break;
+      case 24: lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_32BPP,     160*4, lynx_display_callback, (ULONG)0); break;
+      default: lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_32BPP,     160*4, lynx_display_callback, (ULONG)0); break;
    }
 
    update_geometry();
@@ -159,16 +202,23 @@ static void check_variables(void)
    var.key = "handy_gfx_colors";
    var.value = NULL;
 
-   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
-      static bool once = false;
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      int old_value = RETRO_PIX_BYTES;
 
-      if (!once) {
-         if (strcmp(var.value, "16bit") == 0)
-            VIDEO_CORE_PIXELSIZE = 2;
-         else if (strcmp(var.value, "24bit") == 0)
-            VIDEO_CORE_PIXELSIZE = 4;
-         once = true;
+      if (strcmp(var.value, "16bit") == 0)
+      {
+         RETRO_PIX_BYTES = 2;
+         RETRO_PIX_DEPTH = 16;
       }
+      else if (strcmp(var.value, "24bit") == 0)
+      {
+         RETRO_PIX_BYTES = 4;
+         RETRO_PIX_DEPTH = 24;
+      }
+
+      if (old_value != RETRO_PIX_BYTES)
+         update_video = true;
    }
 }
 
@@ -178,28 +228,6 @@ void retro_init(void)
    environ_cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &log);
    if (log.log)
       log_cb = log.log;
-
-   btn_map = btn_map_no_rot;
-
-
-   check_variables();
-
-   if(VIDEO_CORE_PIXELSIZE == 4) {
-      enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_XRGB8888;
-      if(!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt)) {
-         if(log_cb)
-            log_cb(RETRO_LOG_ERROR, "[could not set RGB8888]\n");
-         VIDEO_CORE_PIXELSIZE = 2;
-      }
-   }
-
-   if(VIDEO_CORE_PIXELSIZE == 2) {
-      enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
-      if(!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt) && log_cb) {
-         log_cb(RETRO_LOG_ERROR, "[could not set RGB565]\n");
-      }
-   }
-
 
    uint64_t serialization_quirks = RETRO_SERIALIZATION_QUIRK_SINGLE_SESSION;
    environ_cb(RETRO_ENVIRONMENT_SET_SERIALIZATION_QUIRKS, &serialization_quirks);
@@ -228,7 +256,7 @@ void retro_set_environment(retro_environment_t cb)
 {
    static const struct retro_variable vars[] = {
       { "handy_rot", "Display rotation; None|90|270" },
-      { "handy_gfx_colors", "Color Depth (Restart); 16bit|24bit" },
+      { "handy_gfx_colors", "Color depth; 16bit|24bit" },
       { NULL, NULL },
    };
 
@@ -337,13 +365,6 @@ static bool lynx_initialize_system(const char* gamepath)
 
    lynx = new CSystem(gamepath, romfilename, true);
 
-   if(VIDEO_CORE_PIXELSIZE == 2) {
-      lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_16BPP_565, 160*2, lynx_display_callback, (ULONG)0);
-   }
-   else if(VIDEO_CORE_PIXELSIZE == 4) {
-      lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_32BPP, 160*4, lynx_display_callback, (ULONG)0);
-   }
-
    return true;
 }
 
@@ -376,17 +397,38 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
 
 void retro_run(void)
 {
+   bool updated = false;
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
+      check_variables();
+
    lynx_input();
+
+   if (update_video /*|| update_audio*/)
+   {
+      struct retro_system_av_info system_av_info;
+
+      if (update_video)
+      {
+         memset(&system_av_info, 0, sizeof(system_av_info));
+         environ_cb(RETRO_ENVIRONMENT_SET_SYSTEM_AV_INFO, &system_av_info);
+
+         check_color_depth();
+         lynx_rotate();
+      }
+
+      retro_get_system_av_info(&system_av_info);
+      environ_cb(RETRO_ENVIRONMENT_SET_SYSTEM_AV_INFO, &system_av_info);
+
+      update_video = false;
+      //update_audio = false;
+   }
+
+   gAudioLastUpdateCycle = gSystemCycleCount;
 
    while (!newFrame)
       lynx->Update();
 
    newFrame = false;
-
-
-   bool updated = false;
-   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
-      check_variables();
 }
 
 size_t retro_serialize_size(void)
@@ -445,15 +487,23 @@ bool retro_load_game(const struct retro_game_info *info)
 
    environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
 
+   check_variables();
+   check_color_depth();
+
    if (!lynx_initialize_system(info->path))
       return false;
 
    if (!lynx_initialize_sound())
       return false;
 
-   check_variables();
+   btn_map = btn_map_no_rot;
+   lynx_rotate();
+
+   update_video = false;
+   //update_audio = false;
 
    initialized = true;
+
    return true;
 }
 
