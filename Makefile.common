@@ -1,5 +1,6 @@
 INCFLAGS = -I$(CORE_DIR)/lynx \
-           -I$(CORE_DIR)/libretro
+           -I$(CORE_DIR)/libretro \
+           -I$(CORE_DIR)
 
 ifneq (,$(findstring msvc2003,$(platform)))
    INCFLAGS += -I$(LIBRETRO_COMM_DIR)/include/compat/msvc
