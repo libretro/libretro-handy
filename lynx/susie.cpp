@@ -853,17 +853,22 @@ ULONG CSusie::PaintSprites(void)
                            pixel_width=mHSIZACUM.Byte.High;
                            mHSIZACUM.Byte.High=0;
 
+                           int pixelcount = 0;
                            for(hloop=0; hloop<pixel_width; hloop++) {
                               // Draw if onscreen but break loop on transition to offscreen
                               if(hoff>=0 && hoff<SCREEN_WIDTH) {
                                  ProcessPixel(hoff,pixel);
                                  onscreen = TRUE;
 								 everonscreen=TRUE;
+								 pixelcount++;
                               } else {
                                  if(onscreen) break;
                               }
                               hoff+=hsign;
                            }
+
+						   //Increment cycle count for the read/modify/write
+						   cycles_used += (pixelcount+1)/2 * SPR_RDWR_CYC;
                         }
                      }
                      voff+=vsign;
@@ -1187,9 +1192,6 @@ inline void CSusie::WritePixel(ULONG hoff,ULONG pixel)
       dest|=pixel;
    }
    RAM_POKE(scr_addr,dest);
-
-   // Increment cycle count for the read/modify/write
-   cycles_used+=2*SPR_RDWR_CYC;
 }
 
 inline ULONG CSusie::ReadPixel(ULONG hoff)
@@ -1228,7 +1230,7 @@ inline void CSusie::WriteCollision(ULONG hoff,ULONG pixel)
    RAM_POKE(col_addr,dest);
 
    // Increment cycle count for the read/modify/write
-   cycles_used+=2*SPR_RDWR_CYC;
+   cycles_used+=SPR_RDWR_CYC;
 }
 
 inline ULONG CSusie::ReadCollision(ULONG hoff)
