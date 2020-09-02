@@ -142,6 +142,8 @@ static UBYTE* lynx_display_callback(ULONG objref)
 
 static void lynx_rotate()
 {
+   if(!lynx) return;
+
    switch(lynx_rot)
    {
    default:
