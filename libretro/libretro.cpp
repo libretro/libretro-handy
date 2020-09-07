@@ -70,6 +70,8 @@ static map btn_map_rot_90[] = {
 static map* btn_map;
 
 static bool update_video = false;
+static bool libretro_supports_input_bitmasks;
+static bool select_button;
 
 static void check_color_depth(void)
 {
@@ -231,6 +233,9 @@ void retro_init(void)
 
    uint64_t serialization_quirks = RETRO_SERIALIZATION_QUIRK_SINGLE_SESSION;
    environ_cb(RETRO_ENVIRONMENT_SET_SERIALIZATION_QUIRKS, &serialization_quirks);
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_INPUT_BITMASKS, NULL))
+      libretro_supports_input_bitmasks = true;
 }
 
 void retro_reset(void)
@@ -250,6 +255,8 @@ void retro_deinit(void)
       delete lynx;
       lynx=0;
    }
+
+   libretro_supports_input_bitmasks = false;
 }
 
 void retro_set_environment(retro_environment_t cb)
@@ -292,8 +299,19 @@ void retro_set_video_refresh(retro_video_refresh_t cb)
 static unsigned get_lynx_input(void)
 {
    unsigned i, res = 0;
-   for (i = 0; i < sizeof(btn_map_no_rot) / sizeof(map); ++i)
-      res |= input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, btn_map[i].retro) ? btn_map[i].lynx : 0;
+   if (libretro_supports_input_bitmasks)
+   {
+      int16_t ret = input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_MASK);
+      for (unsigned i = 0; i < sizeof(btn_map_no_rot) / sizeof(map); i++)
+         res |= ret & (1 << btn_map[i].retro) ? (btn_map[i].lynx) : 0;
+      select_button = ret & (1 << RETRO_DEVICE_ID_JOYPAD_SELECT);
+   }
+   else
+   {
+      for (i = 0; i < sizeof(btn_map_no_rot) / sizeof(map); ++i)
+         res |= input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, btn_map[i].retro) ? btn_map[i].lynx : 0;
+      select_button = input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT);
+   }
    return res;
 }
 
@@ -304,8 +322,6 @@ static void lynx_input(void)
 
 
    static bool select_pressed_last_frame = false;
-   bool select_button = input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT);
-
    if(select_button && !select_pressed_last_frame)
    {
       lynx_rot++;
