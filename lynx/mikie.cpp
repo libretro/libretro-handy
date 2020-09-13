@@ -765,6 +765,8 @@ bool CMikie::ContextLoad(LSS_FILE *fp)
 
    if(!lss_read(&mUART_PARITY_ENABLE,sizeof(ULONG),1,fp)) return 0;
    if(!lss_read(&mUART_PARITY_EVEN,sizeof(ULONG),1,fp)) return 0;
+
+   mikbuf.clear();
    return 1;
 }
 
