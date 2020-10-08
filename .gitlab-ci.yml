@@ -1,7 +1,7 @@
 .core-defs:
   variables:
     JNI_PATH: .
-    CORENAME: gme
+    CORENAME: handy
 
 include:
   - template: Jobs/Code-Quality.gitlab-ci.yml
