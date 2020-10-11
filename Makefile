@@ -194,7 +194,7 @@ else ifeq ($(platform), wiiu)
 	FLAGS += -DGEKKO -DWIIU -DHW_RVL -mrvl -mcpu=750 -meabi -mhard-float -D__ppc__ -DMSB_FIRST
 	STATIC_LINKING = 1
 	LIBS :=
-	
+
 # CTR (3DS)
 else ifeq ($(platform), ctr)
 	TARGET := $(TARGET_NAME)_libretro_$(platform).a
@@ -207,6 +207,16 @@ else ifeq ($(platform), ctr)
 	CFLAGS += -fomit-frame-pointer -ffast-math
 	CXXFLAGS += $(CFLAGS)
 	STATIC_LINKING = 1
+
+# GCW0
+else ifeq ($(platform), gcw0)
+   TARGET := $(TARGET_NAME)_libretro.so
+   CC = /opt/gcw0-toolchain/usr/bin/mipsel-linux-gcc
+   CXX = /opt/gcw0-toolchain/usr/bin/mipsel-linux-g++
+   AR = /opt/gcw0-toolchain/usr/bin/mipsel-linux-ar
+   fpic := -fPIC
+   SHARED := -shared -Wl,--no-undefined -Wl,-version-script=$(LIBRETRO_DIR)/link.T
+   FLAGS += -DDINGUX -fomit-frame-pointer -ffast-math -march=mips32 -mtune=mips32r2 -mhard-float
 
 # Nintendo Switch (libnx)
 else ifeq ($(platform), libnx)
