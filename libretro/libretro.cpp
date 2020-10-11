@@ -14,17 +14,42 @@ static CSystem *lynx = NULL;
 
 static int16_t *soundBuffer = NULL;
 
+#define RETRO_LYNX_WIDTH  160
+#define RETRO_LYNX_HEIGHT 102
+#if defined(DINGUX)
+/* If a display mode of width 102 (or an integer
+ * multiple thereof) is requested on OpenDingux
+ * devices, the OS crashes. This is not a user
+ * space error, and there is no way to capture/
+ * handle it - the OS simply dies (instantly).
+ * Thus when the Lynx display is rotated, we
+ * have to pad the screen 'height' to the nearest
+ * 'safe' value (112) */
+#define RETRO_LYNX_HEIGHT_ROTATE 112
+#endif
 
 // core options
-static uint8_t lynx_rot = MIKIE_NO_ROTATE;
-static uint8_t lynx_width = 160;
-static uint8_t lynx_height = 102;
+static uint8_t lynx_rot    = MIKIE_NO_ROTATE;
+static uint8_t lynx_width  = RETRO_LYNX_WIDTH;
+static uint8_t lynx_height = RETRO_LYNX_HEIGHT;
 
 static int RETRO_PIX_BYTES = 2;
 static int RETRO_PIX_DEPTH = 15;
 
-
-static uint8_t framebuffer[160*160*4];
+#if defined(DINGUX)
+/* When the Lynx display is rotated on OpenDingux
+ * devices, we offset the framebuffer pointer. To
+ * ensure the buffer cannot overflow, increase its
+ * overall size by a corresponding amount (we end
+ * up allocating more memory than we need, but this
+ * is harmless...) */
+static uint8_t framebuffer[
+      RETRO_LYNX_WIDTH *
+      (RETRO_LYNX_WIDTH + (RETRO_LYNX_HEIGHT_ROTATE - RETRO_LYNX_HEIGHT)) *
+      4];
+#else
+static uint8_t framebuffer[RETRO_LYNX_WIDTH*RETRO_LYNX_WIDTH*4];
+#endif
 
 static bool newFrame = false;
 static bool initialized = false;
@@ -130,7 +155,7 @@ static UBYTE* lynx_display_callback(ULONG objref)
    if(!initialized)
       return (UBYTE*)framebuffer;
 
-   video_cb(framebuffer, lynx_width, lynx_height, 160*RETRO_PIX_BYTES);
+   video_cb(framebuffer, lynx_width, lynx_height, RETRO_LYNX_WIDTH*RETRO_PIX_BYTES);
 
 
    for(int total = 0; total < gAudioBufferPointer/4; )
@@ -139,7 +164,17 @@ static UBYTE* lynx_display_callback(ULONG objref)
 
 
    newFrame = true;
-   return (UBYTE*)framebuffer;
+
+#if defined(DINGUX)
+   /* If Lynx display is rotated, offset the framebuffer
+    * by half the OpenDingux padding width */
+   if ((lynx_rot == MIKIE_ROTATE_R) ||
+       (lynx_rot == MIKIE_ROTATE_L))
+      return (UBYTE*)(framebuffer +
+            (((RETRO_LYNX_HEIGHT_ROTATE - RETRO_LYNX_HEIGHT) >> 1) * RETRO_PIX_BYTES));
+   else
+#endif
+      return (UBYTE*)framebuffer;
 }
 
 static void lynx_rotate()
@@ -153,30 +188,50 @@ static void lynx_rotate()
       // intentional fall-through
 
    case MIKIE_NO_ROTATE:
-      lynx_width = 160;
-      lynx_height = 102;
-      btn_map = btn_map_no_rot;
+      lynx_width  = RETRO_LYNX_WIDTH;
+      lynx_height = RETRO_LYNX_HEIGHT;
+      btn_map     = btn_map_no_rot;
       break;
 
    case MIKIE_ROTATE_R:
-      lynx_width = 102;
-      lynx_height = 160;
-      btn_map = btn_map_rot_90;
+#if defined(DINGUX)
+      /* OpenDingux - 'width' must be padded to a
+       * safe value */
+      lynx_width  = RETRO_LYNX_HEIGHT_ROTATE;
+#else
+      lynx_width  = RETRO_LYNX_HEIGHT;
+#endif
+      lynx_height = RETRO_LYNX_WIDTH;
+      btn_map     = btn_map_rot_90;
       break;
 
    case MIKIE_ROTATE_L:
-      lynx_width = 102;
-      lynx_height = 160;
-      btn_map = btn_map_rot_270;
+#if defined(DINGUX)
+      /* OpenDingux - 'width' must be padded to a
+       * safe value */
+      lynx_width  = RETRO_LYNX_HEIGHT_ROTATE;
+#else
+      lynx_width  = RETRO_LYNX_HEIGHT;
+#endif
+      lynx_height = RETRO_LYNX_WIDTH;
+      btn_map     = btn_map_rot_270;
       break;
    }
 
+#if defined(DINGUX)
+   /* Since the OpenDingux framebuffer may
+    * contain padding, ensure that it gets
+    * zeroed out whenever the rotation changes
+    * (avoids garbage pixels) */
+   memset(framebuffer, 0, sizeof(framebuffer));
+#endif
+
    switch (RETRO_PIX_DEPTH)
    {
-      case 15: lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_16BPP_555, 160*2, lynx_display_callback, (ULONG)0); break;
-      case 16: lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_16BPP_565, 160*2, lynx_display_callback, (ULONG)0); break;
-      case 24: lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_32BPP,     160*4, lynx_display_callback, (ULONG)0); break;
-      default: lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_32BPP,     160*4, lynx_display_callback, (ULONG)0); break;
+      case 15: lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_16BPP_555, RETRO_LYNX_WIDTH*2, lynx_display_callback, (ULONG)0); break;
+      case 16: lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_16BPP_565, RETRO_LYNX_WIDTH*2, lynx_display_callback, (ULONG)0); break;
+      case 24: lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_32BPP,     RETRO_LYNX_WIDTH*4, lynx_display_callback, (ULONG)0); break;
+      default: lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_32BPP,     RETRO_LYNX_WIDTH*4, lynx_display_callback, (ULONG)0); break;
    }
 
    update_geometry();
@@ -203,6 +258,16 @@ static void check_variables(void)
          lynx_rotate();
    }
 
+#if defined(DINGUX)
+   {
+      int old_value   = RETRO_PIX_BYTES;
+      RETRO_PIX_BYTES = 2;
+      RETRO_PIX_DEPTH = 16;
+
+      if (old_value != RETRO_PIX_BYTES)
+         update_video = true;
+   }
+#else
    var.key = "handy_gfx_colors";
    var.value = NULL;
 
@@ -224,6 +289,7 @@ static void check_variables(void)
       if (old_value != RETRO_PIX_BYTES)
          update_video = true;
    }
+#endif
 }
 
 void retro_init(void)
@@ -265,7 +331,12 @@ void retro_set_environment(retro_environment_t cb)
 {
    static const struct retro_variable vars[] = {
       { "handy_rot", "Display rotation; None|90|270" },
+#if !defined(DINGUX)
+      /* 24bit colour depth is too slow for
+       * OpenDingux devices, and toggling colour
+       * depths may cause a crash... */
       { "handy_gfx_colors", "Color depth; 16bit|24bit" },
+#endif
       { NULL, NULL },
    };
 
@@ -405,7 +476,7 @@ void retro_get_system_info(struct retro_system_info *info)
 
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
-   struct retro_game_geometry geom = { lynx_width, lynx_height, 160, 160, (float) lynx_width / (float) lynx_height };
+   struct retro_game_geometry geom = { lynx_width, lynx_height, RETRO_LYNX_WIDTH, RETRO_LYNX_WIDTH, (float) lynx_width / (float) lynx_height };
    struct retro_system_timing timing = { 75.0, (float) HANDY_AUDIO_SAMPLE_FREQ };
 
    memset(info, 0, sizeof(*info));
