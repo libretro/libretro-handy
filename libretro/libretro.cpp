@@ -1,6 +1,9 @@
 #include "libretro.h"
+#include "libretro_core_options.h"
+
 #include <string.h>
 #include <fstream>
+
 #include "handy.h"
 
 static retro_log_printf_t log_cb;
@@ -16,17 +19,6 @@ static int16_t *soundBuffer = NULL;
 
 #define RETRO_LYNX_WIDTH  160
 #define RETRO_LYNX_HEIGHT 102
-#if defined(DINGUX)
-/* If a display mode of width 102 (or an integer
- * multiple thereof) is requested on OpenDingux
- * devices, the OS crashes. This is not a user
- * space error, and there is no way to capture/
- * handle it - the OS simply dies (instantly).
- * Thus when the Lynx display is rotated, we
- * have to pad the screen 'height' to the nearest
- * 'safe' value (112) */
-#define RETRO_LYNX_HEIGHT_ROTATE 112
-#endif
 
 // core options
 static uint8_t lynx_rot    = MIKIE_NO_ROTATE;
@@ -34,22 +26,13 @@ static uint8_t lynx_width  = RETRO_LYNX_WIDTH;
 static uint8_t lynx_height = RETRO_LYNX_HEIGHT;
 
 static int RETRO_PIX_BYTES = 2;
-static int RETRO_PIX_DEPTH = 15;
-
-#if defined(DINGUX)
-/* When the Lynx display is rotated on OpenDingux
- * devices, we offset the framebuffer pointer. To
- * ensure the buffer cannot overflow, increase its
- * overall size by a corresponding amount (we end
- * up allocating more memory than we need, but this
- * is harmless...) */
-static uint8_t framebuffer[
-      RETRO_LYNX_WIDTH *
-      (RETRO_LYNX_WIDTH + (RETRO_LYNX_HEIGHT_ROTATE - RETRO_LYNX_HEIGHT)) *
-      4];
+#if defined(FRONTEND_SUPPORTS_RGB565)
+static int RETRO_PIX_DEPTH = 16;
 #else
-static uint8_t framebuffer[RETRO_LYNX_WIDTH*RETRO_LYNX_WIDTH*4];
+static int RETRO_PIX_DEPTH = 15;
 #endif
+
+static uint8_t framebuffer[RETRO_LYNX_WIDTH*RETRO_LYNX_WIDTH*4];
 
 static bool newFrame = false;
 static bool initialized = false;
@@ -94,7 +77,6 @@ static map btn_map_rot_90[] = {
 
 static map* btn_map;
 
-static bool update_video = false;
 static bool libretro_supports_input_bitmasks;
 static bool select_button;
 
@@ -102,6 +84,9 @@ static void check_color_depth(void)
 {
    if (RETRO_PIX_DEPTH == 24)
    {
+      /* If XRGB8888 support is compiled in, attempt to
+       * set 24 bit colour depth */
+#if defined(FRONTEND_SUPPORTS_XRGB8888)
       enum retro_pixel_format rgb888 = RETRO_PIXEL_FORMAT_XRGB8888;
 
       if(!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &rgb888))
@@ -109,8 +94,24 @@ static void check_color_depth(void)
          if(log_cb) log_cb(RETRO_LOG_ERROR, "Pixel format XRGB8888 not supported by platform.\n");
 
          RETRO_PIX_BYTES = 2;
+#if defined(FRONTEND_SUPPORTS_RGB565)
+         RETRO_PIX_DEPTH = 16;
+#else
          RETRO_PIX_DEPTH = 15;
+#endif
       }
+#else
+      /* XRGB8888 support is *not* compiled in.
+       * If we reach this point, then unforeseen
+       * errors have occurred - just 'reset' colour
+       * depth to 16 bit */
+      RETRO_PIX_BYTES = 2;
+#if defined(FRONTEND_SUPPORTS_RGB565)
+      RETRO_PIX_DEPTH = 16;
+#else
+      RETRO_PIX_DEPTH = 15;
+#endif
+#endif
    }
 
    if (RETRO_PIX_BYTES == 2)
@@ -157,7 +158,6 @@ static UBYTE* lynx_display_callback(ULONG objref)
 
    video_cb(framebuffer, lynx_width, lynx_height, RETRO_LYNX_WIDTH*RETRO_PIX_BYTES);
 
-
    for(int total = 0; total < gAudioBufferPointer/4; )
       total += audio_batch_cb(soundBuffer + total*2, (gAudioBufferPointer/4) - total);
    gAudioBufferPointer = 0;
@@ -165,16 +165,7 @@ static UBYTE* lynx_display_callback(ULONG objref)
 
    newFrame = true;
 
-#if defined(DINGUX)
-   /* If Lynx display is rotated, offset the framebuffer
-    * by half the OpenDingux padding width */
-   if ((lynx_rot == MIKIE_ROTATE_R) ||
-       (lynx_rot == MIKIE_ROTATE_L))
-      return (UBYTE*)(framebuffer +
-            (((RETRO_LYNX_HEIGHT_ROTATE - RETRO_LYNX_HEIGHT) >> 1) * RETRO_PIX_BYTES));
-   else
-#endif
-      return (UBYTE*)framebuffer;
+   return (UBYTE*)framebuffer;
 }
 
 static void lynx_rotate()
@@ -194,37 +185,17 @@ static void lynx_rotate()
       break;
 
    case MIKIE_ROTATE_R:
-#if defined(DINGUX)
-      /* OpenDingux - 'width' must be padded to a
-       * safe value */
-      lynx_width  = RETRO_LYNX_HEIGHT_ROTATE;
-#else
       lynx_width  = RETRO_LYNX_HEIGHT;
-#endif
       lynx_height = RETRO_LYNX_WIDTH;
       btn_map     = btn_map_rot_90;
       break;
 
    case MIKIE_ROTATE_L:
-#if defined(DINGUX)
-      /* OpenDingux - 'width' must be padded to a
-       * safe value */
-      lynx_width  = RETRO_LYNX_HEIGHT_ROTATE;
-#else
       lynx_width  = RETRO_LYNX_HEIGHT;
-#endif
       lynx_height = RETRO_LYNX_WIDTH;
       btn_map     = btn_map_rot_270;
       break;
    }
-
-#if defined(DINGUX)
-   /* Since the OpenDingux framebuffer may
-    * contain padding, ensure that it gets
-    * zeroed out whenever the rotation changes
-    * (avoids garbage pixels) */
-   memset(framebuffer, 0, sizeof(framebuffer));
-#endif
 
    switch (RETRO_PIX_DEPTH)
    {
@@ -258,36 +229,23 @@ static void check_variables(void)
          lynx_rotate();
    }
 
-#if defined(DINGUX)
+#if defined(FRONTEND_SUPPORTS_XRGB8888)
+   /* Only read colour depth setting on first run */
+   if (!initialized)
    {
-      int old_value   = RETRO_PIX_BYTES;
+      var.key = "handy_gfx_colors";
+      var.value = NULL;
+
+      /* Set 16bpp by default */
       RETRO_PIX_BYTES = 2;
       RETRO_PIX_DEPTH = 16;
 
-      if (old_value != RETRO_PIX_BYTES)
-         update_video = true;
-   }
-#else
-   var.key = "handy_gfx_colors";
-   var.value = NULL;
-
-   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-   {
-      int old_value = RETRO_PIX_BYTES;
-
-      if (strcmp(var.value, "16bit") == 0)
-      {
-         RETRO_PIX_BYTES = 2;
-         RETRO_PIX_DEPTH = 16;
-      }
-      else if (strcmp(var.value, "24bit") == 0)
-      {
-         RETRO_PIX_BYTES = 4;
-         RETRO_PIX_DEPTH = 24;
-      }
-
-      if (old_value != RETRO_PIX_BYTES)
-         update_video = true;
+      if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+         if (strcmp(var.value, "24bit") == 0)
+         {
+            RETRO_PIX_BYTES = 4;
+            RETRO_PIX_DEPTH = 24;
+         }
    }
 #endif
 }
@@ -329,20 +287,9 @@ void retro_deinit(void)
 
 void retro_set_environment(retro_environment_t cb)
 {
-   static const struct retro_variable vars[] = {
-      { "handy_rot", "Display rotation; None|90|270" },
-#if !defined(DINGUX)
-      /* 24bit colour depth is too slow for
-       * OpenDingux devices, and toggling colour
-       * depths may cause a crash... */
-      { "handy_gfx_colors", "Color depth; 16bit|24bit" },
-#endif
-      { NULL, NULL },
-   };
-
-   cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void*)vars);
-
    environ_cb = cb;
+
+   libretro_set_core_options(environ_cb);
 }
 
 void retro_set_audio_sample(retro_audio_sample_t cb)
@@ -492,26 +439,6 @@ void retro_run(void)
 
    lynx_input();
 
-   if (update_video /*|| update_audio*/)
-   {
-      struct retro_system_av_info system_av_info;
-
-      if (update_video)
-      {
-         memset(&system_av_info, 0, sizeof(system_av_info));
-         environ_cb(RETRO_ENVIRONMENT_SET_SYSTEM_AV_INFO, &system_av_info);
-
-         check_color_depth();
-         lynx_rotate();
-      }
-
-      retro_get_system_av_info(&system_av_info);
-      environ_cb(RETRO_ENVIRONMENT_SET_SYSTEM_AV_INFO, &system_av_info);
-
-      update_video = false;
-      //update_audio = false;
-   }
-
    gAudioLastUpdateCycle = gSystemCycleCount;
 
    while (!newFrame)
@@ -587,9 +514,6 @@ bool retro_load_game(const struct retro_game_info *info)
 
    btn_map = btn_map_no_rot;
    lynx_rotate();
-
-   update_video = false;
-   //update_audio = false;
 
    initialized = true;
 
