@@ -1,6 +1,9 @@
+LIBRETRO_COMM_DIR := $(CORE_DIR)/libretro-common
+
 INCFLAGS = -I$(CORE_DIR)/lynx \
            -I$(CORE_DIR)/libretro \
-           -I$(CORE_DIR)
+           -I$(CORE_DIR) \
+           -I$(LIBRETRO_COMM_DIR)/include \
 
 ifneq (,$(findstring msvc2003,$(platform)))
    INCFLAGS += -I$(LIBRETRO_COMM_DIR)/include/compat/msvc
@@ -8,6 +11,10 @@ endif
 
 ifeq ($(FRONTEND_SUPPORTS_RGB565), 1)
    FLAGS += -DFRONTEND_SUPPORTS_RGB565
+endif
+
+ifeq ($(FRONTEND_SUPPORTS_XRGB8888), 1)
+   FLAGS += -DFRONTEND_SUPPORTS_XRGB8888
 endif
 
 SOURCES_CXX := $(CORE_DIR)/lynx/lynxdec.cpp \

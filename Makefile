@@ -1,5 +1,6 @@
 DEBUG = 0
 FRONTEND_SUPPORTS_RGB565 = 1
+FRONTEND_SUPPORTS_XRGB8888 = 0
 
 TARGET_NAME := handy
 GIT_VERSION := " $(shell git rev-parse --short HEAD || echo unknown)"
@@ -53,6 +54,7 @@ ifeq ($(platform), unix)
 	fpic := -fPIC
 	TARGET := $(TARGET_NAME)_libretro.so
 	SHARED := -shared -Wl,-version-script=$(LIBRETRO_DIR)/link.T -Wl,-no-undefined
+	FRONTEND_SUPPORTS_XRGB8888 = 1
 
 # OS X
 else ifeq ($(platform),osx)
@@ -522,6 +524,7 @@ else
 	CC ?= gcc
 	CXX ?= g++
 	SHARED := -shared -static-libgcc -static-libstdc++ -Wl,-no-undefined -Wl,-version-script=$(LIBRETRO_DIR)/link.T
+	FRONTEND_SUPPORTS_XRGB8888 = 1
 
 endif
 
@@ -532,7 +535,7 @@ include Makefile.common
 OBJECTS := $(SOURCES_CXX:.cpp=.o)
 
 ifeq ($(DEBUG),1)
-FLAGS += -O0
+FLAGS += -O0 -g
 else
 FLAGS += -O2 -DNDEBUG
 endif
