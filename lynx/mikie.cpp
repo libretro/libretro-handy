@@ -872,6 +872,13 @@ void CMikie::DisplaySetAttributes(ULONG Rotate,ULONG Format,ULONG Pitch,UBYTE* (
             mColourMap[Spot.Index]|=(Spot.Colours.Blue>>2)&0x03;
          }
          break;
+      case MIKIE_PIXEL_FORMAT_16BPP_BGR555:
+         for(Spot.Index=0;Spot.Index<4096;Spot.Index++) {
+            mColourMap[Spot.Index]=((Spot.Colours.Blue<<11)&0x7800) | (Spot.Colours.Blue<<7)&0x0400;
+            mColourMap[Spot.Index]|=((Spot.Colours.Green<<6)&0x03c0) | ((Spot.Colours.Green<<2)&0x0020);
+            mColourMap[Spot.Index]|=((Spot.Colours.Red<<1)&0x001e) | ((Spot.Colours.Red>>3)&0x0001);
+         }
+         break;
       case MIKIE_PIXEL_FORMAT_16BPP_555:
          for(Spot.Index=0;Spot.Index<4096;Spot.Index++) {
             mColourMap[Spot.Index]=((Spot.Colours.Red<<11)&0x7800) | (Spot.Colours.Red<<7)&0x0400;
@@ -987,7 +994,7 @@ ULONG CMikie::DisplayRenderLine(void)
                      bitmap_tmp+=sizeof(UBYTE);
                   }
                }
-            } else if(mDisplayFormat==MIKIE_PIXEL_FORMAT_16BPP_555 || mDisplayFormat==MIKIE_PIXEL_FORMAT_16BPP_565) {
+            } else if(mDisplayFormat==MIKIE_PIXEL_FORMAT_16BPP_BGR555 || mDisplayFormat==MIKIE_PIXEL_FORMAT_16BPP_555 || mDisplayFormat==MIKIE_PIXEL_FORMAT_16BPP_565) {
                for(loop=0;loop<SCREEN_WIDTH/2;loop++) {
                   source=mpRamPointer[mLynxAddr];
                   if(mDISPCTL_Flip) {
@@ -1077,7 +1084,7 @@ ULONG CMikie::DisplayRenderLine(void)
                   }
                }
                mpDisplayCurrent-=sizeof(UBYTE);
-            } else if(mDisplayFormat==MIKIE_PIXEL_FORMAT_16BPP_555 || mDisplayFormat==MIKIE_PIXEL_FORMAT_16BPP_565) {
+            } else if(mDisplayFormat==MIKIE_PIXEL_FORMAT_16BPP_BGR555 || mDisplayFormat==MIKIE_PIXEL_FORMAT_16BPP_555 || mDisplayFormat==MIKIE_PIXEL_FORMAT_16BPP_565) {
                for(loop=0;loop<SCREEN_WIDTH/2;loop++) {
                   source=mpRamPointer[mLynxAddr];
                   if(mDISPCTL_Flip) {
@@ -1173,7 +1180,7 @@ ULONG CMikie::DisplayRenderLine(void)
                   }
                }
                mpDisplayCurrent+=sizeof(UBYTE);
-            } else if(mDisplayFormat==MIKIE_PIXEL_FORMAT_16BPP_555 || mDisplayFormat==MIKIE_PIXEL_FORMAT_16BPP_565) {
+            } else if(mDisplayFormat==MIKIE_PIXEL_FORMAT_16BPP_BGR555 || mDisplayFormat==MIKIE_PIXEL_FORMAT_16BPP_555 || mDisplayFormat==MIKIE_PIXEL_FORMAT_16BPP_565) {
                for(loop=0;loop<SCREEN_WIDTH/2;loop++) {
                   source=mpRamPointer[mLynxAddr];
                   if(mDISPCTL_Flip) {
@@ -1290,6 +1297,7 @@ ULONG CMikie::DisplayEndOfFrame(void)
             case MIKIE_PIXEL_FORMAT_8BPP:
                mpDisplayCurrent+=1*(HANDY_SCREEN_HEIGHT-1);
                break;
+            case MIKIE_PIXEL_FORMAT_16BPP_BGR555:
             case MIKIE_PIXEL_FORMAT_16BPP_555:
             case MIKIE_PIXEL_FORMAT_16BPP_565:
                mpDisplayCurrent+=2*(HANDY_SCREEN_HEIGHT-1);

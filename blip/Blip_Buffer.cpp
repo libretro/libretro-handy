@@ -23,6 +23,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA */
 	#include BLARGG_ENABLE_OPTIMIZER
 #endif
 
+#if defined(PS2)
+	#define __LONG_LONG_MAX__ 9223372036854775807LL
+	#define ULLONG_MAX (__LONG_LONG_MAX__ * 2ULL + 1)
+#endif
+
 Blip_Buffer::Blip_Buffer()
 {
 	factor_       = (blip_u64)ULLONG_MAX;
