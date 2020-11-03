@@ -73,6 +73,35 @@ extern "C" {
 
 /* RETRO_LANGUAGE_TURKISH */
 
+struct retro_core_option_definition option_defs_tr[] = {
+   {
+      "handy_rot",
+      "Ekran Döndürme",
+      "Geleneksel (yatay) bir ekranda 'portre' odaklı oyunların doğru düzenini elde etmek için sanal konsol ekranını döndürün.",
+      {
+         { "None", "devre dışı" },
+         { "270",  "Saat yönünde" },
+         { "90",   "Saat yönünün tersi" },
+         { NULL, NULL },
+      },
+      "None"
+   },
+#if defined(FRONTEND_SUPPORTS_XRGB8888)
+   {
+      "handy_gfx_colors",
+      "Renk Derinliği (Yeniden Başlat)",
+      "Ekranda görüntülenecek renk sayısını belirtin. 24 bit, genel performansı önemli ölçüde artırır ve tüm platformlarda kullanılamaz.",
+      {
+         { "16bit", "Binlerce (16 bit)" },
+         { "24bit", "Milyonlar (24 bit)" },
+         { NULL,    NULL },
+      },
+      "16bit"
+   },
+#endif   
+   { NULL, NULL, NULL, {{0}}, NULL },
+};	
+
 /* RETRO_LANGUAGE_SLOVAK */
 
 /* RETRO_LANGUAGE_PERSIAN */
