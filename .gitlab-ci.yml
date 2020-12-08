@@ -57,7 +57,7 @@ include:
   
   # OpenDingux
   - project: 'libretro-infrastructure/ci-templates'
-    file: '/dingux-i386.yml'
+    file: '/dingux-mips32.yml'
 
 # Stages for building
 stages:
