@@ -2,7 +2,6 @@
 #include "libretro_core_options.h"
 
 #include <string.h>
-#include <fstream>
 
 #include "handy.h"
 
@@ -143,7 +142,7 @@ unsigned retro_api_version(void)
    return RETRO_API_VERSION;
 }
 
-static void update_geometry()
+static void update_geometry(void)
 {
    struct retro_system_av_info info;
 
@@ -153,12 +152,13 @@ static void update_geometry()
 
 static UBYTE* lynx_display_callback(ULONG objref)
 {
+   int total;
    if(!initialized)
       return (UBYTE*)framebuffer;
 
    video_cb(framebuffer, lynx_width, lynx_height, RETRO_LYNX_WIDTH*RETRO_PIX_BYTES);
 
-   for(int total = 0; total < gAudioBufferPointer/4; )
+   for(total = 0; total < gAudioBufferPointer/4;)
       total += audio_batch_cb(soundBuffer + total*2, (gAudioBufferPointer/4) - total);
    gAudioBufferPointer = 0;
 
@@ -168,45 +168,56 @@ static UBYTE* lynx_display_callback(ULONG objref)
    return (UBYTE*)framebuffer;
 }
 
-static void lynx_rotate()
+static void lynx_rotate(void)
 {
-   if(!lynx) return;
+   if(!lynx)
+      return;
 
    switch(lynx_rot)
    {
-   default:
-      lynx_rot = MIKIE_NO_ROTATE;
-      // intentional fall-through
+      default:
+         lynx_rot = MIKIE_NO_ROTATE;
+         // intentional fall-through
 
-   case MIKIE_NO_ROTATE:
-      lynx_width  = RETRO_LYNX_WIDTH;
-      lynx_height = RETRO_LYNX_HEIGHT;
-      btn_map     = btn_map_no_rot;
-      break;
+      case MIKIE_NO_ROTATE:
+         lynx_width  = RETRO_LYNX_WIDTH;
+         lynx_height = RETRO_LYNX_HEIGHT;
+         btn_map     = btn_map_no_rot;
+         break;
 
-   case MIKIE_ROTATE_R:
-      lynx_width  = RETRO_LYNX_HEIGHT;
-      lynx_height = RETRO_LYNX_WIDTH;
-      btn_map     = btn_map_rot_90;
-      break;
+      case MIKIE_ROTATE_R:
+         lynx_width  = RETRO_LYNX_HEIGHT;
+         lynx_height = RETRO_LYNX_WIDTH;
+         btn_map     = btn_map_rot_90;
+         break;
 
-   case MIKIE_ROTATE_L:
-      lynx_width  = RETRO_LYNX_HEIGHT;
-      lynx_height = RETRO_LYNX_WIDTH;
-      btn_map     = btn_map_rot_270;
-      break;
+      case MIKIE_ROTATE_L:
+         lynx_width  = RETRO_LYNX_HEIGHT;
+         lynx_height = RETRO_LYNX_WIDTH;
+         btn_map     = btn_map_rot_270;
+         break;
    }
 
    switch (RETRO_PIX_DEPTH)
    {
-      case 15: lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_16BPP_555, RETRO_LYNX_WIDTH*2, lynx_display_callback, (ULONG)0); break;
+      case 15:
+         lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_16BPP_555, RETRO_LYNX_WIDTH*2, lynx_display_callback, (ULONG)0);
+         break;
 #if defined(ABGR1555)
-      case 16: lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_16BPP_BGR555, RETRO_LYNX_WIDTH*2, lynx_display_callback, (ULONG)0); break;
+      case 16:
+         lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_16BPP_BGR555, RETRO_LYNX_WIDTH*2, lynx_display_callback, (ULONG)0);
+         break;
 #else
-      case 16: lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_16BPP_565, RETRO_LYNX_WIDTH*2, lynx_display_callback, (ULONG)0); break;
+      case 16:
+         lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_16BPP_565, RETRO_LYNX_WIDTH*2, lynx_display_callback, (ULONG)0);
+         break;
 #endif
-      case 24: lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_32BPP,     RETRO_LYNX_WIDTH*4, lynx_display_callback, (ULONG)0); break;
-      default: lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_32BPP,     RETRO_LYNX_WIDTH*4, lynx_display_callback, (ULONG)0); break;
+      case 24:
+         lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_32BPP,     RETRO_LYNX_WIDTH*4, lynx_display_callback, (ULONG)0);
+         break;
+      default:
+         lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_32BPP,     RETRO_LYNX_WIDTH*4, lynx_display_callback, (ULONG)0);
+         break;
    }
 
    update_geometry();
@@ -257,12 +268,13 @@ static void check_variables(void)
 void retro_init(void)
 {
    struct retro_log_callback log;
+   uint64_t serialization_quirks = RETRO_SERIALIZATION_QUIRK_SINGLE_SESSION;
    environ_cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &log);
    if (log.log)
       log_cb = log.log;
 
-   uint64_t serialization_quirks = RETRO_SERIALIZATION_QUIRK_SINGLE_SESSION;
-   environ_cb(RETRO_ENVIRONMENT_SET_SERIALIZATION_QUIRKS, &serialization_quirks);
+   environ_cb(RETRO_ENVIRONMENT_SET_SERIALIZATION_QUIRKS,
+         &serialization_quirks);
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_INPUT_BITMASKS, NULL))
       libretro_supports_input_bitmasks = true;
@@ -270,7 +282,8 @@ void retro_init(void)
 
 void retro_reset(void)
 {
-   if(lynx){
+   if(lynx)
+   {
       lynx->SaveEEPROM();
       lynx->Reset();
    }
@@ -280,7 +293,8 @@ void retro_deinit(void)
 {
    initialized = false;
 
-   if(lynx){
+   if(lynx)
+   {
       lynx->SaveEEPROM();
       delete lynx;
       lynx=0;
@@ -320,49 +334,6 @@ void retro_set_video_refresh(retro_video_refresh_t cb)
    video_cb = cb;
 }
 
-static unsigned get_lynx_input(void)
-{
-   unsigned i, res = 0;
-   if (libretro_supports_input_bitmasks)
-   {
-      int16_t ret = input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_MASK);
-      for (unsigned i = 0; i < sizeof(btn_map_no_rot) / sizeof(map); i++)
-         res |= ret & (1 << btn_map[i].retro) ? (btn_map[i].lynx) : 0;
-      select_button = ret & (1 << RETRO_DEVICE_ID_JOYPAD_SELECT);
-   }
-   else
-   {
-      for (i = 0; i < sizeof(btn_map_no_rot) / sizeof(map); ++i)
-         res |= input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, btn_map[i].retro) ? btn_map[i].lynx : 0;
-      select_button = input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT);
-   }
-   return res;
-}
-
-static void lynx_input(void)
-{
-   input_poll_cb();
-   lynx->SetButtonData(get_lynx_input());
-
-
-   static bool select_pressed_last_frame = false;
-   if(select_button && !select_pressed_last_frame)
-   {
-      lynx_rot++;
-
-      lynx_rotate();
-   }
-   
-   select_pressed_last_frame = select_button;
-}
-
-static bool lynx_initialize_sound(void)
-{
-   gAudioEnabled = true;
-   soundBuffer = (int16_t *) (&gAudioBuffer);
-   return true;
-}
-
 static int file_exists(const char *path)
 {
    FILE *dummy = fopen(path, "rb");
@@ -391,26 +362,7 @@ static bool lynx_romfilename(char *dest)
    return true;
 }
 
-static bool lynx_initialize_system(const char* gamepath)
-{
-   char romfilename[1024];
-
-   if(lynx){
-      lynx->SaveEEPROM();
-      delete lynx;
-      lynx=0;
-   }
-
-   lynx_romfilename(romfilename);
-
-   lynx = new CSystem(gamepath, romfilename, true);
-
-   return true;
-}
-
-void retro_set_controller_port_device(unsigned, unsigned)
-{
-}
+void retro_set_controller_port_device(unsigned, unsigned) { }
 
 void retro_get_system_info(struct retro_system_info *info)
 {
@@ -427,7 +379,7 @@ void retro_get_system_info(struct retro_system_info *info)
 
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
-   struct retro_game_geometry geom = { lynx_width, lynx_height, RETRO_LYNX_WIDTH, RETRO_LYNX_WIDTH, (float) lynx_width / (float) lynx_height };
+   struct retro_game_geometry geom   = { lynx_width, lynx_height, RETRO_LYNX_WIDTH, RETRO_LYNX_WIDTH, (float) lynx_width / (float) lynx_height };
    struct retro_system_timing timing = { 75.0, (float) HANDY_AUDIO_SAMPLE_FREQ };
 
    memset(info, 0, sizeof(*info));
@@ -437,13 +389,39 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
 
 void retro_run(void)
 {
+   unsigned i, res = 0;
+   static bool select_pressed_last_frame = false;
    bool updated = false;
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
       check_variables();
 
-   lynx_input();
+   input_poll_cb();
+   if (libretro_supports_input_bitmasks)
+   {
+      int16_t ret = input_state_cb(0, RETRO_DEVICE_JOYPAD, 0,
+            RETRO_DEVICE_ID_JOYPAD_MASK);
+      for (i = 0; i < sizeof(btn_map_no_rot) / sizeof(map); i++)
+         res |= ret & (1 << btn_map[i].retro) ? (btn_map[i].lynx) : 0;
+      select_button = ret & (1 << RETRO_DEVICE_ID_JOYPAD_SELECT);
+   }
+   else
+   {
+      for (i = 0; i < sizeof(btn_map_no_rot) / sizeof(map); ++i)
+         res |= input_state_cb(0, RETRO_DEVICE_JOYPAD, 0,
+               btn_map[i].retro) ? btn_map[i].lynx : 0;
+      select_button = input_state_cb(0, RETRO_DEVICE_JOYPAD, 0,
+            RETRO_DEVICE_ID_JOYPAD_SELECT);
+   }
+   lynx->SetButtonData(res);
 
-   gAudioLastUpdateCycle = gSystemCycleCount;
+   if (select_button && !select_pressed_last_frame)
+   {
+      lynx_rot++;
+      lynx_rotate();
+   }
+   
+   select_pressed_last_frame = select_button;
+   gAudioLastUpdateCycle     = gSystemCycleCount;
 
    while (!newFrame)
       lynx->Update();
@@ -461,12 +439,12 @@ size_t retro_serialize_size(void)
 
 bool retro_serialize(void *data, size_t size)
 {
+   LSS_FILE fp;
    if(!lynx)
       return false;
 
-   LSS_FILE fp;
-   fp.memptr = (UBYTE *) data;
-   fp.index = 0;
+   fp.memptr      = (UBYTE *) data;
+   fp.index       = 0;
    fp.index_limit = size;
 
    return lynx->ContextSave(&fp);
@@ -474,12 +452,12 @@ bool retro_serialize(void *data, size_t size)
 
 bool retro_unserialize(const void *data, size_t size)
 {
+   LSS_FILE fp;
    if(!lynx)
       return false;
 
-   LSS_FILE fp;
-   fp.memptr = (UBYTE *) data;
-   fp.index = 0;
+   fp.memptr      = (UBYTE *) data;
+   fp.index       = 0;
    fp.index_limit = size;
 
    return lynx->ContextLoad(&fp);
@@ -487,6 +465,7 @@ bool retro_unserialize(const void *data, size_t size)
 
 bool retro_load_game(const struct retro_game_info *info)
 {
+   char romfilename[1024];
    static struct retro_input_descriptor desc[] = {
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "D-Pad Left" },
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,    "D-Pad Up" },
@@ -510,13 +489,20 @@ bool retro_load_game(const struct retro_game_info *info)
    check_variables();
    check_color_depth();
 
-   if (!lynx_initialize_system(info->path))
+   if(lynx)
+   {
+      lynx->SaveEEPROM();
+      delete lynx;
+      lynx=0;
+   }
+
+   if (!lynx_romfilename(romfilename))
       return false;
 
-   if (!lynx_initialize_sound())
-      return false;
-
-   btn_map = btn_map_no_rot;
+   lynx          = new CSystem(info->path, romfilename, true);
+   gAudioEnabled = true;
+   soundBuffer   = (int16_t *)&gAudioBuffer;
+   btn_map       = btn_map_no_rot;
    lynx_rotate();
 
    initialized = true;
@@ -534,15 +520,10 @@ void retro_unload_game(void)
    initialized = false;
 }
 
-void retro_cheat_reset(void)
-{
-}
+void retro_cheat_reset(void) { }
+void retro_cheat_set(unsigned index, bool enabled, const char *code) { }
 
-void retro_cheat_set(unsigned index, bool enabled, const char *code)
-{
-}
-
-unsigned retro_get_region()
+unsigned retro_get_region(void)
 {
    return RETRO_REGION_NTSC;
 }
