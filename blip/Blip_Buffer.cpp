@@ -3,7 +3,7 @@
 #include <blip/Blip_Buffer.h>
 
 #include <assert.h>
-#include <climits>
+#include <limits.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
