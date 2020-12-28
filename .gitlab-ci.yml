@@ -50,7 +50,11 @@ include:
   # Nintendo Wii
   - project: 'libretro-infrastructure/ci-templates'
     file: '/wii-static.yml'
-    
+
+  # Nintendo WiiU
+  - project: 'libretro-infrastructure/ci-templates'
+    file: '/wiiu-static.yml'
+
   # Nintendo Switch
   - project: 'libretro-infrastructure/ci-templates'
     file: '/libnx-static.yml'
@@ -73,14 +77,14 @@ stages:
 # Windows 64-bit
 libretro-build-windows-x64:
   extends:
-    - .core-defs
     - .libretro-windows-x64-mingw-make-default
-
+    - .core-defs
+    
 # Linux 64-bit
 libretro-build-linux-x64:
   extends:
-    - .core-defs
     - .libretro-linux-x64-make-default
+    - .core-defs
     
 # MacOS 64-bit
 libretro-build-osx-x64:
@@ -92,45 +96,45 @@ libretro-build-osx-x64:
 # Android ARMv7a
 android-armeabi-v7a:
   extends:
-    - .core-defs
     - .libretro-android-jni-armeabi-v7a
-
+    - .core-defs
+    
 # Android ARMv8a
 android-arm64-v8a:
   extends:
-    - .core-defs
     - .libretro-android-jni-arm64-v8a
-
+    - .core-defs
+    
 # Android 64-bit x86
 android-x86_64:
   extends:
-    - .core-defs
     - .libretro-android-jni-x86_64
- 
+    - .core-defs
+    
 # Android 32-bit x86
 android-x86:
   extends:
-    - .core-defs
     - .libretro-android-jni-x86
-    
+    - .core-defs
+     
 ################################### CONSOLES ################################# 
 # PlayStation Portable
 libretro-build-psp:
   extends:
-    - .core-defs
     - .libretro-psp-static-retroarch-master
-
+    - .core-defs
+    
 # PlayStation Vita
 libretro-build-vita:
   extends:
-    - .core-defs
     - .libretro-vita-static-retroarch-master
-
+    - .core-defs
+    
 # PlayStation2
 libretro-build-ps2:
   extends:
-    - .core-defs
     - .libretro-ps2-static-retroarch-master
+    - .core-defs
     
 # Nintendo 3DS
 libretro-build-ctr:
@@ -144,14 +148,20 @@ libretro-build-wii:
     - .libretro-wii-static-retroarch-master
     - .core-defs
 
+# Nintendo WiiU
+libretro-build-wiiu:
+  extends:
+    - .libretro-wiiu-static-retroarch-master
+    - .core-defs
+
 # Nintendo Switch
 libretro-build-libnx-aarch64:
   extends:
-    - .core-defs
     - .libretro-libnx-static-retroarch-master
+    - .core-defs
     
 # OpenDingux
 libretro-build-dingux-mips32:
   extends:
-    - .core-defs
     - .libretro-dingux-mips32-make-default
+    - .core-defs
