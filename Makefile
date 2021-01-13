@@ -50,7 +50,7 @@ unixpath = $(subst \,/,$1)
 unixcygpath = /$(subst :,,$(call unixpath,$1))
 
 # Unix
-ifeq ($(platform), unix)
+ifneq (,$(findstring unix,$(platform)))
 	fpic := -fPIC
 	TARGET := $(TARGET_NAME)_libretro.so
 	SHARED := -shared -Wl,-version-script=$(LIBRETRO_DIR)/link.T -Wl,-no-undefined
