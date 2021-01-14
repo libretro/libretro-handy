@@ -153,9 +153,9 @@ else ifeq ($(platform), sncps3)
 # PS2
 else ifeq ($(platform),ps2)
 	TARGET := $(TARGET_NAME)_libretro_$(platform).a
-	CC = ee-gcc$(EXE_EXT)
-	CXX = ee-g++$(EXE_EXT)
-	AR = ee-ar$(EXE_EXT)
+	CC = mips64r5900el-ps2-elf-gcc$(EXE_EXT)
+	CXX = mips64r5900el-ps2-elf-g++$(EXE_EXT)
+	AR = mips64r5900el-ps2-elf-ar$(EXE_EXT)
 	FLAGS += -G0 -DPS2 -DABGR1555 -DHAVE_NO_LANGEXTRA
 	INCFLAGS_PLATFORM += -O3
 	STATIC_LINKING := 1
