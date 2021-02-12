@@ -60,9 +60,9 @@ extern void lynx_decrypt(unsigned char * result, const unsigned char * encrypted
 
 int lss_read(void* dest, int varsize, int varcount, LSS_FILE *fp)
 {
-   ULONG copysize;
-   copysize=varsize*varcount;
-   if((fp->index + copysize) > fp->index_limit) copysize=fp->index_limit - fp->index;
+   ULONG copysize=varsize*varcount;
+   if((fp->index + copysize) > fp->index_limit)
+      copysize=fp->index_limit - fp->index;
    memcpy(dest,fp->memptr+fp->index,copysize);
    fp->index+=copysize;
    return copysize;
@@ -70,9 +70,7 @@ int lss_read(void* dest, int varsize, int varcount, LSS_FILE *fp)
 
 int lss_write(void* src, int varsize, int varcount, LSS_FILE *fp)
 {
-   ULONG copysize;
-   copysize=varsize*varcount;
-   //if((fp->index + copysize) > fp->index_limit) copysize=fp->index_limit - fp->index;
+   ULONG copysize=varsize*varcount;
    memcpy(fp->memptr+fp->index,src,copysize);
    fp->index+=copysize;
    return copysize;
@@ -80,14 +78,13 @@ int lss_write(void* src, int varsize, int varcount, LSS_FILE *fp)
 
 int lss_printf(LSS_FILE *fp, const char *str)
 {
-   ULONG copysize;
-   copysize=strlen(str);
+   ULONG copysize=strlen(str);
    memcpy(fp->memptr+fp->index,str,copysize);
    fp->index+=copysize;
    return copysize;
 }
 
-void _splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
+static void split_path(const char* path, char* drv, char* dir, char* name, char* ext)
 {
    const char* end; /* end of processed string */
    const char* p;   /* search pointer */
@@ -230,7 +227,7 @@ CSystem::CSystem(const char* gamefile, const char* romfile, bool useEmu)
             FILE *fp;
             char drive[3],dir[256],cartgo[256];
             mFileType=HANDY_FILETYPE_HOMEBREW;
-            _splitpath(romfile,drive,dir,NULL,NULL);
+            split_path(romfile,drive,dir,NULL,NULL);
             strcpy(cartgo,drive);
             strcat(cartgo,dir);
             strcat(cartgo,"howard.o");
