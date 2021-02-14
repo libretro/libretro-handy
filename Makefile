@@ -570,6 +570,12 @@ endif
 
 ifeq (,$(findstring msvc,$(platform)))
 FLAGS += -fomit-frame-pointer
+else
+ifeq ($(DEBUG),1)
+FLAGS += -MTd
+else
+FLAGS += -MT
+endif
 endif
 
 FLAGS += -I. $(fpic) $(libs) $(includes) -DWANT_CRC32
