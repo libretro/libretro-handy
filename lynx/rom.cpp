@@ -53,85 +53,76 @@
 #include "system.h"
 #include "rom.h"
 
-extern CErrorInterface *gError;
-
 CRom::CRom(const char *romfile,bool useEmu)
 {
+   int loop;
    mWriteEnable = FALSE;
-   mValid = TRUE;
-   strncpy(mFileName,romfile,1024);
+   mValid       = TRUE;
    Reset();
 
    // Initialise ROM
-   for(int loop=0;loop<ROM_SIZE;loop++) mRomData[loop]=DEFAULT_ROM_CONTENTS;
+   for(loop = 0; loop < ROM_SIZE; loop++)
+      mRomData[loop] = DEFAULT_ROM_CONTENTS;
+
    // actually not part of Boot ROM but uninitialized otherwise
    // Reset Vector etc
-   mRomData[0x1F8]=0x00;
-   mRomData[0x1F9]=0x80;
-   mRomData[0x1FA]=0x00;
-   mRomData[0x1FB]=0x30;
-   mRomData[0x1FC]=0x80;
-   mRomData[0x1FD]=0xFF;
-   mRomData[0x1FE]=0x80;
-   mRomData[0x1FF]=0xFF;
+   mRomData[0x1F8] = 0x00;
+   mRomData[0x1F9] = 0x80;
+   mRomData[0x1FA] = 0x00;
+   mRomData[0x1FB] = 0x30;
+   mRomData[0x1FC] = 0x80;
+   mRomData[0x1FD] = 0xFF;
+   mRomData[0x1FE] = 0x80;
+   mRomData[0x1FF] = 0xFF;
 
-   if(useEmu){
-      mValid = FALSE;
-   }else{
-      // Load up the file
+   if (useEmu)
+      mValid       = FALSE;
+   else
+   {
+      FILE *fp;
 
-      FILE	*fp;
-
-      if((fp=fopen(mFileName,"rb"))==NULL) {
-        fprintf(stdout, "The Lynx Boot ROM image couldn't be located! Using built-in replacement\n");
-        mValid = FALSE;
-      } else {
-         // Read in the 512 bytes
-         fprintf(stdout, "Read Lynx Boot ROM image\n");
-
-         if(fread(mRomData,sizeof(char),ROM_SIZE,fp)!=ROM_SIZE) {
-            fprintf(stdout, "The Lynx Boot ROM image couldn't be loaded! Using built-in replacement\n");
+      /* Load up the file */
+      if((fp=fopen(romfile,"rb"))==NULL)
+        mValid     = FALSE;
+      else
+      {
+         /* Read in the 512 bytes */
+         if (fread(mRomData,sizeof(char),ROM_SIZE,fp)!=ROM_SIZE) 
             mValid = FALSE;
-         }
-         if(fp) fclose(fp);
+         if (fp)
+            fclose(fp);
       }
 
-      // Check the code that has been loaded and report an error if its a
-      // fake version (from handy distribution) of the bootrom
-      // would be more intelligent to make a crc
+      /* Check the code that has been loaded and report an error if its a
+       * fake version (from handy distribution) of the bootrom
+       * would be more intelligent to make a crc
+       */
 
-      if(mRomData[0x1FE]!=0x80 || mRomData[0x1FF]!=0xFF){
-         fprintf(stdout, "The Lynx Boot ROM image is invalid! Using built-in replacement\n");
+      if(mRomData[0x1FE] != 0x80 || mRomData[0x1FF] != 0xFF)
          mValid = FALSE;
-      }
-
-      if(mValid==FALSE){
-         fprintf(stdout, "The chosen bootrom is not existing or invalid.\n"
-                      "Switching now to bootrom emulation.\n"
-                     );
-      }
    }
 }
 
-void CRom::Reset(void)
-{
-   // Nothing to do here
-}
-
+// Nothing to do here
+void CRom::Reset(void) { }
 bool CRom::ContextSave(FILE *fp)
 {
-   if(!fprintf(fp,"CRom::ContextSave")) return 0;
-   if(!fwrite(mRomData,sizeof(UBYTE),ROM_SIZE,fp)) return 0;
+   if(!fprintf(fp,"CRom::ContextSave"))
+      return 0;
+   if(!fwrite(mRomData,sizeof(UBYTE),ROM_SIZE,fp))
+      return 0;
    return 1;
 }
 
 bool CRom::ContextLoad(LSS_FILE *fp)
 {
    char teststr[100]="XXXXXXXXXXXXXXXXX";
-   if(!lss_read(teststr,sizeof(char),17,fp)) return 0;
-   if(strcmp(teststr,"CRom::ContextSave")!=0) return 0;
-
-   if(!lss_read(mRomData,sizeof(UBYTE),ROM_SIZE,fp)) return 0;
+   if(!lss_read(teststr,sizeof(char),17,fp))
+      return 0;
+   if(strcmp(teststr,"CRom::ContextSave")!=0)
+      return 0;
+   if(!lss_read(mRomData,sizeof(UBYTE),ROM_SIZE,fp))
+      return 0;
    return 1;
 }
 
