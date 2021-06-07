@@ -62,22 +62,6 @@
      _a > _b ? _b : _a; })
 #endif
 
-#ifdef TRACE_CART
-
-#define TRACE_CART0(msg)					_RPT1(_CRT_WARN,"CCart::"msg" (Time=%012d)\n",gSystemCycleCount)
-#define TRACE_CART1(msg,arg1)				_RPT2(_CRT_WARN,"CCart::"msg" (Time=%012d)\n",arg1,gSystemCycleCount)
-#define TRACE_CART2(msg,arg1,arg2)			_RPT3(_CRT_WARN,"CCart::"msg" (Time=%012d)\n",arg1,arg2,gSystemCycleCount)
-#define TRACE_CART3(msg,arg1,arg2,arg3)		_RPT4(_CRT_WARN,"CCart::"msg" (Time=%012d)\n",arg1,arg2,arg3,gSystemCycleCount)
-
-#else
-
-#define TRACE_CART0(msg)
-#define TRACE_CART1(msg,arg1)
-#define TRACE_CART2(msg,arg1,arg2)
-#define TRACE_CART3(msg,arg1,arg2,arg3)
-
-#endif
-
 #define DEFAULT_CART_CONTENTS	0xFF
 
 enum CTYPE {UNUSED,C64K,C128K,C256K,C512K,C1024K};

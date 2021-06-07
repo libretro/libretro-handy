@@ -45,9 +45,6 @@
 
 #define RAM_CPP
 
-//#include <crtdbg.h>
-//#define   TRACE_RAM
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -45,7 +45,6 @@
 #define CART_CPP
 
 //#include <crtdbg.h>
-//#define   TRACE_CART
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -57,8 +56,7 @@
 
 CCart::CCart(UBYTE *gamedata,ULONG gamesize)
 {
-   int headersize=0
-   TRACE_CART1("CCart() called with %s",gamefile);
+   int headersize=0;
    LYNX_HEADER	header;
 
    mWriteEnableBank0=FALSE;
@@ -158,7 +156,6 @@ CCart::CCart(UBYTE *gamedata,ULONG gamesize)
          fprintf(stderr, "Invalid cart (bank0 size).\n");
          break;
    }
-   TRACE_CART1("CCart() - Bank0 = $%06x",mMaskBank0);
 
    switch(header.page_size_bank1) {
       case 0x000:
@@ -195,7 +192,6 @@ CCart::CCart(UBYTE *gamedata,ULONG gamesize)
          fprintf(stderr, "Invalid cart (bank1 size).\n");
          break;
    }
-   TRACE_CART1("CCart() - Bank1 = $%06x",mMaskBank1);
 
    // Make some space for the new carts
 
@@ -273,7 +269,6 @@ CCart::CCart(UBYTE *gamedata,ULONG gamesize)
             }
          }
       }
-      TRACE_CART1("CCart() - mHeaderLess=%d",mHeaderLess);
    }
 
    // Dont allow an empty Bank1 - Use it for shadow SRAM/EEPROM
@@ -281,7 +276,6 @@ CCart::CCart(UBYTE *gamedata,ULONG gamesize)
       // Delete the single byte allocated  earlier
       delete[] mCartBank1;
       // Allocate some new memory for us
-      TRACE_CART0("CCart() - Bank1 being converted to 64K SRAM");
       banktype1=C64K;
       mMaskBank1=0x00ffff;
       mShiftCount1=8;
@@ -295,7 +289,6 @@ CCart::CCart(UBYTE *gamedata,ULONG gamesize)
 
 CCart::~CCart()
 {
-   TRACE_CART0("~CCart()");
    delete[] mCartBank0;
    delete[] mCartBank1;
    delete[] mCartBank0A;
@@ -305,7 +298,6 @@ CCart::~CCart()
 
 void CCart::Reset(void)
 {
-   TRACE_CART0("Reset()");
    mCounter=0;
    mShifter=0;
    mAddrData=0;
@@ -314,7 +306,6 @@ void CCart::Reset(void)
 
 bool CCart::ContextSave(LSS_FILE *fp)
 {
-   TRACE_CART0("ContextSave()");
    if(!lss_printf(fp,"CCart::ContextSave")) return 0;
    if(!lss_write(&mCounter,sizeof(ULONG),1,fp)) return 0;
    if(!lss_write(&mShifter,sizeof(ULONG),1,fp)) return 0;
@@ -338,7 +329,6 @@ bool CCart::ContextSave(LSS_FILE *fp)
 
 bool CCart::ContextLoad(LSS_FILE *fp)
 {
-   TRACE_CART0("ContextLoad()");
    char teststr[100]="XXXXXXXXXXXXXXXXXX";
    if(!lss_read(teststr,sizeof(char),18,fp)) return 0;
    if(strcmp(teststr,"CCart::ContextSave")!=0) return 0;
@@ -366,7 +356,6 @@ bool CCart::ContextLoad(LSS_FILE *fp)
 
 bool CCart::ContextLoadLegacy(LSS_FILE *fp)
 {
-   TRACE_CART0("ContextLoadLegacy()");
    strcpy(mName,"<** IMAGE **>");
    strcpy(mManufacturer,"<** RESTORED **>");
    char teststr[100]="XXXXXXXXXXXXXXXXXX";
@@ -436,12 +425,10 @@ void CCart::CartAddressStrobe(bool strobe)
       mShifter&=0xff;
    }
    last_strobe=mStrobe;
-   TRACE_CART2("CartAddressStrobe(strobe=%d) mShifter=$%06x",strobe,mShifter);
 }
 
 void CCart::CartAddressData(bool data)
 {
-   TRACE_CART1("CartAddressData($%02x)",data);
    mAddrData=data;
 }
 

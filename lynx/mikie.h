@@ -49,25 +49,6 @@
 #ifndef MIKIE_H
 #define MIKIE_H
 
-//#include <crtdbg.h>
-//#define	TRACE_MIKIE
-
-#ifdef TRACE_MIKIE
-
-#define TRACE_MIKIE0(msg)					_RPT1(_CRT_WARN,"CMikie::"msg" (Time=%012d)\n",gSystemCycleCount)
-#define TRACE_MIKIE1(msg,arg1)				_RPT2(_CRT_WARN,"CMikie::"msg" (Time=%012d)\n",arg1,gSystemCycleCount)
-#define TRACE_MIKIE2(msg,arg1,arg2)			_RPT3(_CRT_WARN,"CMikie::"msg" (Time=%012d)\n",arg1,arg2,gSystemCycleCount)
-#define TRACE_MIKIE3(msg,arg1,arg2,arg3)	_RPT4(_CRT_WARN,"CMikie::"msg" (Time=%012d)\n",arg1,arg2,arg3,gSystemCycleCount)
-
-#else
-
-#define TRACE_MIKIE0(msg)
-#define TRACE_MIKIE1(msg,arg1)
-#define TRACE_MIKIE2(msg,arg1,arg2)
-#define TRACE_MIKIE3(msg,arg1,arg2,arg3)
-
-#endif
-
 class CSystem;
 
 #define MIKIE_START	0xfd00

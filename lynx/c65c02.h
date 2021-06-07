@@ -45,25 +45,6 @@
 #ifndef C65C02_H
 #define C65C02_H
 
-//#include <crtdbg.h>
-//#define	TRACE_CPU
-
-#ifdef TRACE_CPU
-
-#define TRACE_CPU0(msg)					_RPT1(_CRT_WARN,"C65C02::"msg" (Time=%012d)\n",gSystemCycleCount)
-#define TRACE_CPU1(msg,arg1)			_RPT2(_CRT_WARN,"C65C02::"msg" (Time=%012d)\n",arg1,gSystemCycleCount)
-#define TRACE_CPU2(msg,arg1,arg2)		_RPT3(_CRT_WARN,"C65C02::"msg" (Time=%012d)\n",arg1,arg2,gSystemCycleCount)
-#define TRACE_CPU3(msg,arg1,arg2,arg3)	_RPT4(_CRT_WARN,"C65C02::"msg" (Time=%012d)\n",arg1,arg2,arg3,gSystemCycleCount)
-
-#else
-
-#define TRACE_CPU0(msg)
-#define TRACE_CPU1(msg,arg1)
-#define TRACE_CPU2(msg,arg1,arg2)
-#define TRACE_CPU3(msg,arg1,arg2,arg3)
-
-#endif
-
 //
 // Handy definitions
 //
@@ -140,7 +121,6 @@ class C65C02
       C65C02(CSystemBase& parent)
          :mSystem(parent)
       {
-         TRACE_CPU0("C65C02()");
          // Compute the BCD lookup table
          for(UWORD t=0;t<256;++t)
          {
@@ -157,13 +137,11 @@ class C65C02
 
       ~C65C02()
       {
-         TRACE_CPU0("~C65C02()");
       }
 
    public:
       inline void Reset(void)
       {
-         TRACE_CPU0("Reset()");
          mRamPointer=mSystem.GetRamPointer();
          mA=0;
          mX=0;
@@ -190,7 +168,6 @@ class C65C02
 
       inline bool ContextSave(LSS_FILE *fp)
       {
-         TRACE_CPU0("ContextSave()");
          int mPS;
          mPS=PS();
          if(!lss_printf(fp,"C6502::ContextSave")) return 0;
@@ -206,7 +183,6 @@ class C65C02
 
       inline bool ContextLoad(LSS_FILE *fp)
       {
-         TRACE_CPU0("ContextLoad()");
          int mPS;
          char teststr[100]="XXXXXXXXXXXXXXXXXX";
          if(!lss_read(teststr,sizeof(char),18,fp)) return 0;
@@ -247,7 +223,6 @@ class C65C02
 
          if(gSystemIRQ && !mI)
          {
-            TRACE_CPU1("Update() IRQ taken at PC=%04x",mPC);
             // IRQ signal clearance is handled by CMikie::Update() as this
             // is the only source of interrupts
 
@@ -280,7 +255,6 @@ class C65C02
 
          // Fetch opcode
          mOpcode=CPU_PEEK(mPC);
-         TRACE_CPU2("Update() PC=$%04x, Opcode=%02x",mPC,mOpcode);
          mPC++;
 
          // Execute Opcode

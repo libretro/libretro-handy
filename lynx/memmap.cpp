@@ -44,9 +44,6 @@
 
 #define MEMMAP_CPP
 
-//#include <crtdbg.h>
-//#define	TRACE_MEMMAP
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -144,8 +141,6 @@ bool CMemMap::ContextLoad(LSS_FILE *fp)
 
 inline void CMemMap::Poke(ULONG addr, UBYTE data)
 {
-   TRACE_MEMMAP1("Poke() - Data %02x",data);
-
    int newstate,loop;
 
    // FC00-FCFF Susie area
@@ -207,7 +202,6 @@ inline UBYTE CMemMap::Peek(ULONG addr)
    retval+=(mMikieEnabled)?0:0x02;
    retval+=(mRomEnabled)?0:0x04;
    retval+=(mVectorsEnabled)?0:0x08;
-   TRACE_MEMMAP1("Peek() - Data %02x",retval);
    return retval;
 }
 

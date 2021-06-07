@@ -48,22 +48,6 @@
 
 #define MEMMAP_SIZE				0x1
 
-#ifdef TRACE_CART
-
-#define TRACE_MEMMAP0(msg)					_RPT1(_CRT_WARN,"CMamMap::"msg" (Time=%012d)\n",gSystemCycleCount)
-#define TRACE_MEMMAP1(msg,arg1)				_RPT2(_CRT_WARN,"CMamMap::"msg" (Time=%012d)\n",arg1,gSystemCycleCount)
-#define TRACE_MEMMAP2(msg,arg1,arg2)		_RPT3(_CRT_WARN,"CMamMap::"msg" (Time=%012d)\n",arg1,arg2,gSystemCycleCount)
-#define TRACE_MEMMAP3(msg,arg1,arg2,arg3)	_RPT4(_CRT_WARN,"CMamMap::"msg" (Time=%012d)\n",arg1,arg2,arg3,gSystemCycleCount)
-
-#else
-
-#define TRACE_MEMMAP0(msg)
-#define TRACE_MEMMAP1(msg,arg1)
-#define TRACE_MEMMAP2(msg,arg1,arg2)
-#define TRACE_MEMMAP3(msg,arg1,arg2,arg3)
-
-#endif
-
 class CMemMap : public CLynxBase
 {
    // Function members
