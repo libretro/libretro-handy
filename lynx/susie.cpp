@@ -584,10 +584,10 @@ ULONG CSusie::PaintSprites(void)
 
          // Setup screen start end variables
 
-         int screen_h_start=(SWORD)mHOFF.Word;
-         int screen_h_end=(SWORD)mHOFF.Word+SCREEN_WIDTH;
-         int screen_v_start=(SWORD)mVOFF.Word;
-         int screen_v_end=(SWORD)mVOFF.Word+SCREEN_HEIGHT;
+         int screen_h_start=(int16_t)mHOFF.Word;
+         int screen_h_end=(int16_t)mHOFF.Word+SCREEN_WIDTH;
+         int screen_v_start=(int16_t)mVOFF.Word;
+         int screen_v_end=(int16_t)mVOFF.Word+SCREEN_HEIGHT;
 
          int world_h_mid=screen_h_start+(SCREEN_WIDTH/2);
          int world_v_mid=screen_v_start+(SCREEN_HEIGHT/2);
@@ -606,8 +606,8 @@ ULONG CSusie::PaintSprites(void)
 
          // Check ref is inside screen area
 
-         if((SWORD)mHPOSSTRT.Word<screen_h_start || (SWORD)mHPOSSTRT.Word>=screen_h_end ||
-            (SWORD)mVPOSSTRT.Word<screen_v_start || (SWORD)mVPOSSTRT.Word>=screen_v_end) superclip=TRUE;
+         if((int16_t)mHPOSSTRT.Word<screen_h_start || (int16_t)mHPOSSTRT.Word>=screen_h_end ||
+            (int16_t)mVPOSSTRT.Word<screen_v_start || (int16_t)mVPOSSTRT.Word>=screen_v_end) superclip=TRUE;
 
          // Quadrant mapping is:	SE	NE	NW	SW
          //						0	1	2	3
@@ -701,16 +701,17 @@ ULONG CSusie::PaintSprites(void)
             static int vquadoff=0;
             static int hquadoff=0;
 
-            if(render) {
+            if(render)
+            {
                // Set the vertical position & offset
-               voff=(SWORD)mVPOSSTRT.Word-screen_v_start;
+               voff=(int16_t)mVPOSSTRT.Word-screen_v_start;
 
                // Zero the stretch,tilt & acum values
                mTILTACUM.Word=0;
 
                // Perform the SIZOFF
                if(vsign==1) mVSIZACUM.Word=mVSIZOFF.Word;
-			   else mVSIZACUM.Word=0;
+               else mVSIZACUM.Word=0;
 
                // Take the sign of the first quad (0) as the basic
                // sign, all other quads drawing in the other direction
@@ -749,13 +750,13 @@ ULONG CSusie::PaintSprites(void)
                      // Only allow the draw to take place if the line is visible
                      if(voff>=0 && voff<SCREEN_HEIGHT) {
                         // Work out the horizontal pixel start position, start + tilt
-                        mHPOSSTRT.Word+=((SWORD)mTILTACUM.Word>>8);
+                        mHPOSSTRT.Word+=((int16_t)mTILTACUM.Word>>8);
                         mTILTACUM.Byte.High=0;
-                        hoff=(int)((SWORD)mHPOSSTRT.Word)-screen_h_start;
+                        hoff=(int)((int16_t)mHPOSSTRT.Word)-screen_h_start;
 
                         // Zero/Force the horizontal scaling accumulator
                         if(hsign==1) mHSIZACUM.Word=mHSIZOFF.Word;
-						else mHSIZACUM.Word=0;
+                        else mHSIZACUM.Word=0;
 
                         // Take the sign of the first quad (0) as the basic
                         // sign, all other quads drawing in the other direction
@@ -781,7 +782,7 @@ ULONG CSusie::PaintSprites(void)
                               if(hoff>=0 && hoff<SCREEN_WIDTH) {
                                  ProcessPixel(hoff,pixel);
                                  onscreen = TRUE;
-								 everonscreen=TRUE;
+                                 everonscreen=TRUE;
                               } else {
                                  if(onscreen) break;
                               }
@@ -808,9 +809,12 @@ ULONG CSusie::PaintSprites(void)
                   // Update the line start for our next run thru the loop
                   mSPRDLINE.Word+=mSPRDOFF.Word;
                }
-            } else {
+            }
+            else
+            {
                // Skip thru data to next quad
-               for(;;) {
+               for(;;)
+               {
                   // Read the start of line offset
 
                   mSPRDOFF.Word=(UWORD)LineInit(0);

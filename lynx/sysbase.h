@@ -66,10 +66,6 @@ class CSystemBase
       virtual UWORD	PeekW_RAM(ULONG addr)=0;
 
       virtual UBYTE*	GetRamPointer(void)=0;
-
-#ifdef _LYNXDBG
-      virtual	void	DebugTrace(int address)=0;
-#endif
 };
 
 #endif

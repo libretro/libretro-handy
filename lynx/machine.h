@@ -49,15 +49,12 @@
 #include <stdint.h>
 
 // Bytes should be 8-bits wide
-typedef int8_t SBYTE;
 typedef uint8_t UBYTE;
 
 // Words should be 16-bits wide
-typedef int16_t SWORD;
 typedef uint16_t UWORD;
 
 // Longs should be 32-bits wide
-typedef int32_t SLONG;
 typedef uint32_t ULONG;
 
 // Read/Write Cycle definitions

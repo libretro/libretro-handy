@@ -102,9 +102,6 @@ typedef struct
    bool NMI;
    bool IRQ;
    bool WAIT;
-#ifdef _LYNXDBG
-   int	cpuBreakpoints[MAX_CPU_BREAKPOINTS];
-#endif
 }C6502_REGS;
 
 //
@@ -127,10 +124,6 @@ class C65C02
             mBCDTable[0][t]=((t >> 4) * 10) + (t & 0x0f);
             mBCDTable[1][t]=(((t % 100) / 10) << 4) | (t % 10);
          }
-#ifdef _LYNXDBG
-         for(int loop=0;loop<MAX_CPU_BREAKPOINTS;loop++)	mPcBreakpoints[loop]=0xfffffff;
-         mDbgFlag=0;
-#endif
          Reset();
 
       }
@@ -1641,51 +1634,6 @@ class C65C02
                break;
          }
 
-#ifdef _LYNXDBG
-
-         // Trigger breakpoint if required
-
-         for(int loop=0;loop<MAX_CPU_BREAKPOINTS;loop++)
-         {
-            if(mPcBreakpoints[loop]==mPC)
-            {
-               gBreakpointHit=TRUE;
-               mSystem.DebugTrace(0);
-            }
-         }
-
-         // Check code level debug features
-         // back to back CPX ($Absolute)
-         // on the 2nd Occurance we do some debug
-         if(mOpcode==0xec)
-         {
-            if(mDbgFlag)
-            {
-               // We shoud do some debug now
-               if(!mOperand)
-               {
-                  // Trigger a breakpoint
-                  gBreakpointHit=TRUE;
-                  // Generate a debug trail output
-                  mSystem.DebugTrace(0);
-               }
-               else
-               {
-                  // Generate a debug trail output
-                  mSystem.DebugTrace(mOperand);
-               }
-               mDbgFlag=0;
-            }
-            else
-            {
-               if(mOperand==0x5aa5) mDbgFlag=1; else mDbgFlag=0;
-            }
-         }
-         else
-         {
-            mDbgFlag=0;
-         }
-#endif
       }
 
       //		inline void SetBreakpoint(ULONG breakpoint) {mPcBreakpoint=breakpoint;};
@@ -1701,9 +1649,6 @@ class C65C02
          mOperand=regs.Operand;
          mPC=regs.PC;
          gSystemCPUSleep=regs.WAIT;
-#ifdef _LYNXDBG
-         for(int loop=0;loop<MAX_CPU_BREAKPOINTS;loop++)	mPcBreakpoints[loop]=regs.cpuBreakpoints[loop];
-#endif
          gSystemNMI=regs.NMI;
          gSystemIRQ=regs.IRQ;
       }
@@ -1719,9 +1664,6 @@ class C65C02
          regs.Operand=mOperand;
          regs.PC=mPC;
          regs.WAIT=(gSystemCPUSleep)?true:false;
-#ifdef _LYNXDBG
-         for(int loop=0;loop<MAX_CPU_BREAKPOINTS;loop++)	regs.cpuBreakpoints[loop]=mPcBreakpoints[loop];
-#endif
          regs.NMI=(gSystemNMI)?true:false;
          regs.IRQ=(gSystemIRQ)?true:false;
       }
@@ -1758,10 +1700,6 @@ class C65C02
 
       int mIRQActive;
 
-#ifdef _LYNXDBG
-      int mPcBreakpoints[MAX_CPU_BREAKPOINTS];
-      int mDbgFlag;
-#endif
       UBYTE *mRamPointer;
 
       // Associated lookup tables

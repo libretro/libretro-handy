@@ -148,11 +148,6 @@ CSystem::CSystem(const char* gamefile, const char* romfile, bool useEmu)
    mEEPROM(NULL)
 {
 
-#ifdef _LYNXDBG
-   mpDebugCallback=NULL;
-   mDebugCallbackObject=0;
-#endif
-
    // Select the default filetype
    UBYTE *filememory=NULL;
    UBYTE *howardmemory=NULL;
@@ -415,10 +410,6 @@ void CSystem::Reset(void)
 //	memset(gAudioBuffer,128,HANDY_AUDIO_BUFFER_SIZE); // only for unsigned 8bit
 	memset(gAudioBuffer,0,HANDY_AUDIO_BUFFER_SIZE); // for unsigned 8/16 bit
 
-#ifdef _LYNXDBG
-   gSystemHalt=TRUE;
-#endif
-
    mMemMap->Reset();
    mCart->Reset();
    mEEPROM->Reset();
@@ -601,48 +592,3 @@ bool CSystem::ContextLoad(LSS_FILE *fp)
 
    return status;
 }
-
-#ifdef _LYNXDBG
-
-void CSystem::DebugTrace(int address)
-{
-   char message[1024+1];
-   int count=0;
-
-   sprintf(message,"%08x - DebugTrace(): ",gSystemCycleCount);
-   count=strlen(message);
-
-   if(address) {
-      if(address==0xffff) {
-         C6502_REGS regs;
-         char linetext[1024];
-         // Register dump
-         GetRegs(regs);
-         sprintf(linetext,"PC=$%04x SP=$%02x PS=0x%02x A=0x%02x X=0x%02x Y=0x%02x",regs.PC,regs.SP, regs.PS,regs.A,regs.X,regs.Y);
-         strcat(message,linetext);
-         count=strlen(message);
-      } else {
-         // The RAM address contents should be dumped to an open debug file in this function
-         do {
-            message[count++]=Peek_RAM(address);
-         } while(count<1024 && Peek_RAM(address++)!=0);
-      }
-   } else {
-      strcat(message,"CPU Breakpoint");
-      count=strlen(message);
-   }
-   message[count]=0;
-
-   // Callback to dump the message
-   if(mpDebugCallback) {
-      (*mpDebugCallback)(mDebugCallbackObject,message);
-   }
-}
-
-void CSystem::DebugSetCallback(void (*function)(ULONG objref,char *message),ULONG objref)
-{
-   mDebugCallbackObject=objref;
-   mpDebugCallback=function;
-}
-
-#endif

@@ -49,16 +49,6 @@
 #pragma inline_depth (255)
 #pragma inline_recursion (on)
 
-#ifdef _LYNXDBG
-
-//#ifdef _DEBUG
-//#define new DEBUG_NEW
-//#undef THIS_FILE
-//static char THIS_FILE[] = __FILE__;
-//#endif
-
-#endif
-
 #include "machine.h"
 
 #define HANDY_SYSTEM_FREQ                       16000000
@@ -67,14 +57,7 @@
 #define HANDY_AUDIO_SAMPLE_PERIOD               (HANDY_SYSTEM_FREQ/HANDY_AUDIO_SAMPLE_FREQ)
 #define HANDY_AUDIO_WAVESHAPER_TABLE_LENGTH     0x200000
 
-#ifdef SDL_PATCH
-//#define HANDY_AUDIO_BUFFER_SIZE               4096    // Needed for SDL 8bit MONO
-//#define HANDY_AUDIO_BUFFER_SIZE               8192    // Needed for SDL STEREO 8bit
-#define HANDY_AUDIO_BUFFER_SIZE                 16384   // Needed for SDL STEREO 16bit
-#else
-//#define HANDY_AUDIO_BUFFER_SIZE               (HANDY_AUDIO_SAMPLE_FREQ/4)
 #define HANDY_AUDIO_BUFFER_SIZE                 (HANDY_AUDIO_SAMPLE_FREQ)
-#endif
 
 
 #define HANDY_FILETYPE_LNX      0
@@ -222,16 +205,6 @@ class CSystem : public CSystemBase
          mCpu->Update();
          //         fprintf(stderr, "end cpu update\n");
 
-#ifdef _LYNXDBG
-         // Check breakpoint
-         static ULONG lastcycle=0;
-         if(lastcycle<mCycleCountBreakpoint && gSystemCycleCount>=mCycleCountBreakpoint) gBreakpointHit=TRUE;
-         lastcycle=gSystemCycleCount;
-
-         // Check single step mode
-         if(gSingleStepMode) gBreakpointHit=TRUE;
-#endif
-
          //
          // If the CPU is asleep then skip to the next timer event
          //
@@ -315,14 +288,6 @@ class CSystem : public CSystemBase
       ULONG  GetButtonData(void) {return mSusie->GetButtonData();};
       void   SetCycleBreakpoint(ULONG breakpoint) {mCycleCountBreakpoint=breakpoint;};
       UBYTE* GetRamPointer(void) {return mRam->GetRamPointer();};
-#ifdef _LYNXDBG
-      void   DebugTrace(int address);
-
-      void   DebugSetCallback(void (*function)(ULONG objref, char *message),ULONG objref);
-
-      void   (*mpDebugCallback)(ULONG objref, char *message);
-      ULONG  mDebugCallbackObject;
-#endif
 
    public:
       ULONG         mCycleCountBreakpoint;

@@ -479,8 +479,8 @@ bool CMikie::ContextSave(LSS_FILE *fp)
    if(!lss_write(&mAUDIO_0_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
    if(!lss_write(&mAUDIO_0_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
    if(!lss_write(&mAUDIO_0_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
-   if(!lss_write(&mAUDIO_0_VOLUME,sizeof(SBYTE),1,fp)) return 0;
-   if(!lss_write(&mAUDIO_OUTPUT[0],sizeof(SBYTE),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_0_VOLUME,sizeof(int8_t),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_OUTPUT[0],sizeof(int8_t),1,fp)) return 0;
    if(!lss_write(&mAUDIO_0_INTEGRATE_ENABLE,sizeof(ULONG),1,fp)) return 0;
    if(!lss_write(&mAUDIO_0_WAVESHAPER,sizeof(ULONG),1,fp)) return 0;
 
@@ -495,8 +495,8 @@ bool CMikie::ContextSave(LSS_FILE *fp)
    if(!lss_write(&mAUDIO_1_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
    if(!lss_write(&mAUDIO_1_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
    if(!lss_write(&mAUDIO_1_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
-   if(!lss_write(&mAUDIO_1_VOLUME,sizeof(SBYTE),1,fp)) return 0;
-   if(!lss_write(&mAUDIO_OUTPUT[1],sizeof(SBYTE),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_1_VOLUME,sizeof(int8_t),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_OUTPUT[1],sizeof(int8_t),1,fp)) return 0;
    if(!lss_write(&mAUDIO_1_INTEGRATE_ENABLE,sizeof(ULONG),1,fp)) return 0;
    if(!lss_write(&mAUDIO_1_WAVESHAPER,sizeof(ULONG),1,fp)) return 0;
 
@@ -511,8 +511,8 @@ bool CMikie::ContextSave(LSS_FILE *fp)
    if(!lss_write(&mAUDIO_2_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
    if(!lss_write(&mAUDIO_2_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
    if(!lss_write(&mAUDIO_2_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
-   if(!lss_write(&mAUDIO_2_VOLUME,sizeof(SBYTE),1,fp)) return 0;
-   if(!lss_write(&mAUDIO_OUTPUT[2],sizeof(SBYTE),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_2_VOLUME,sizeof(int8_t),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_OUTPUT[2],sizeof(int8_t),1,fp)) return 0;
    if(!lss_write(&mAUDIO_2_INTEGRATE_ENABLE,sizeof(ULONG),1,fp)) return 0;
    if(!lss_write(&mAUDIO_2_WAVESHAPER,sizeof(ULONG),1,fp)) return 0;
 
@@ -527,8 +527,8 @@ bool CMikie::ContextSave(LSS_FILE *fp)
    if(!lss_write(&mAUDIO_3_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
    if(!lss_write(&mAUDIO_3_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
    if(!lss_write(&mAUDIO_3_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
-   if(!lss_write(&mAUDIO_3_VOLUME,sizeof(SBYTE),1,fp)) return 0;
-   if(!lss_write(&mAUDIO_OUTPUT[3],sizeof(SBYTE),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_3_VOLUME,sizeof(int8_t),1,fp)) return 0;
+   if(!lss_write(&mAUDIO_OUTPUT[3],sizeof(int8_t),1,fp)) return 0;
    if(!lss_write(&mAUDIO_3_INTEGRATE_ENABLE,sizeof(ULONG),1,fp)) return 0;
    if(!lss_write(&mAUDIO_3_WAVESHAPER,sizeof(ULONG),1,fp)) return 0;
 
@@ -683,8 +683,8 @@ bool CMikie::ContextLoad(LSS_FILE *fp)
    if(!lss_read(&mAUDIO_0_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
    if(!lss_read(&mAUDIO_0_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
    if(!lss_read(&mAUDIO_0_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
-   if(!lss_read(&mAUDIO_0_VOLUME,sizeof(SBYTE),1,fp)) return 0;
-   if(!lss_read(&mAUDIO_OUTPUT[0],sizeof(SBYTE),1,fp)) return 0;
+   if(!lss_read(&mAUDIO_0_VOLUME,sizeof(int8_t),1,fp)) return 0;
+   if(!lss_read(&mAUDIO_OUTPUT[0],sizeof(int8_t),1,fp)) return 0;
    if(!lss_read(&mAUDIO_0_INTEGRATE_ENABLE,sizeof(ULONG),1,fp)) return 0;
    if(!lss_read(&mAUDIO_0_WAVESHAPER,sizeof(ULONG),1,fp)) return 0;
 
@@ -699,8 +699,8 @@ bool CMikie::ContextLoad(LSS_FILE *fp)
    if(!lss_read(&mAUDIO_1_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
    if(!lss_read(&mAUDIO_1_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
    if(!lss_read(&mAUDIO_1_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
-   if(!lss_read(&mAUDIO_1_VOLUME,sizeof(SBYTE),1,fp)) return 0;
-   if(!lss_read(&mAUDIO_OUTPUT[1],sizeof(SBYTE),1,fp)) return 0;
+   if(!lss_read(&mAUDIO_1_VOLUME,sizeof(int8_t),1,fp)) return 0;
+   if(!lss_read(&mAUDIO_OUTPUT[1],sizeof(int8_t),1,fp)) return 0;
    if(!lss_read(&mAUDIO_1_INTEGRATE_ENABLE,sizeof(ULONG),1,fp)) return 0;
    if(!lss_read(&mAUDIO_1_WAVESHAPER,sizeof(ULONG),1,fp)) return 0;
 
@@ -715,8 +715,8 @@ bool CMikie::ContextLoad(LSS_FILE *fp)
    if(!lss_read(&mAUDIO_2_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
    if(!lss_read(&mAUDIO_2_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
    if(!lss_read(&mAUDIO_2_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
-   if(!lss_read(&mAUDIO_2_VOLUME,sizeof(SBYTE),1,fp)) return 0;
-   if(!lss_read(&mAUDIO_OUTPUT[2],sizeof(SBYTE),1,fp)) return 0;
+   if(!lss_read(&mAUDIO_2_VOLUME,sizeof(int8_t),1,fp)) return 0;
+   if(!lss_read(&mAUDIO_OUTPUT[2],sizeof(int8_t),1,fp)) return 0;
    if(!lss_read(&mAUDIO_2_INTEGRATE_ENABLE,sizeof(ULONG),1,fp)) return 0;
    if(!lss_read(&mAUDIO_2_WAVESHAPER,sizeof(ULONG),1,fp)) return 0;
 
@@ -731,8 +731,8 @@ bool CMikie::ContextLoad(LSS_FILE *fp)
    if(!lss_read(&mAUDIO_3_BORROW_OUT,sizeof(ULONG),1,fp)) return 0;
    if(!lss_read(&mAUDIO_3_LAST_LINK_CARRY,sizeof(ULONG),1,fp)) return 0;
    if(!lss_read(&mAUDIO_3_LAST_COUNT,sizeof(ULONG),1,fp)) return 0;
-   if(!lss_read(&mAUDIO_3_VOLUME,sizeof(SBYTE),1,fp)) return 0;
-   if(!lss_read(&mAUDIO_OUTPUT[3],sizeof(SBYTE),1,fp)) return 0;
+   if(!lss_read(&mAUDIO_3_VOLUME,sizeof(int8_t),1,fp)) return 0;
+   if(!lss_read(&mAUDIO_OUTPUT[3],sizeof(int8_t),1,fp)) return 0;
    if(!lss_read(&mAUDIO_3_INTEGRATE_ENABLE,sizeof(ULONG),1,fp)) return 0;
    if(!lss_read(&mAUDIO_3_WAVESHAPER,sizeof(ULONG),1,fp)) return 0;
 
@@ -1524,7 +1524,7 @@ void CMikie::Poke(ULONG addr,UBYTE data)
          break;
 
       case (AUD0VOL&0xff):
-         mAUDIO_0_VOLUME=(SBYTE)data;
+         mAUDIO_0_VOLUME=(int8_t)data;
          break;
       case (AUD0SHFTFB&0xff):
          mAUDIO_0_WAVESHAPER&=0x001fff;
@@ -1572,7 +1572,7 @@ void CMikie::Poke(ULONG addr,UBYTE data)
          break;
 
       case (AUD1VOL&0xff):
-         mAUDIO_1_VOLUME=(SBYTE)data;
+         mAUDIO_1_VOLUME=(int8_t)data;
          break;
       case (AUD1SHFTFB&0xff):
          mAUDIO_1_WAVESHAPER&=0x001fff;
@@ -1620,7 +1620,7 @@ void CMikie::Poke(ULONG addr,UBYTE data)
          break;
 
       case (AUD2VOL&0xff):
-         mAUDIO_2_VOLUME=(SBYTE)data;
+         mAUDIO_2_VOLUME=(int8_t)data;
          break;
       case (AUD2SHFTFB&0xff):
          mAUDIO_2_WAVESHAPER&=0x001fff;
@@ -1668,7 +1668,7 @@ void CMikie::Poke(ULONG addr,UBYTE data)
          break;
 
       case (AUD3VOL&0xff):
-         mAUDIO_3_VOLUME=(SBYTE)data;
+         mAUDIO_3_VOLUME=(int8_t)data;
          break;
       case (AUD3SHFTFB&0xff):
          mAUDIO_3_WAVESHAPER&=0x001fff;
@@ -1854,7 +1854,7 @@ void CMikie::Poke(ULONG addr,UBYTE data)
          // CPU at the right time.
          //
          {
-            SLONG cycles_used=(SLONG)mSystem.PaintSprites();
+            int32_t cycles_used=(int32_t)mSystem.PaintSprites();
             gCPUWakeupTime=gSystemCycleCount+cycles_used;
             SetCPUSleep();
          }
@@ -2404,8 +2404,8 @@ UBYTE CMikie::Peek(ULONG addr)
 
 inline void CMikie::Update(void)
 {
-   SLONG divide;
-   SLONG decval;
+   int32_t divide;
+   int32_t decval;
    ULONG tmp;
    ULONG mikie_work_done=0;
 
@@ -3144,12 +3144,12 @@ inline void CMikie::Update(void)
                   mAUDIO_0_WAVESHAPER=GetLfsrNext(mAUDIO_0_WAVESHAPER);
 
                if(mAUDIO_0_INTEGRATE_ENABLE) {
-                  SLONG temp=mAUDIO_OUTPUT[0];
+                  int32_t temp=mAUDIO_OUTPUT[0];
                   if(mAUDIO_0_WAVESHAPER&0x0001) temp+=mAUDIO_0_VOLUME;
                   else temp-=mAUDIO_0_VOLUME;
                   if(temp>127) temp=127;
                   if(temp<-128) temp=-128;
-                  mAUDIO_OUTPUT[0]=(SBYTE)temp;
+                  mAUDIO_OUTPUT[0]=(int8_t)temp;
                } else {
                   if(mAUDIO_0_WAVESHAPER&0x0001) mAUDIO_OUTPUT[0]=mAUDIO_0_VOLUME;
                   else mAUDIO_OUTPUT[0]=-mAUDIO_0_VOLUME;
@@ -3221,12 +3221,12 @@ inline void CMikie::Update(void)
                   mAUDIO_1_WAVESHAPER=GetLfsrNext(mAUDIO_1_WAVESHAPER);
 
                if(mAUDIO_1_INTEGRATE_ENABLE) {
-                  SLONG temp=mAUDIO_OUTPUT[1];
+                  int32_t temp=mAUDIO_OUTPUT[1];
                   if(mAUDIO_1_WAVESHAPER&0x0001) temp+=mAUDIO_1_VOLUME;
                   else temp-=mAUDIO_1_VOLUME;
                   if(temp>127) temp=127;
                   if(temp<-128) temp=-128;
-                  mAUDIO_OUTPUT[1]=(SBYTE)temp;
+                  mAUDIO_OUTPUT[1]=(int8_t)temp;
                } else {
                   if(mAUDIO_1_WAVESHAPER&0x0001) mAUDIO_OUTPUT[1]=mAUDIO_1_VOLUME;
                   else mAUDIO_OUTPUT[1]=-mAUDIO_1_VOLUME;
@@ -3298,12 +3298,12 @@ inline void CMikie::Update(void)
                   mAUDIO_2_WAVESHAPER=GetLfsrNext(mAUDIO_2_WAVESHAPER);
 
                if(mAUDIO_2_INTEGRATE_ENABLE) {
-                  SLONG temp=mAUDIO_OUTPUT[2];
+                  int32_t temp=mAUDIO_OUTPUT[2];
                   if(mAUDIO_2_WAVESHAPER&0x0001) temp+=mAUDIO_2_VOLUME;
                   else temp-=mAUDIO_2_VOLUME;
                   if(temp>127) temp=127;
                   if(temp<-128) temp=-128;
-                  mAUDIO_OUTPUT[2]=(SBYTE)temp;
+                  mAUDIO_OUTPUT[2]=(int8_t)temp;
                } else {
                   if(mAUDIO_2_WAVESHAPER&0x0001) mAUDIO_OUTPUT[2]=mAUDIO_2_VOLUME;
                   else mAUDIO_OUTPUT[2]=-mAUDIO_2_VOLUME;
@@ -3375,12 +3375,12 @@ inline void CMikie::Update(void)
                   mAUDIO_3_WAVESHAPER=GetLfsrNext(mAUDIO_3_WAVESHAPER);
 
                if(mAUDIO_3_INTEGRATE_ENABLE) {
-                  SLONG temp=mAUDIO_OUTPUT[3];
+                  int32_t temp=mAUDIO_OUTPUT[3];
                   if(mAUDIO_3_WAVESHAPER&0x0001) temp+=mAUDIO_3_VOLUME;
                   else temp-=mAUDIO_3_VOLUME;
                   if(temp>127) temp=127;
                   if(temp<-128) temp=-128;
-                  mAUDIO_OUTPUT[3]=(SBYTE)temp;
+                  mAUDIO_OUTPUT[3]=(int8_t)temp;
                } else {
                   if(mAUDIO_3_WAVESHAPER&0x0001) mAUDIO_OUTPUT[3]=mAUDIO_3_VOLUME;
                   else mAUDIO_OUTPUT[3]=-mAUDIO_3_VOLUME;

@@ -81,16 +81,16 @@
 //	UBYTE	oldA=mA;\
 //	if(!mD)\
 //	{\
-//		SWORD sum=(SWORD)((SBYTE)mA)+(SWORD)((SBYTE)value)+(mC?1:0);\
+//		int16_t sum=(int16_t)((int8_t)mA)+(int16_t)((int8_t)value)+(mC?1:0);\
 //		mV=((sum > 127) || (sum < -128));\
-//		sum=(SWORD)mA + (SWORD)value + (mC?1:0);\
+//		sum=(int16_t)mA + (int16_t)value + (mC?1:0);\
 //		mA=(UBYTE)sum;\
 //		mC=(sum>0xff);\
 //		SET_NZ(mA);\
 //	}\
 //	else\
 //	{\
-//		SWORD sum=mBCDTable[0][mA]+mBCDTable[0][value]+(mC?1:0);\
+//		int16_t sum=mBCDTable[0][mA]+mBCDTable[0][value]+(mC?1:0);\
 //		mC=(sum > 99);\
 //		mA=mBCDTable[1][sum & 0xff];\
 //		SET_NZ(mA);\
@@ -667,9 +667,9 @@
 //	if(!mD)\
 //	{\
 //		UBYTE value=~(CPU_PEEK(mOperand));\
-//		SWORD difference=(SWORD)((SBYTE)mA)+(SWORD)((SBYTE)value)+(mC?1:0);\
+//		int16_t difference=(int16_t)((int8_t)mA)+(int16_t)((int8_t)value)+(mC?1:0);\
 //		mV=((difference>127)||(difference<-128));\
-//		difference=((SWORD)mA)+((SWORD)value)+ (mC?1:0);\
+//		difference=((int16_t)mA)+((int16_t)value)+ (mC?1:0);\
 //		mA=(UBYTE)difference;\
 //		mC=(difference>0xff);\
 //		SET_NZ(mA);\
@@ -677,7 +677,7 @@
 //	else\
 //	{\
 //		UBYTE value=CPU_PEEK(mOperand);\
-//		SWORD difference=mBCDTable[0][mA]-mBCDTable[0][value]-(mC?0:1);\
+//		int16_t difference=mBCDTable[0][mA]-mBCDTable[0][value]-(mC?0:1);\
 //		if(difference<0) difference+=100;\
 //		mA=mBCDTable[1][difference];\
 //		mC=(oldA>=(value+(mC?0:1)));\
