@@ -43,6 +43,35 @@ extern "C" {
 
 /* RETRO_LANGUAGE_SPANISH */
 
+struct retro_core_option_definition option_defs_es[] = {
+   {
+      "handy_rot",
+      "Rotación de imagen",
+      "Rota la pantalla virtual de la consola para mostrar correctamente los juegos con orientación vertical en una pantalla con orientación horizontal.",
+      {
+         { "None", "Desactivada" },
+         { "270",  "Girar a la derecha" },
+         { "90",   "Girar a la izquierda" },
+         { NULL, NULL },
+      },
+      "None"
+   },
+#if defined(FRONTEND_SUPPORTS_XRGB8888)
+   {
+      "handy_gfx_colors",
+      "Profundidad de color (es necesario reiniciar)",
+      "Especifica el número de colores a mostrar en pantalla. 24 bits reduce significativamente la carga de la CPU y no está disponible en todas las plataformas.",
+      {
+         { "16bit", "Miles (16 bits)" },
+         { "24bit", "Millones (24 bits)" },
+         { NULL,    NULL },
+      },
+      "16bit"
+   },
+#endif   
+   { NULL, NULL, NULL, {{0}}, NULL },
+};
+
 /* RETRO_LANGUAGE_GERMAN */
 
 /* RETRO_LANGUAGE_ITALIAN */
