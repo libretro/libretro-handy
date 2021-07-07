@@ -64,7 +64,7 @@ struct retro_core_option_definition option_defs_us[] = {
 #if defined(FRONTEND_SUPPORTS_XRGB8888)
    {
       "handy_gfx_colors",
-      "Color Depth (Restart)",
+      "Color Depth (Restart Required)",
       "Specify number of colors to display on-screen. 24-bit significantly increases performance overheads and is not available on all platforms.",
       {
          { "16bit", "Thousands (16-bit)" },
@@ -88,7 +88,7 @@ struct retro_core_option_definition *option_defs_intl[RETRO_LANGUAGE_LAST] = {
    option_defs_us, /* RETRO_LANGUAGE_ENGLISH */
    NULL,           /* RETRO_LANGUAGE_JAPANESE */
    NULL,           /* RETRO_LANGUAGE_FRENCH */
-   NULL,           /* RETRO_LANGUAGE_SPANISH */
+   option_defs_es, /* RETRO_LANGUAGE_SPANISH */
    NULL,           /* RETRO_LANGUAGE_GERMAN */
    NULL,           /* RETRO_LANGUAGE_ITALIAN */
    NULL,           /* RETRO_LANGUAGE_DUTCH */
