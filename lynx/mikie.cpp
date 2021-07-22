@@ -947,6 +947,10 @@ ULONG CMikie::DisplayRenderLine(void)
       // Cycle hit for a 80 RAM access in rendering a line
       work_done+=(80+100)*DMA_RDWR_CYC;
 
+      // If we are skipping this frame, return now
+      if(gSkipFrame)
+         return work_done;
+
       // Mikie screen DMA can only see the system RAM....
       // (Step through bitmap, line at a time)
 

@@ -18,11 +18,14 @@ static int16_t *soundBuffer = NULL;
 
 #define RETRO_LYNX_WIDTH  160
 #define RETRO_LYNX_HEIGHT 102
+#define RETRO_LYNX_FPS    75.0
 
 // core options
 static uint8_t lynx_rot    = MIKIE_NO_ROTATE;
 static uint8_t lynx_width  = RETRO_LYNX_WIDTH;
 static uint8_t lynx_height = RETRO_LYNX_HEIGHT;
+
+static bool lynx_rot_updated = false;
 
 static int RETRO_PIX_BYTES = 2;
 #if defined(FRONTEND_SUPPORTS_RGB565)
@@ -78,6 +81,81 @@ static map* btn_map;
 
 static bool libretro_supports_input_bitmasks;
 static bool select_button;
+
+/* Frameskipping Support START */
+
+static unsigned frameskip_type             = 0;
+static unsigned frameskip_threshold        = 0;
+static uint16_t frameskip_counter          = 0;
+
+static bool retro_audio_buff_active        = false;
+static unsigned retro_audio_buff_occupancy = 0;
+static bool retro_audio_buff_underrun      = false;
+/* Maximum number of consecutive frames that
+ * can be skipped */
+#define FRAMESKIP_MAX 60
+
+static unsigned audio_latency              = 0;
+static bool update_audio_latency           = false;
+
+static void retro_audio_buff_status_cb(
+      bool active, unsigned occupancy, bool underrun_likely)
+{
+   retro_audio_buff_active    = active;
+   retro_audio_buff_occupancy = occupancy;
+   retro_audio_buff_underrun  = underrun_likely;
+}
+
+static void init_frameskip(void)
+{
+   if (frameskip_type > 0)
+   {
+      struct retro_audio_buffer_status_callback buf_status_cb;
+
+      buf_status_cb.callback = retro_audio_buff_status_cb;
+      if (!environ_cb(RETRO_ENVIRONMENT_SET_AUDIO_BUFFER_STATUS_CALLBACK,
+            &buf_status_cb))
+      {
+         if (log_cb)
+            log_cb(RETRO_LOG_WARN, "Frameskip disabled - frontend does not support audio buffer status monitoring.\n");
+
+         retro_audio_buff_active    = false;
+         retro_audio_buff_occupancy = 0;
+         retro_audio_buff_underrun  = false;
+         audio_latency              = 0;
+      }
+      else
+      {
+         /* Frameskip is enabled - increase frontend
+          * audio latency to minimise potential
+          * buffer underruns */
+         float frame_time_msec = 1000.0f / (float)RETRO_LYNX_FPS;
+
+         /* Set latency to 8x current frame time...
+          * (for 60Hz cores we normally use a 6x
+          * multiplier - but the Lynx runs
+          * at an unusually high frame rate, which
+          * seems to place greater demands on the
+          * frontend. Increasing the multiplier to
+          * 8x gives the frontend more room to
+          * manoeuvre, and improves the efficacy of
+          * the 'Auto' frameskip setting) */
+         audio_latency = (unsigned)((8.0f * frame_time_msec) + 0.5f);
+
+         /* ...then round up to nearest multiple of 32 */
+         audio_latency = (audio_latency + 0x1F) & ~0x1F;
+      }
+   }
+   else
+   {
+      environ_cb(RETRO_ENVIRONMENT_SET_AUDIO_BUFFER_STATUS_CALLBACK, NULL);
+      audio_latency = 0;
+   }
+
+   update_audio_latency = true;
+}
+
+/* Frameskipping Support END */
 
 static void check_color_depth(void)
 {
@@ -156,7 +234,8 @@ static UBYTE* lynx_display_callback(ULONG objref)
    if(!initialized)
       return (UBYTE*)framebuffer;
 
-   video_cb(framebuffer, lynx_width, lynx_height, RETRO_LYNX_WIDTH*RETRO_PIX_BYTES);
+   video_cb((bool)gSkipFrame ? NULL : framebuffer,
+         lynx_width, lynx_height, RETRO_LYNX_WIDTH*RETRO_PIX_BYTES);
 
    for(total = 0; total < gAudioBufferPointer/4;)
       total += audio_batch_cb(soundBuffer + total*2, (gAudioBufferPointer/4) - total);
@@ -221,11 +300,13 @@ static void lynx_rotate(void)
    }
 
    update_geometry();
+   lynx_rot_updated = true;
 }
 
 static void check_variables(void)
 {
    struct retro_variable var = {0};
+   unsigned old_frameskip_type;
 
    var.key = "handy_rot";
    var.value = NULL;
@@ -263,6 +344,30 @@ static void check_variables(void)
          }
    }
 #endif
+
+   old_frameskip_type = frameskip_type;
+   frameskip_type     = 0;
+   var.key            = "handy_frameskip";
+   var.value          = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      if (!strcmp(var.value, "auto"))
+         frameskip_type = 1;
+      else if (!strcmp(var.value, "manual"))
+         frameskip_type = 2;
+   }
+
+   frameskip_threshold = 33;
+   var.key             = "handy_frameskip_threshold";
+   var.value           = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+      frameskip_threshold = strtol(var.value, NULL, 10);
+
+   /* Reinitialise frameskipping, if required */
+   if ((frameskip_type != old_frameskip_type) && initialized)
+      init_frameskip();
 }
 
 void retro_init(void)
@@ -278,6 +383,15 @@ void retro_init(void)
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_INPUT_BITMASKS, NULL))
       libretro_supports_input_bitmasks = true;
+
+   frameskip_type             = 0;
+   frameskip_threshold        = 0;
+   frameskip_counter          = 0;
+   retro_audio_buff_active    = false;
+   retro_audio_buff_occupancy = 0;
+   retro_audio_buff_underrun  = false;
+   audio_latency              = 0;
+   update_audio_latency       = false;
 }
 
 void retro_reset(void)
@@ -380,7 +494,7 @@ void retro_get_system_info(struct retro_system_info *info)
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
    struct retro_game_geometry geom   = { lynx_width, lynx_height, RETRO_LYNX_WIDTH, RETRO_LYNX_WIDTH, (float) lynx_width / (float) lynx_height };
-   struct retro_system_timing timing = { 75.0, (float) HANDY_AUDIO_SAMPLE_FREQ };
+   struct retro_system_timing timing = { RETRO_LYNX_FPS, (float) HANDY_AUDIO_SAMPLE_FREQ };
 
    memset(info, 0, sizeof(*info));
    info->geometry = geom;
@@ -423,10 +537,50 @@ void retro_run(void)
    select_pressed_last_frame = select_button;
    gAudioLastUpdateCycle     = gSystemCycleCount;
 
+   /* Check whether current frame should be skipped */
+   gSkipFrame = 0;
+   if ((frameskip_type > 0) && retro_audio_buff_active)
+   {
+      switch (frameskip_type)
+      {
+         case 1: /* auto */
+            gSkipFrame = retro_audio_buff_underrun ? 1 : 0;
+            break;
+         case 2: /* manual */
+            gSkipFrame = (retro_audio_buff_occupancy < frameskip_threshold) ? 1 : 0;
+            break;
+         default:
+            gSkipFrame = 0;
+            break;
+      }
+
+      /* Note: We cannot skip this frame if the display
+       * dimensions have changed (due to screen rotation) */
+      if (!gSkipFrame ||
+          (frameskip_counter >= FRAMESKIP_MAX) ||
+          lynx_rot_updated)
+      {
+         gSkipFrame        = 0;
+         frameskip_counter = 0;
+      }
+      else
+         frameskip_counter++;
+   }
+
+   /* If frameskip settings have changed, update
+    * frontend audio latency */
+   if (update_audio_latency)
+   {
+      environ_cb(RETRO_ENVIRONMENT_SET_MINIMUM_AUDIO_LATENCY,
+            &audio_latency);
+      update_audio_latency = false;
+   }
+
    while (!newFrame)
       lynx->Update();
 
    newFrame = false;
+   lynx_rot_updated = false;
 }
 
 size_t retro_serialize_size(void)
@@ -488,6 +642,7 @@ bool retro_load_game(const struct retro_game_info *info)
 
    check_variables();
    check_color_depth();
+   init_frameskip();
 
    if(lynx)
    {

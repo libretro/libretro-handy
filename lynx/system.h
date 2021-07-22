@@ -97,6 +97,8 @@ UBYTE   gAudioBuffer[HANDY_AUDIO_BUFFER_SIZE];
 ULONG   gAudioBufferPointer=0;
 ULONG   gAudioLastUpdateCycle=0;
 
+UBYTE   gSkipFrame=FALSE;
+
 CErrorInterface *gError=NULL;
 #else
 
@@ -123,6 +125,8 @@ extern ULONG    gAudioEnabled;
 extern UBYTE    gAudioBuffer[HANDY_AUDIO_BUFFER_SIZE];
 extern ULONG    gAudioBufferPointer;
 extern ULONG    gAudioLastUpdateCycle;
+
+extern UBYTE    gSkipFrame;
 
 extern CErrorInterface *gError;
 #endif
