@@ -244,6 +244,16 @@ else ifeq ($(platform), gcw0)
    fpic := -fPIC
    SHARED := -shared -Wl,--no-undefined -Wl,-version-script=$(LIBRETRO_DIR)/link.T
    FLAGS += -DDINGUX -fomit-frame-pointer -ffast-math -march=mips32 -mtune=mips32r2 -mhard-float
+	 
+ # RETROFW
+ else ifeq ($(platform), retrofw)
+    TARGET := $(TARGET_NAME)_libretro.so
+		CC = /opt/retrofw-toolchain/usr/bin/mipsel-linux-gcc
+		CXX = /opt/retrofw-toolchain/usr/bin/mipsel-linux-g++
+		AR = /opt/retrofw-toolchain/usr/bin/mipsel-linux-ar
+    fpic := -fPIC
+    SHARED := -shared -Wl,--no-undefined -Wl,-version-script=$(LIBRETRO_DIR)/link.T
+    FLAGS += -DDINGUX -fomit-frame-pointer -ffast-math -march=mips32 -mtune=mips32 -mhard-float
 
 # Nintendo Switch (libnx)
 else ifeq ($(platform), libnx)
