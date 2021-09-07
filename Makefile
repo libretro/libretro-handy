@@ -247,13 +247,23 @@ else ifeq ($(platform), gcw0)
 	 
  # RETROFW
  else ifeq ($(platform), retrofw)
-    TARGET := $(TARGET_NAME)_libretro.so
+    TARGET := $(TARGET_NAME)_libretro.so   	
 		CC = /opt/retrofw-toolchain/usr/bin/mipsel-linux-gcc
 		CXX = /opt/retrofw-toolchain/usr/bin/mipsel-linux-g++
 		AR = /opt/retrofw-toolchain/usr/bin/mipsel-linux-ar
     fpic := -fPIC
     SHARED := -shared -Wl,--no-undefined -Wl,-version-script=$(LIBRETRO_DIR)/link.T
     FLAGS += -DDINGUX -fomit-frame-pointer -ffast-math -march=mips32 -mtune=mips32 -mhard-float
+
+ # MIYOO
+ else ifeq ($(platform), miyoo)
+    TARGET := $(TARGET_NAME)_libretro.so
+   	CC = /opt/miyoo/usr/bin/arm-linux-gcc
+   	CXX = /opt/miyoo/usr/bin/arm-linux-g++
+   	AR = /opt/miyoo/usr/bin/arm-linux-ar
+    fpic := -fPIC
+    SHARED := -shared -Wl,--no-undefined -Wl,-version-script=$(LIBRETRO_DIR)/link.T
+    FLAGS += -DDINGUX -fomit-frame-pointer -ffast-math -march=armv5te -mtune=arm926ej-s
 
 # Nintendo Switch (libnx)
 else ifeq ($(platform), libnx)
