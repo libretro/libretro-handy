@@ -44,14 +44,11 @@
 
 #define CART_CPP
 
-//#include <crtdbg.h>
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include "system.h"
 #include "cart.h"
-//#include "zlib.h"
 #include "scrc32.h"
 #include "handy.h"
 
