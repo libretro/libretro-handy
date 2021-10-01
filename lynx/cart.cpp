@@ -53,8 +53,9 @@
 #include "cart.h"
 //#include "zlib.h"
 #include "scrc32.h"
+#include "handy.h"
 
-CCart::CCart(UBYTE *gamedata,ULONG gamesize)
+CCart::CCart(const UBYTE *gamedata, ULONG gamesize)
 {
    int headersize=0;
    LYNX_HEADER	header;
@@ -82,7 +83,7 @@ CCart::CCart(UBYTE *gamedata,ULONG gamesize)
 
       if(header.magic[0]!='L' || header.magic[1]!='Y' || header.magic[2]!='N' || header.magic[3]!='X' || header.version!=1) {
         memset(&header,0,sizeof(LYNX_HEADER));
-        fprintf(stderr, "Invalid cart (no header?).\nGuessing a ROM layout...\n");
+        handy_log(RETRO_LOG_ERROR, "Invalid cart (no header?) - Guessing a ROM layout...\n");
         strncpy((char*)&header.cartname,"NO HEADER",32);
         strncpy((char*)&header.manufname,"HANDY",16);
         header.page_size_bank0=gamesize>>8;// Hard workaround...
@@ -153,7 +154,7 @@ CCart::CCart(UBYTE *gamedata,ULONG gamesize)
          mCountMask0=0x7ff;
          break;
       default:
-         fprintf(stderr, "Invalid cart (bank0 size).\n");
+         handy_log(RETRO_LOG_ERROR, "Invalid cart (bank0 size).\n");
          break;
    }
 
@@ -189,7 +190,7 @@ CCart::CCart(UBYTE *gamedata,ULONG gamesize)
          mCountMask1=0x7ff;
          break;
       default:
-         fprintf(stderr, "Invalid cart (bank1 size).\n");
+         handy_log(RETRO_LOG_ERROR, "Invalid cart (bank1 size).\n");
          break;
    }
 

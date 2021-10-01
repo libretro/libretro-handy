@@ -45,14 +45,15 @@
 #ifndef ROM_H
 #define ROM_H
 
-#define ROM_SIZE				   0x200
-#define ROM_ADDR_MASK			0x01ff
-#define DEFAULT_ROM_CONTENTS	0x88
+#define ROM_SIZE              0x200
+#define ROM_CRC32             0xD973C9D
+#define ROM_ADDR_MASK         0x01ff
+#define DEFAULT_ROM_CONTENTS  0x88
 
-#define BROM_START		      0xfe00
-#define BROM_SIZE		         0x200
-#define VECTOR_START	         0xfffa
-#define VECTOR_SIZE		      0x6
+#define BROM_START            0xfe00
+#define BROM_SIZE             0x200
+#define VECTOR_START          0xfffa
+#define VECTOR_SIZE           0x6
 
 class CRom : public CLynxBase
 {
@@ -62,7 +63,6 @@ class CRom : public CLynxBase
 
    public:
       void	Reset(void);
-      bool	ContextSave(FILE *fp);
       bool	ContextLoad(LSS_FILE *fp);
 
       void	Poke(ULONG addr,UBYTE data) { if(mWriteEnable) mRomData[addr&ROM_ADDR_MASK]=data;};

@@ -45,6 +45,8 @@
 #ifndef C65C02_H
 #define C65C02_H
 
+#include "handy.h"
+
 //
 // Handy definitions
 //
@@ -1672,9 +1674,9 @@ class C65C02
 
       inline void xILLEGAL(void)
       {
-         //char addr[1024];
-         //sprintf(addr,"C65C02::Update() - Illegal opcode (%02x) at PC=$%04x.",mOpcode,mPC);
-         fprintf(stderr, "C65C02::Update() - Illegal opcode (%02x) at PC=$%04x.",mOpcode,mPC);
+         handy_log(RETRO_LOG_ERROR,
+               "C65C02::Update() - Illegal opcode (%02x) at PC=$%04x.\n",
+               mOpcode, mPC);
       }
 
    private:

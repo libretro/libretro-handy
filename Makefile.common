@@ -17,15 +17,33 @@ ifeq ($(FRONTEND_SUPPORTS_XRGB8888), 1)
    FLAGS += -DFRONTEND_SUPPORTS_XRGB8888
 endif
 
-SOURCES_CXX := $(CORE_DIR)/lynx/lynxdec.cpp \
-	$(CORE_DIR)/lynx/cart.cpp \
-	$(CORE_DIR)/lynx/memmap.cpp \
-	$(CORE_DIR)/lynx/mikie.cpp \
-	$(CORE_DIR)/lynx/ram.cpp \
-	$(CORE_DIR)/lynx/rom.cpp \
-	$(CORE_DIR)/lynx/susie.cpp \
-	$(CORE_DIR)/lynx/system.cpp \
-	$(CORE_DIR)/lynx/eeprom.cpp \
-	$(CORE_DIR)/libretro/libretro.cpp \
-	$(CORE_DIR)/blip/Blip_Buffer.cpp \
-	$(CORE_DIR)/blip/Stereo_Buffer.cpp
+SOURCES_CXX := \
+   $(CORE_DIR)/lynx/lynxdec.cpp \
+   $(CORE_DIR)/lynx/cart.cpp \
+   $(CORE_DIR)/lynx/memmap.cpp \
+   $(CORE_DIR)/lynx/mikie.cpp \
+   $(CORE_DIR)/lynx/ram.cpp \
+   $(CORE_DIR)/lynx/rom.cpp \
+   $(CORE_DIR)/lynx/susie.cpp \
+   $(CORE_DIR)/lynx/system.cpp \
+   $(CORE_DIR)/lynx/eeprom.cpp \
+   $(CORE_DIR)/libretro/libretro.cpp \
+   $(CORE_DIR)/blip/Blip_Buffer.cpp \
+   $(CORE_DIR)/blip/Stereo_Buffer.cpp
+
+ifneq ($(STATIC_LINKING), 1)
+SOURCES_C := \
+   $(LIBRETRO_COMM_DIR)/compat/compat_posix_string.c \
+   $(LIBRETRO_COMM_DIR)/compat/compat_snprintf.c \
+   $(LIBRETRO_COMM_DIR)/compat/compat_strcasestr.c \
+   $(LIBRETRO_COMM_DIR)/compat/compat_strl.c \
+   $(LIBRETRO_COMM_DIR)/compat/fopen_utf8.c \
+   $(LIBRETRO_COMM_DIR)/encodings/encoding_utf.c \
+   $(LIBRETRO_COMM_DIR)/file/file_path.c \
+   $(LIBRETRO_COMM_DIR)/file/file_path_io.c \
+   $(LIBRETRO_COMM_DIR)/streams/file_stream.c \
+   $(LIBRETRO_COMM_DIR)/streams/file_stream_transforms.c \
+   $(LIBRETRO_COMM_DIR)/string/stdstring.c \
+   $(LIBRETRO_COMM_DIR)/time/rtime.c \
+   $(LIBRETRO_COMM_DIR)/vfs/vfs_implementation.c
+endif

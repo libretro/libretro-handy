@@ -178,7 +178,12 @@ class CSystem;
 class CSystem : public CSystemBase
 {
    public:
-      CSystem(const char* gamefile, const char* romfile,bool useEmu);
+      CSystem(const char *gamefile,
+              const UBYTE *gamedata,
+              ULONG gamesize,
+              const char *romfile,
+              bool useEmu,
+              const char *eepromfile);
       ~CSystem();
     void SaveEEPROM(void);
 
@@ -191,7 +196,6 @@ class CSystem : public CSystemBase
       size_t ContextSize(void);
       bool ContextSave(LSS_FILE *fp);
       bool ContextLoad(LSS_FILE *fp);
-      bool IsZip(char *filename);
 
       inline void Update(void)
       {

@@ -54,7 +54,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <string/stdstring.h>
+#include <file/file_path.h>
+#include <streams/file_stream.h>
+
 #include "system.h"
+#include "handy.h"
 
 extern void lynx_decrypt(unsigned char * result, const unsigned char * encrypted, const int length);
 
@@ -84,60 +90,12 @@ int lss_printf(LSS_FILE *fp, const char *str)
    return copysize;
 }
 
-static void split_path(const char* path, char* drv, char* dir, char* name, char* ext)
-{
-   const char* end; /* end of processed string */
-   const char* p;   /* search pointer */
-   const char* s;   /* copy pointer */
-
-   /* extract drive name */
-   if (path[0] && path[1]==':') {
-      if (drv) {
-         *drv++ = *path++;
-         *drv++ = *path++;
-         *drv = '\0';
-      }
-   } else if (drv)
-      *drv = '\0';
-
-   /* search for end of string or stream separator */
-   for(end=path; *end && *end!=':'; )
-      end++;
-
-   /* search for begin of file extension */
-   for(p=end; p>path && *--p!='\\' && *p!='/'; )
-      if (*p == '.') {
-         end = p;
-         break;
-      }
-
-   if (ext)
-      for(s=end; (*ext=*s++); )
-         ext++;
-
-   /* search for end of directory name */
-   for(p=end; p>path; )
-      if (*--p=='\\' || *p=='/') {
-         p++;
-         break;
-      }
-
-   if (name) {
-      for(s=p; s<end; )
-         *name++ = *s++;
-
-      *name = '\0';
-   }
-
-   if (dir) {
-      for(s=path; s<p; )
-         *dir++ = *s++;
-
-      *dir = '\0';
-   }
-}
-
-CSystem::CSystem(const char* gamefile, const char* romfile, bool useEmu)
+CSystem::CSystem(const char *gamefile,
+                 const UBYTE *gamedata,
+                 ULONG gamesize,
+                 const char *romfile,
+                 bool useEmu,
+                 const char *eepromfile)
  : mCart(NULL),
    mRom(NULL),
    mMemMap(NULL),
@@ -147,56 +105,67 @@ CSystem::CSystem(const char* gamefile, const char* romfile, bool useEmu)
    mSusie(NULL),
    mEEPROM(NULL)
 {
+   const UBYTE *game_memory = NULL;
+   UBYTE *game_memory_buf   = NULL;
+   ULONG game_memory_size   = 0;
+   UBYTE *howard_memory     = NULL;
+   ULONG howard_memory_size = 0;
 
    // Select the default filetype
-   UBYTE *filememory=NULL;
-   UBYTE *howardmemory=NULL;
-   ULONG filesize=0;
-   ULONG howardsize=0;
-
    mFileType=HANDY_FILETYPE_ILLEGAL;
-   if(strcmp(gamefile,"")==0) {
-      // No file
-      filesize=0;
-      filememory=NULL;
+
+   // Check whether a data buffer is provided
+   if (gamedata && (gamesize != 0)) {
+      game_memory      = gamedata;
+      game_memory_size = gamesize;
    }
-   else {
-      // Open the file and load the file
-      FILE *fp;
+   // Otherwise load data from file
+   else if (!string_is_empty(gamefile)) {
+      RFILE *fp = NULL;
 
       // Open the cartridge file for reading
-      if((fp=fopen(gamefile,"rb"))==NULL) {
-         fprintf(stderr, "Invalid Cart.\n");
+      fp = filestream_open(gamefile, RETRO_VFS_FILE_ACCESS_READ,
+            RETRO_VFS_FILE_ACCESS_HINT_NONE);
+
+      if (fp) {
+         // How big is the file?
+         filestream_seek(fp, 0, RETRO_VFS_SEEK_POSITION_END);
+         game_memory_size = filestream_tell(fp);
+         filestream_seek(fp, 0, RETRO_VFS_SEEK_POSITION_START);
+
+         game_memory_buf = (UBYTE*) new UBYTE[game_memory_size];
+
+         if (filestream_read(fp, game_memory_buf, game_memory_size) == game_memory_size)
+         {
+            handy_log(RETRO_LOG_INFO, "Read Cart file: %s\n", gamefile);
+            game_memory = game_memory_buf;
+         }
+         else {
+            handy_log(RETRO_LOG_ERROR, "Failed to read Cart file: %s\n", gamefile);
+            game_memory_size = 0;
+         }
+
+         filestream_close(fp);
       }
-
-      // How big is the file ??
-      fseek(fp,0,SEEK_END);
-      filesize=ftell(fp);
-      fseek(fp,0,SEEK_SET);
-      filememory=(UBYTE*) new UBYTE[filesize];
-
-      if(fread(filememory,sizeof(char),filesize,fp)!=filesize) {
-         fprintf(stderr, "Invalid Cart (filesize).\n");
-      }
-
-      fclose(fp);
+      else
+         handy_log(RETRO_LOG_ERROR, "Failed to open Cart file: %s\n", gamefile);
    }
 
-   // Now try and determine the filetype we have opened
-   if(filesize) {
+   // Try to determine the game (cartridge) type
+   if (game_memory && (game_memory_size > 0)) {
       char clip[11];
-      memcpy(clip,filememory,11);
+      memcpy(clip,game_memory,11);
       clip[4]=0;
       clip[10]=0;
 
       if(!strcmp(&clip[6],"BS93")) mFileType=HANDY_FILETYPE_HOMEBREW;
       else if(!strcmp(&clip[0],"LYNX")) mFileType=HANDY_FILETYPE_LNX;
       else if(!strcmp(&clip[0],LSS_VERSION_OLD)) mFileType=HANDY_FILETYPE_SNAPSHOT;
-      else if(filesize==128*1024 || filesize==256*1024 || filesize==512*1024) {
-         fprintf(stderr, "Invalid Cart (type). but 128/256/512k size -> set to RAW and try to load raw rom image\n");
+      else if(game_memory_size==128*1024 || game_memory_size==256*1024 || game_memory_size==512*1024) {
+         handy_log(RETRO_LOG_ERROR, "Invalid Cart (type). but 128/256/512k size -> set to RAW and try to load raw rom image\n");
          mFileType=HANDY_FILETYPE_RAW;
       } else {
-         fprintf(stderr, "Invalid Cart (type). -> set to RAW and try to load raw rom image\n");
+         handy_log(RETRO_LOG_ERROR, "Invalid Cart (type). -> set to RAW and try to load raw rom image\n");
          mFileType=HANDY_FILETYPE_RAW;
       }
    }
@@ -215,44 +184,56 @@ CSystem::CSystem(const char* gamefile, const char* romfile, bool useEmu)
    switch(mFileType) {
       case HANDY_FILETYPE_RAW:
       case HANDY_FILETYPE_LNX:
-         mCart = new CCart(filememory,filesize);
+         mCart = new CCart(game_memory,game_memory_size);
          if(mCart->CartHeaderLess()) {
-            // veryvery strange Howard Check CANNOT work, as there are two different loader-less card types...
+            // Very strange Howard Check CANNOT work, as there are two
+            // different loader-less card types...
             // unclear HOW this should do anything useful...
-            FILE *fp;
-            char drive[3],dir[256],cartgo[256];
-            mFileType=HANDY_FILETYPE_HOMEBREW;
-            split_path(romfile,drive,dir,NULL,NULL);
-            strcpy(cartgo,drive);
-            strcat(cartgo,dir);
-            strcat(cartgo,"howard.o");
+            mFileType = HANDY_FILETYPE_HOMEBREW;
 
-            // Open the howard file for reading
-            if((fp=fopen(cartgo,"rb"))==NULL) {
-               fprintf(stderr, "Invalid Cart.\n");
+            if (!string_is_empty(romfile)) {
+               RFILE *fp = NULL;
+               char cartgo[PATH_MAX_LENGTH];
+               cartgo[0] = '\0';
+
+               fill_pathname_resolve_relative(cartgo,
+                     romfile, "howard.o", sizeof(cartgo));
+
+               // Open the howard file for reading
+               if (!string_is_empty(cartgo) &&
+                   path_is_valid(cartgo))
+                  fp = filestream_open(cartgo, RETRO_VFS_FILE_ACCESS_READ,
+                        RETRO_VFS_FILE_ACCESS_HINT_NONE);
+
+               if (fp) {
+                  // How big is the file?
+                  filestream_seek(fp, 0, RETRO_VFS_SEEK_POSITION_END);
+                  howard_memory_size = filestream_tell(fp);
+                  filestream_seek(fp, 0, RETRO_VFS_SEEK_POSITION_START);
+
+                  howard_memory = (UBYTE*) new UBYTE[howard_memory_size];
+
+                  if (filestream_read(fp, howard_memory, howard_memory_size) != howard_memory_size) {
+                     handy_log(RETRO_LOG_ERROR, "Failed to read howard file: %s\n", cartgo);
+                     howard_memory_size = 0;
+                  }
+
+                  filestream_close(fp);
+               }
+               else
+                  handy_log(RETRO_LOG_ERROR, "Failed to open howard file: %s\n",
+                        string_is_empty(cartgo) ? "NULL" : cartgo);
             }
-
-            // How big is the file ??
-            fseek(fp,0,SEEK_END);
-            howardsize=ftell(fp);
-            fseek(fp,0,SEEK_SET);
-            howardmemory=(UBYTE*) new UBYTE[filesize];
-
-            if(fread(howardmemory,sizeof(char),howardsize,fp)!=howardsize) {
-               fprintf(stderr, "Invalid Cart.\n");
-            }
-
-            fclose(fp);
 
             // Pass it to RAM to load
-            mRam = new CRam(howardmemory,howardsize);
+            mRam = new CRam(howard_memory,howard_memory_size);
          } else {
             mRam = new CRam(0,0);
          }
          break;
       case HANDY_FILETYPE_HOMEBREW:
          mCart = new CCart(0,0);
-         mRam = new CRam(filememory,filesize);
+         mRam = new CRam(game_memory,game_memory_size);
          break;
       case HANDY_FILETYPE_SNAPSHOT:
       case HANDY_FILETYPE_ILLEGAL:
@@ -280,18 +261,15 @@ CSystem::CSystem(const char* gamefile, const char* romfile, bool useEmu)
 
    Reset();
 
-   if(filememory) delete[] filememory;
-   if(howardmemory) delete[] howardmemory;
-   mEEPROM->SetEEPROMType(mCart->mEEPROMType);
+   if (game_memory_buf)
+      delete[] game_memory_buf;
 
-   {
-      char eepromfile[1024];
-      strncpy(eepromfile, gamefile,1024-10);
-      strcat(eepromfile,".eeprom");
-      mEEPROM->SetFilename(eepromfile);
-      printf("filename %d %s %s\n",mCart->mEEPROMType,gamefile,eepromfile);
-      mEEPROM->Load();
-   }
+   if (howard_memory)
+      delete[] howard_memory;
+
+   mEEPROM->SetEEPROMType(mCart->mEEPROMType);
+   mEEPROM->SetFilename(eepromfile);
+   mEEPROM->Load();
 }
 
 void CSystem::SaveEEPROM(void)
@@ -311,20 +289,6 @@ CSystem::~CSystem()
    if(mMikie!=NULL) delete mMikie;
    if(mSusie!=NULL) delete mSusie;
    if(mMemMap!=NULL) delete mMemMap;
-}
-
-bool CSystem::IsZip(char *filename)
-{
-   UBYTE buf[2];
-   FILE *fp;
-
-   if((fp=fopen(filename,"rb"))!=NULL) {
-      fread(buf, 2, 1, fp);
-      fclose(fp);
-      return(memcmp(buf,"PK",2)==0);
-   }
-   if(fp)fclose(fp);
-   return FALSE;
 }
 
 void CSystem::HLE_BIOS_FE00(void)
@@ -538,7 +502,7 @@ bool CSystem::ContextLoad(LSS_FILE *fp)
          // Read CRC32 and check against the CART for a match
          lss_read(&checksum,sizeof(ULONG),1,fp);
          if(mCart->CRC32()!=checksum) {
-            fprintf(stderr, "[handy]LSS Snapshot CRC does not match the loaded cartridge image, aborting load.\n");
+            handy_log(RETRO_LOG_ERROR, "LSS Snapshot CRC does not match the loaded cartridge image, aborting load.\n");
             return 0;
          }
       }
@@ -587,7 +551,7 @@ bool CSystem::ContextLoad(LSS_FILE *fp)
 
       gAudioBufferPointer = 0;
    } else {
-      fprintf(stderr, "[handy]Not a recognised LSS file\n");
+      handy_log(RETRO_LOG_ERROR, "Not a recognised LSS file\n");
    }
 
    return status;

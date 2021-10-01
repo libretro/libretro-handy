@@ -6,6 +6,17 @@
 #ifndef EEPROM_H
 #define EEPROM_H
 
+#include <string.h>
+#include <string/stdstring.h>
+
+#ifndef PATH_MAX_LENGTH
+#if defined(_XBOX1) || defined(_3DS) || defined(PSP) || defined(PS2) || defined(GEKKO)|| defined(WIIU) || defined(ORBIS) || defined(__PSL1GHT__) || defined(__PS3__)
+#define PATH_MAX_LENGTH 512
+#else
+#define PATH_MAX_LENGTH 4096
+#endif
+#endif
+
 #ifndef __min
 #define __min(a,b) \
    ({ __typeof__ (a) _a = (a); \
@@ -27,7 +38,7 @@ public:
    bool ContextLoad(LSS_FILE *fp);
    void Reset(void);
 
-   bool Available(void){ return type!=0;};
+   bool Available(void){ return ((type != 0) && !string_is_empty(filename)); };
    void ProcessEepromIO(UBYTE iodir,UBYTE iodat);
    void ProcessEepromCounter(UWORD cnt);
    void ProcessEepromBusy(void);
@@ -45,14 +56,20 @@ public:
       return(0);
    };
 
-   void SetFilename(char* f){strcpy(filename,f);};
+   void SetFilename(const char *f)
+   {
+      if (!string_is_empty(f))
+         strlcpy(filename, f, PATH_MAX_LENGTH);
+      else
+         *filename='\0';
+   };
    char* GetFilename(void){ return filename;};
    
    void Load(void);
    void Save(void);
 
 private:
-   char filename[1024];
+   char filename[PATH_MAX_LENGTH];
     
    void UpdateEeprom(UWORD cnt);
    UBYTE type; // 0 ... no eeprom
