@@ -54,8 +54,13 @@ typedef uint8_t UBYTE;
 // Words should be 16-bits wide
 typedef uint16_t UWORD;
 
+#if (defined(WIN32) || defined(_WIN32) || defined(_MSC_VER))
+// ULONG is a built-in type on Windows platforms...
+#include <windows.h>
+#else
 // Longs should be 32-bits wide
 typedef uint32_t ULONG;
+#endif
 
 // Read/Write Cycle definitions
 #define CPU_RDWR_CYC	5

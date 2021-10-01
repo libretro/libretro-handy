@@ -53,7 +53,7 @@
 #include "system.h"
 #include "mikie.h"
 #include "lynxdef.h"
-
+#include "handy.h"
 
 void CMikie::BlowOut(void)
 {
@@ -1303,7 +1303,7 @@ ULONG CMikie::DisplayEndOfFrame(void)
    }
 
    mikbuf.end_frame((gSystemCycleCount - gAudioLastUpdateCycle) / 4);
-   gAudioBufferPointer = mikbuf.read_samples((blip_sample_t*) gAudioBuffer, HANDY_AUDIO_BUFFER_SIZE / 2) * 2;
+   gAudioBufferPointer = mikbuf.read_samples((blip_sample_t*) gAudioBuffer, HANDY_AUDIO_BUFFER_SIZE / 2);
 
    return 0;
 }
@@ -1915,7 +1915,7 @@ void CMikie::Poke(ULONG addr,UBYTE data)
                   mSystem.HLE_BIOS_FF80();
                   break;
                default:
-                  printf("ROM code missing...\n");
+                  handy_log(RETRO_LOG_ERROR, "ROM code missing...\n");
                   break;
                }
             }

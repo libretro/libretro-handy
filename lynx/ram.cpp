@@ -50,27 +50,28 @@
 #include <string.h>
 #include "system.h"
 #include "ram.h"
+#include "handy.h"
 
-CRam::CRam(UBYTE *filememory,ULONG filesize)
+CRam::CRam(const UBYTE *gamedata, ULONG gamesize)
 {
    HOME_HEADER	header;
 
    // Take a copy into the backup buffer for restore on reset
-   mFileSize=filesize;
+   mFileSize=gamesize;
 
-   if(filesize) {
+   if(mFileSize) {
       // Take a copy of the ram data
       mFileData = new UBYTE[mFileSize];
-      memcpy(mFileData,filememory,mFileSize);
+      memcpy(mFileData,gamedata,mFileSize);
 
       // Sanity checks on the header
       memcpy(&header,mFileData,sizeof(HOME_HEADER));
 
       if(header.magic[0]!='B' || header.magic[1]!='S' || header.magic[2]!='9' || header.magic[3]!='3') {
-         fprintf(stderr, "Invalid cart.\n");
+         handy_log(RETRO_LOG_ERROR, "Invalid Cart (incorrect header)\n");
       }
    } else {
-      filememory=NULL;
+      mFileData=NULL;
    }
    // Reset will cause the loadup
 

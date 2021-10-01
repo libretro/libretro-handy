@@ -127,7 +127,23 @@ void Blip_Buffer::bass_freq( int freq )
 void Blip_Buffer::end_frame( blip_time_t t )
 {
 	offset_ += t * factor_;
-	assert( samples_avail() <= (long) buffer_size_ ); // time outside buffer length
+
+	// When using a 'fake' internal BIOS, core
+	// timers are started 'artificially' on
+	// load content. When using a real BIOS file
+	// this does not happen - and it takes one frame
+	// for the timers to start counting normally.
+	// This makes the first frame unusually 'long'
+	// (very high cycle count), which overflows
+	// the blip buffer. To enable the use of a real
+	// BIOS file, we therefore have to cap offset_
+	// here by resetting internal blip buffer counters
+	// and clearing any waiting samples in the event
+	// of an overflow
+	// > Original code just used an assert():
+	//      assert( samples_avail() <= (long) buffer_size_ ); // time outside buffer length
+	if (samples_avail() > (long) buffer_size_)
+		clear(0);
 }
 
 void Blip_Buffer::remove_silence( long count )

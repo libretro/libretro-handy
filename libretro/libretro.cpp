@@ -1,7 +1,9 @@
 #include "libretro.h"
 #include "libretro_core_options.h"
 
-#include <string.h>
+#include <string/stdstring.h>
+#include <file/file_path.h>
+#include <streams/file_stream.h>
 
 #include "handy.h"
 
@@ -116,8 +118,8 @@ static void init_frameskip(void)
       if (!environ_cb(RETRO_ENVIRONMENT_SET_AUDIO_BUFFER_STATUS_CALLBACK,
             &buf_status_cb))
       {
-         if (log_cb)
-            log_cb(RETRO_LOG_WARN, "Frameskip disabled - frontend does not support audio buffer status monitoring.\n");
+         handy_log(RETRO_LOG_WARN,
+               "Frameskip disabled - frontend does not support audio buffer status monitoring.\n");
 
          retro_audio_buff_active    = false;
          retro_audio_buff_occupancy = 0;
@@ -157,6 +159,27 @@ static void init_frameskip(void)
 
 /* Frameskipping Support END */
 
+void handy_log(enum retro_log_level level, const char *format, ...)
+{
+   char msg[512];
+   va_list ap;
+
+   msg[0] = '\0';
+
+   if (string_is_empty(format))
+      return;
+
+   va_start(ap, format);
+   vsprintf(msg, format, ap);
+   va_end(ap);
+
+   if (log_cb)
+      log_cb(level, "[Handy] %s", msg);
+   else
+      fprintf((level == RETRO_LOG_ERROR) ? stderr : stdout,
+            "[Handy] %s", msg);
+}
+
 static void check_color_depth(void)
 {
    if (RETRO_PIX_DEPTH == 24)
@@ -168,7 +191,8 @@ static void check_color_depth(void)
 
       if(!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &rgb888))
       {
-         if(log_cb) log_cb(RETRO_LOG_ERROR, "Pixel format XRGB8888 not supported by platform.\n");
+         handy_log(RETRO_LOG_ERROR,
+               "Pixel format XRGB8888 not supported by platform.\n");
 
          RETRO_PIX_BYTES = 2;
 #if defined(FRONTEND_SUPPORTS_RGB565)
@@ -198,7 +222,8 @@ static void check_color_depth(void)
 
       if (environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &rgb565))
       {
-         if(log_cb) log_cb(RETRO_LOG_INFO, "Frontend supports RGB565 - will use that instead of XRGB1555.\n");
+         handy_log(RETRO_LOG_INFO,
+               "Frontend supports RGB565 - will use that instead of XRGB1555.\n");
 
          RETRO_PIX_DEPTH = 16;
       }
@@ -207,7 +232,8 @@ static void check_color_depth(void)
 
       if (environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &rgb555))
       {
-         if(log_cb) log_cb(RETRO_LOG_INFO, "Using default 0RGB1555 pixel format.\n");
+         handy_log(RETRO_LOG_INFO,
+               "Using default 0RGB1555 pixel format.\n");
 
          RETRO_PIX_DEPTH = 15;
       }
@@ -237,10 +263,9 @@ static UBYTE* lynx_display_callback(ULONG objref)
    video_cb((bool)gSkipFrame ? NULL : framebuffer,
          lynx_width, lynx_height, RETRO_LYNX_WIDTH*RETRO_PIX_BYTES);
 
-   for(total = 0; total < gAudioBufferPointer/4;)
-      total += audio_batch_cb(soundBuffer + total*2, (gAudioBufferPointer/4) - total);
+   /* Divide gAudioBufferPointer by number of channels */
+   audio_batch_cb(soundBuffer, gAudioBufferPointer >> 1);
    gAudioBufferPointer = 0;
-
 
    newFrame = true;
 
@@ -419,9 +444,27 @@ void retro_deinit(void)
 
 void retro_set_environment(retro_environment_t cb)
 {
+   struct retro_vfs_interface_info vfs_iface_info;
+   static const struct retro_system_content_info_override content_overrides[] = {
+      {
+         "lnx|o", /* extensions */
+         false,   /* need_fullpath */
+         false    /* persistent_data */
+      },
+      { NULL, false, false }
+   };
+
    environ_cb = cb;
 
    libretro_set_core_options(environ_cb);
+
+   vfs_iface_info.required_interface_version = 1;
+   vfs_iface_info.iface                      = NULL;
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VFS_INTERFACE, &vfs_iface_info))
+      filestream_vfs_init(&vfs_iface_info);
+
+   environ_cb(RETRO_ENVIRONMENT_SET_CONTENT_INFO_OVERRIDE,
+         (void*)content_overrides);
 }
 
 void retro_set_audio_sample(retro_audio_sample_t cb)
@@ -446,34 +489,6 @@ void retro_set_input_state(retro_input_state_t cb)
 void retro_set_video_refresh(retro_video_refresh_t cb)
 {
    video_cb = cb;
-}
-
-static int file_exists(const char *path)
-{
-   FILE *dummy = fopen(path, "rb");
-
-   if (!dummy)
-      return 0;
-
-   fclose(dummy);
-   return 1;
-}
-
-static bool lynx_romfilename(char *dest)
-{
-   const char *dir = 0;
-   environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &dir);
-
-   sprintf(dest, "%s%c%s", dir, SLASH_STR, ROM_FILE);
-
-   if (!file_exists(dest))
-   {
-      if (log_cb)
-         log_cb(RETRO_LOG_ERROR, "[handy] ROM not found %s\n", dest);
-      return false;
-   }
-
-   return true;
 }
 
 void retro_set_controller_port_device(unsigned, unsigned) { }
@@ -619,7 +634,16 @@ bool retro_unserialize(const void *data, size_t size)
 
 bool retro_load_game(const struct retro_game_info *info)
 {
-   char romfilename[1024];
+   const struct retro_game_info_ext *info_ext = NULL;
+   const char *content_path                   = NULL;
+   const UBYTE *content_data                  = NULL;
+   size_t content_size                        = 0;
+   const char *system_dir                     = NULL;
+   const char *eeprom_dir                     = NULL;
+   bool bios_found                            = false;
+   char bios_file[PATH_MAX_LENGTH];
+   char eeprom_file[PATH_MAX_LENGTH];
+
    static struct retro_input_descriptor desc[] = {
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "D-Pad Left" },
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,    "D-Pad Up" },
@@ -635,26 +659,85 @@ bool retro_load_game(const struct retro_game_info *info)
       { 0 },
    };
 
-   if (!info)
-      return false;
+   bios_file[0]   = '\0';
+   eeprom_file[0] = '\0';
 
    environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
 
+   /* Get save directory */
+   environ_cb(RETRO_ENVIRONMENT_GET_SAVE_DIRECTORY, &eeprom_dir);
+
+   /* Attempt to fetch extended game info */
+   if (environ_cb(RETRO_ENVIRONMENT_GET_GAME_INFO_EXT, &info_ext) &&
+       info_ext->data && (info_ext->size > 0))
+   {
+      content_path = NULL;
+      content_data = (const UBYTE *)info_ext->data;
+      content_size = info_ext->size;
+
+      /* EEPROM file is <save_dir>/<content_name>.eeprom */
+      if (eeprom_dir)
+      {
+         fill_pathname_join(eeprom_file, eeprom_dir,
+               info_ext->name, sizeof(eeprom_file));
+         strlcat(eeprom_file, ".eeprom", sizeof(eeprom_file));
+      }
+   }
+   else
+   {
+      /* No extended info - just pass content
+       * path to emulator */
+      const char *content_file = NULL;
+
+      if (!info || string_is_empty(info->path))
+         return false;
+
+      content_path = info->path;
+      content_data = NULL;
+      content_size = 0;
+
+      /* Use content file name to build EEPROM path */
+      content_file = path_basename(content_path);
+      if (eeprom_dir && !string_is_empty(content_file))
+      {
+         char *content_name = strdup(content_file);
+         path_remove_extension(content_name);
+
+         fill_pathname_join(eeprom_file, eeprom_dir,
+               content_name, sizeof(eeprom_file));
+         strlcat(eeprom_file, ".eeprom", sizeof(eeprom_file));
+
+         free(content_name);
+      }
+   }
+
+   /* Get bios path */
+   if (environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &system_dir) &&
+         system_dir)
+      fill_pathname_join(bios_file, system_dir,
+            ROM_FILE, sizeof(bios_file));
+
+   if (!string_is_empty(bios_file) &&
+       path_is_valid(bios_file))
+      bios_found = true;
+   else
+      handy_log(RETRO_LOG_WARN, "BIOS file missing: %s\n",
+            string_is_empty(bios_file) ? ROM_FILE : bios_file);
+
+   /* Initialise emulator */
    check_variables();
    check_color_depth();
    init_frameskip();
 
-   if(lynx)
+   if (lynx)
    {
       lynx->SaveEEPROM();
       delete lynx;
       lynx=0;
    }
 
-   if (!lynx_romfilename(romfilename))
-      return false;
-
-   lynx          = new CSystem(info->path, romfilename, true);
+   lynx          = new CSystem(content_path, content_data, content_size,
+         bios_file, !bios_found, eeprom_file);
    gAudioEnabled = true;
    soundBuffer   = (int16_t *)&gAudioBuffer;
    btn_map       = btn_map_no_rot;

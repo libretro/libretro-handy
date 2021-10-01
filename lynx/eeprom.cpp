@@ -7,13 +7,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <streams/file_stream.h>
 #include "system.h"
 #include "eeprom.h"
+#include "handy.h"
 
 CEEPROM::CEEPROM()
 {
    type=0;
-   *filename=0;
+   *filename='\0';
    memset(romdata, 0xff, sizeof(romdata));
 
    Reset();
@@ -43,23 +45,38 @@ CEEPROM::~CEEPROM()
 
 void CEEPROM::Load(void)
 {
-   if(!Available()) return;
-   FILE *fe;
-   if((fe=fopen(filename,"rb"))!=NULL){
-      printf("EEPROM LOAD %s\n",filename);
-      fread(romdata,1,1024,fe);
-      fclose(fe);
+   RFILE *fe = NULL;
+
+   if(!Available())
+      return;
+
+   fe = filestream_open(filename, RETRO_VFS_FILE_ACCESS_READ,
+         RETRO_VFS_FILE_ACCESS_HINT_NONE);
+
+   if (fe)
+   {
+      handy_log(RETRO_LOG_INFO, "EEPROM LOAD %s\n", filename);
+      memset(romdata, 0xff, sizeof(romdata));
+      filestream_read(fe, romdata, 1024);
+      filestream_close(fe);
    }
 }
 
 void CEEPROM::Save(void)
 {
-   if(!Available()) return;
-   FILE *fe;
-   if((fe=fopen(filename,"wb+"))!=NULL){
-      printf("EEPROM SAVE %s\n",filename);
-      fwrite(romdata,1,Size(),fe);
-      fclose(fe);
+   RFILE *fe = NULL;
+
+   if(!Available())
+      return;
+
+   fe = filestream_open(filename, RETRO_VFS_FILE_ACCESS_WRITE,
+         RETRO_VFS_FILE_ACCESS_HINT_NONE);
+
+   if (fe)
+   {
+      handy_log(RETRO_LOG_INFO, "EEPROM SAVE %s\n", filename);
+      filestream_write(fe, romdata, Size());
+      filestream_close(fe);
    }
 }
 
@@ -112,57 +129,63 @@ bool CEEPROM::ContextLoad(LSS_FILE *fp)
 
 void CEEPROM::SetEEPROMType(UBYTE b)
 {
+   char msg[256];
+   msg[0] = '\0';
+
+   strlcpy(msg, "EEPROM: ", sizeof(msg));
+
    type=b;
-   printf("\nEEPROM: ");
    switch(b&0x7) {
       case 1: // 93C46 , 8 bit mode
          ADDR_MASK =  0x7F;
          CMD_BITS  =  10;
          ADDR_BITS =  7;
-         printf("93C46 ");
+         strlcat(msg, "93C46 ", sizeof(msg));
          break;
       case 2: // 93C56 , 8 bit mode
          ADDR_MASK =  0xFF;
          CMD_BITS  =  12;
          ADDR_BITS =  9;
-         printf("93C56 ");
+         strlcat(msg, "93C56 ", sizeof(msg));
          break;
       case 3: // 93C66 , 8 bit mode
          ADDR_MASK =  0x1FF;
          CMD_BITS  =  12;
          ADDR_BITS =  9;
-         printf("93C66 ");
+         strlcat(msg, "93C66 ", sizeof(msg));
          break;
       case 4: // 93C76 , 8 bit mode
          ADDR_MASK =  0x3FF;
          CMD_BITS  =  14;
          ADDR_BITS =  11;
-         printf("93C76 ");
+         strlcat(msg, "93C76 ", sizeof(msg));
          break;
       case 5: // 93C86 , 8 bit mode
          ADDR_MASK =  0x7FF;
          CMD_BITS  =  14;
          ADDR_BITS =  11;
-         printf("93C86 ");
+         strlcat(msg, "93C86 ", sizeof(msg));
          break;
       case 0: // NONE, fallthrou
       default:
          ADDR_MASK =  0;
          CMD_BITS  =  1;
          ADDR_BITS =  1;
-         printf("none ");
+         strlcat(msg, "none ", sizeof(msg));
          break;
    }
    if(b&0x80) { // 8 bit access
       DONE_MASK =  0x100;
-      printf("8 bit\n");
+      strlcat(msg, "(8 bit)", sizeof(msg));
    } else { // 16 bit access
       ADDR_MASK>>=1;
       CMD_BITS--;
       ADDR_BITS--;
       DONE_MASK = 0x10000;
-      printf("16 bit\n");
+      strlcat(msg, "(16 bit)", sizeof(msg));
    }
+
+   handy_log(RETRO_LOG_INFO, "%s\n", msg);
 }
 
 int CEEPROM::Size(void)

@@ -48,68 +48,89 @@
 #include <stdlib.h>
 #include <string.h>
 #include "system.h"
+#include "scrc32.h"
+#include <string/stdstring.h>
+#include <streams/file_stream.h>
 #include "rom.h"
+#include "handy.h"
 
-CRom::CRom(const char *romfile,bool useEmu)
+static void initialise_rom_data(UBYTE *rom_data)
 {
-   int loop;
+   unsigned i;
+
+   // Initialise ROM
+   for(i = 0; i < ROM_SIZE; i++)
+      rom_data[i] = DEFAULT_ROM_CONTENTS;
+
+   // actually not part of Boot ROM but uninitialized otherwise
+   // Reset Vector etc
+   rom_data[0x1F8] = 0x00;
+   rom_data[0x1F9] = 0x80;
+   rom_data[0x1FA] = 0x00;
+   rom_data[0x1FB] = 0x30;
+   rom_data[0x1FC] = 0x80;
+   rom_data[0x1FD] = 0xFF;
+   rom_data[0x1FE] = 0x80;
+   rom_data[0x1FF] = 0xFF;
+}
+
+CRom::CRom(const char *romfile, bool useEmu)
+{
+   ULONG crc    = 0;
    mWriteEnable = FALSE;
    mValid       = TRUE;
    Reset();
 
-   // Initialise ROM
-   for(loop = 0; loop < ROM_SIZE; loop++)
-      mRomData[loop] = DEFAULT_ROM_CONTENTS;
-
-   // actually not part of Boot ROM but uninitialized otherwise
-   // Reset Vector etc
-   mRomData[0x1F8] = 0x00;
-   mRomData[0x1F9] = 0x80;
-   mRomData[0x1FA] = 0x00;
-   mRomData[0x1FB] = 0x30;
-   mRomData[0x1FC] = 0x80;
-   mRomData[0x1FD] = 0xFF;
-   mRomData[0x1FE] = 0x80;
-   mRomData[0x1FF] = 0xFF;
+   initialise_rom_data(mRomData);
 
    if (useEmu)
-      mValid       = FALSE;
+      mValid = FALSE;
    else
    {
-      FILE *fp;
+      RFILE *fp = NULL;
 
       /* Load up the file */
-      if((fp=fopen(romfile,"rb"))==NULL)
-        mValid     = FALSE;
-      else
+      if (!string_is_empty(romfile))
+         fp = filestream_open(romfile, RETRO_VFS_FILE_ACCESS_READ,
+               RETRO_VFS_FILE_ACCESS_HINT_NONE);
+
+      if (fp)
       {
          /* Read in the 512 bytes */
-         if (fread(mRomData,sizeof(char),ROM_SIZE,fp)!=ROM_SIZE) 
+         if (filestream_read(fp, mRomData, ROM_SIZE) != ROM_SIZE)
             mValid = FALSE;
-         if (fp)
-            fclose(fp);
+
+         filestream_close(fp);
       }
+      else
+         mValid = FALSE;
 
       /* Check the code that has been loaded and report an error if its a
-       * fake version (from handy distribution) of the bootrom
-       * would be more intelligent to make a crc
-       */
+       * fake version (from handy distribution) of the bootrom */
+      crc = crc32(crc, mRomData, ROM_SIZE);
 
-      if(mRomData[0x1FE] != 0x80 || mRomData[0x1FF] != 0xFF)
+      if (crc != ROM_CRC32)
+      {
+         handy_log(RETRO_LOG_ERROR,
+               "Invalid BIOS detected - CRC: 0x%08x (expected 0x%08x)\n", crc, ROM_CRC32);
          mValid = FALSE;
+      }
+
+      /* If we failed to load the correct bios,
+       * reset the rom data to the default */
+      if (!mValid)
+      {
+         handy_log(RETRO_LOG_ERROR,
+               "Failed to load BIOS - Using internal fallback...\n", crc, ROM_CRC32);
+         initialise_rom_data(mRomData);
+      }
+      else
+         handy_log(RETRO_LOG_INFO, "BIOS loaded: %s\n", romfile);
    }
 }
 
 // Nothing to do here
 void CRom::Reset(void) { }
-bool CRom::ContextSave(FILE *fp)
-{
-   if(!fprintf(fp,"CRom::ContextSave"))
-      return 0;
-   if(!fwrite(mRomData,sizeof(UBYTE),ROM_SIZE,fp))
-      return 0;
-   return 1;
-}
 
 bool CRom::ContextLoad(LSS_FILE *fp)
 {
