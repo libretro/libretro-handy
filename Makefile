@@ -247,7 +247,7 @@ else ifeq ($(platform), gcw0)
 	 
  # RETROFW
  else ifeq ($(platform), retrofw)
-    TARGET := $(TARGET_NAME)_libretro.so   	
+    TARGET := $(TARGET_NAME)_libretro.so
 		CC = /opt/retrofw-toolchain/usr/bin/mipsel-linux-gcc
 		CXX = /opt/retrofw-toolchain/usr/bin/mipsel-linux-g++
 		AR = /opt/retrofw-toolchain/usr/bin/mipsel-linux-ar
