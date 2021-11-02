@@ -50,6 +50,7 @@
 #pragma inline_recursion (on)
 
 #include "machine.h"
+#include "errorinterface.h"
 
 #define HANDY_SYSTEM_FREQ                       16000000
 #define HANDY_TIMER_FREQ                        20
@@ -199,29 +200,15 @@ class CSystem : public CSystemBase
 
       inline void Update(void)
       {
-         //         fprintf(stderr, "sys update\n");
-         //
          // Only update if there is a predicted timer event
-         //
          if(gSystemCycleCount>=gNextTimerEvent)
-         {
             mMikie->Update();
-         }
-         //
          // Step the processor through 1 instruction
-         //
          mCpu->Update();
-         //         fprintf(stderr, "end cpu update\n");
 
-         //
          // If the CPU is asleep then skip to the next timer event
-         //
          if(gSystemCPUSleep)
-         {
             gSystemCycleCount=gNextTimerEvent;
-         }
-
-         //         fprintf(stderr, "end sys update\n");
       }
 
       //

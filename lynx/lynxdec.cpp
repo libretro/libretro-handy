@@ -3,7 +3,6 @@
     http://atariage.com/forums/topic/129030-lynx-encryption/
 */
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 

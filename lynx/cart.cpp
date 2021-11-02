@@ -45,7 +45,6 @@
 #define CART_CPP
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include "system.h"
 #include "cart.h"

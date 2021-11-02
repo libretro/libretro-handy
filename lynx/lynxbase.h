@@ -43,8 +43,8 @@ class CLynxBase
 
    public:
       virtual void	Reset(void) {};
-      virtual bool	ContextLoad(FILE *fp) { return 0; };
-      virtual bool	ContextSave(FILE *fp) { return 0; };
+      virtual bool	ContextLoad(LSS_FILE *fp) { return 0; };
+      virtual bool	ContextSave(LSS_FILE *fp) { return 0; };
 
       virtual void	Poke(ULONG addr,UBYTE data)=0;
       virtual UBYTE	Peek(ULONG addr)=0;

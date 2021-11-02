@@ -5,7 +5,6 @@
 #define EEPROM_CPP
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include <streams/file_stream.h>
 #include "system.h"

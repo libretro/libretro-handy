@@ -80,7 +80,4 @@ typedef uint32_t ULONG;
 #define FALSE	false
 #endif
 
-#include "lynxbase.h"
-#include "errorinterface.h"
-
 #endif

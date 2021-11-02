@@ -384,14 +384,6 @@ void CSusie::DoMathMultiply(void)
    if(mSPRSYS_Accumulate) {
       ULONG tmp=mMATHJKLM.Long+mMATHEFGH.Long;
 
-#if 0
-      // Let sign change indicate overflow
-      if((tmp&0x80000000)!=(mMATHJKLM.Long&0x80000000)) {
-         //			mSPRSYS_Mathbit=TRUE;
-      } else {
-         //			mSPRSYS_Mathbit=FALSE;
-      }
-#endif
       // Save accumulated result
       mMATHJKLM.Long=tmp;
    }
