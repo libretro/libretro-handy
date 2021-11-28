@@ -100,6 +100,8 @@ static bool retro_audio_buff_underrun      = false;
 static unsigned audio_latency              = 0;
 static bool update_audio_latency           = false;
 
+static bool libretro_supports_option_categories = false;
+
 static void retro_audio_buff_status_cb(
       bool active, unsigned occupancy, bool underrun_likely)
 {
@@ -456,7 +458,8 @@ void retro_set_environment(retro_environment_t cb)
 
    environ_cb = cb;
 
-   libretro_set_core_options(environ_cb);
+   libretro_set_core_options(environ_cb,
+         &libretro_supports_option_categories);
 
    vfs_iface_info.required_interface_version = 1;
    vfs_iface_info.iface                      = NULL;
