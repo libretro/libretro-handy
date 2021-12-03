@@ -1381,12 +1381,12 @@ struct retro_core_options_v2 options_fa = {
 #define HANDY_ROT_LABEL_FI "Näytön kierto"
 #define HANDY_ROT_INFO_0_FI "Kierrä virtuaalikonsolin näyttöä saadaksesi oikean ulkoasun tavallisella vaakatasonäytöllä sellaisille peleille, joiden oletuksena on pystykuvanäyttö."
 #define OPTION_VAL_NONE_FI "Ei mitään"
-#define OPTION_VAL_270_FI NULL
-#define OPTION_VAL_90_FI NULL
-#define HANDY_GFX_COLORS_LABEL_FI NULL
+#define OPTION_VAL_270_FI "Myötäpäivään"
+#define OPTION_VAL_90_FI "Vastapäivään"
+#define HANDY_GFX_COLORS_LABEL_FI "Värisyvyys (Uudelleenkäynnistys vaaditaan)"
 #define HANDY_GFX_COLORS_INFO_0_FI "Määritä ruudulla näytettävien värien määrä. 24-bittinen kuormittaa suorituskykyä merkittävästi eikä ole käytettävissä kaikilla alustoilla."
-#define OPTION_VAL_16BIT_FI NULL
-#define OPTION_VAL_24BIT_FI NULL
+#define OPTION_VAL_16BIT_FI "Tuhansissa (16-bit)"
+#define OPTION_VAL_24BIT_FI "Miljoonissa (24-bittinen)"
 #define HANDY_FRAMESKIP_LABEL_FI "Kuvanohitus"
 #define HANDY_FRAMESKIP_INFO_0_FI "Ohita kuvia välttääksesi äänipuskurin ali ajon (säröily). Parantaa suorituskykyä visuaalisen tasaisuuden kustannuksella. \"Automaatti\" ohittaa kehykset käyttöliittymän asetusten mukaan. \"Manuaalinen\" käyttää \"Kuvienohituksen arvo (%)\" -asetusta."
 #define OPTION_VAL_AUTO_FI "Automaattinen"
@@ -1481,15 +1481,15 @@ struct retro_core_options_v2 options_fi = {
 
 /* RETRO_LANGUAGE_FR */
 
-#define HANDY_ROT_LABEL_FR NULL
-#define HANDY_ROT_INFO_0_FR "Fait pivoter l'écran de la console virtuelle pour obtenir la bonne présentation des jeux en mode 'portrait' sur un écran conventionnel (paysage)."
-#define OPTION_VAL_NONE_FR "Aucun"
-#define OPTION_VAL_270_FR NULL
-#define OPTION_VAL_90_FR NULL
-#define HANDY_GFX_COLORS_LABEL_FR NULL
-#define HANDY_GFX_COLORS_INFO_0_FR "Spécifie le nombre de couleurs à afficher à l'écran. 24 bits augmente significativement la charge sur les performances et n'est pas disponible pour toutes les plateformes."
-#define OPTION_VAL_16BIT_FR NULL
-#define OPTION_VAL_24BIT_FR NULL
+#define HANDY_ROT_LABEL_FR "Rotation d'écran"
+#define HANDY_ROT_INFO_0_FR "Faire pivoter l'écran de la console virtuelle pour obtenir la bonne présentation des jeux en mode 'portrait' sur un écran conventionnel (paysage)."
+#define OPTION_VAL_NONE_FR "Aucune"
+#define OPTION_VAL_270_FR "Horaire"
+#define OPTION_VAL_90_FR "Anti-horaire"
+#define HANDY_GFX_COLORS_LABEL_FR "Profondeur des couleurs (Redémarrage requis)"
+#define HANDY_GFX_COLORS_INFO_0_FR "Spécifier le nombre de couleurs à afficher à l'écran. 24 bits augmente significativement la charge sur les performances et n'est pas disponible pour toutes les plateformes."
+#define OPTION_VAL_16BIT_FR "Milliers (16 bits)"
+#define OPTION_VAL_24BIT_FR "Millions (24 bits)"
 #define HANDY_FRAMESKIP_LABEL_FR "Saut d'images"
 #define HANDY_FRAMESKIP_INFO_0_FR "Sauter des images pour éviter que le tampon audio ne soit sous-exécuté (crépitements). Améliore les performances au détriment de la fluidité visuelle. 'Auto' saute des images lorsque le frontend le conseille. 'Manuel' utilise le paramètre 'Seuil de saut d'images (%)'."
 #define OPTION_VAL_AUTO_FR NULL
@@ -2717,21 +2717,21 @@ struct retro_core_options_v2 options_pl = {
 
 /* RETRO_LANGUAGE_PT_BR */
 
-#define HANDY_ROT_LABEL_PT_BR NULL
+#define HANDY_ROT_LABEL_PT_BR "Rotação de tela"
 #define HANDY_ROT_INFO_0_PT_BR "Gire a tela do console virtual para alcançar o formato correto de jogos com orientação de 'retrato' para uma exibição convencional (paisagem)."
 #define OPTION_VAL_NONE_PT_BR "Nenhum"
-#define OPTION_VAL_270_PT_BR NULL
-#define OPTION_VAL_90_PT_BR NULL
-#define HANDY_GFX_COLORS_LABEL_PT_BR NULL
-#define HANDY_GFX_COLORS_INFO_0_PT_BR "Determina a quantidade de cores que serão exibidas na tela. Os 24 bits aumentam significativamente a sobrecarga do desempenho e não estão disponíveis em todas as plataformas."
-#define OPTION_VAL_16BIT_PT_BR NULL
-#define OPTION_VAL_24BIT_PT_BR NULL
+#define OPTION_VAL_270_PT_BR "Sentido horário"
+#define OPTION_VAL_90_PT_BR "Sentido anti-horário"
+#define HANDY_GFX_COLORS_LABEL_PT_BR "Profundidade de cor (requer reinício)"
+#define HANDY_GFX_COLORS_INFO_0_PT_BR "Especifica o quantidade de cores a serem exibidas na tela. 24-bit aumenta significativamente as sobrecarga de desempenho e não está disponível em todas as plataformas."
+#define OPTION_VAL_16BIT_PT_BR "Milhares (16-bit)"
+#define OPTION_VAL_24BIT_PT_BR "Milhões (24-bit)"
 #define HANDY_FRAMESKIP_LABEL_PT_BR "Pulo de quadro"
-#define HANDY_FRAMESKIP_INFO_0_PT_BR "Ignora quadros para evitar o esvaziamento do buffer do áudio (pipocos no áudio). Melhora o desempenho ao custo da suavidade visual. A opção 'Auto' ignora os quadros quando for aconselhado pela interface. Já 'Manual' utiliza a configuração 'Limite do salto de quadros (%)'."
-#define OPTION_VAL_AUTO_PT_BR "Automática"
+#define HANDY_FRAMESKIP_INFO_0_PT_BR "Ignora quadros para evitar o esvaziamento do buffer do áudio (corte no áudio). Melhora o desempenho ao custo da suavidade visual. A opção 'Automático' ignora os quadros quando aconselhado pela interface. Já 'Manual' utiliza a configuração 'Limite de pulo de quadro (%)'."
+#define OPTION_VAL_AUTO_PT_BR "Automático"
 #define OPTION_VAL_MANUAL_PT_BR NULL
 #define HANDY_FRAMESKIP_THRESHOLD_LABEL_PT_BR "Limite de pulo de quadro (%)"
-#define HANDY_FRAMESKIP_THRESHOLD_INFO_0_PT_BR "Quando o 'Frameskip' for definido como 'Manual', especifica o limite de ocupação do buffer de áudio (em porcentagem) abaixo do qual os quadros serão pulados. Valores maiores reduzem o risco de engasgos pois farão que os quadros sejam descartados com mais frequência."
+#define HANDY_FRAMESKIP_THRESHOLD_INFO_0_PT_BR "Quando o 'Pulo de quadro' for definido como 'Manual', especifica o limite de ocupação do buffer de áudio (em porcentagem) abaixo do qual os quadros serão pulados. Valores maiores reduzem o risco de engasgos pois farão que os quadros sejam descartados com mais frequência."
 
 struct retro_core_option_v2_category option_cats_pt_br[] = {
    { NULL, NULL, NULL },
@@ -3543,14 +3543,14 @@ struct retro_core_options_v2 options_sv = {
 
 #define HANDY_ROT_LABEL_TR "Ekran Döndürme"
 #define HANDY_ROT_INFO_0_TR "Geleneksel (yatay) bir ekranda 'portre' odaklı oyunların doğru düzenini elde etmek için sanal konsol ekranını döndürün."
-#define OPTION_VAL_NONE_TR "devre dışı"
+#define OPTION_VAL_NONE_TR "Yok"
 #define OPTION_VAL_270_TR "Saat yönünde"
 #define OPTION_VAL_90_TR "Saat yönünün tersi"
-#define HANDY_GFX_COLORS_LABEL_TR "Renk Derinliği (Yeniden Başlat)"
+#define HANDY_GFX_COLORS_LABEL_TR "Renk Derinliği (Yeniden Başlatılmalı)"
 #define HANDY_GFX_COLORS_INFO_0_TR "Ekranda görüntülenecek renk sayısını belirtin. 24 bit, genel performansı önemli ölçüde artırır ve tüm platformlarda kullanılamaz."
-#define OPTION_VAL_16BIT_TR "Binlerce (16 bit)"
-#define OPTION_VAL_24BIT_TR "Milyonlar (24 bit)"
-#define HANDY_FRAMESKIP_LABEL_TR "Kare atlama"
+#define OPTION_VAL_16BIT_TR "Binlerce (16-bit)"
+#define OPTION_VAL_24BIT_TR "Milyonlarca (24-bit)"
+#define HANDY_FRAMESKIP_LABEL_TR "Kare Atlama"
 #define HANDY_FRAMESKIP_INFO_0_TR "Yetersiz çalıştırılan ses arabelleğini (çatırtı) önlemek için kareleri atlayın. Görsel pürüzsüzlük pahasına performansı iyileştirir. \"Otomatik\", ön uç tarafından önerildiğinde kareleri atlar. 'El ile', 'Kare Atlama Eşiği (%)' ayarını kullanır."
 #define OPTION_VAL_AUTO_TR "Otomatik"
 #define OPTION_VAL_MANUAL_TR "El ile"
