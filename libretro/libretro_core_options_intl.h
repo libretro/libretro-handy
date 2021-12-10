@@ -51,7 +51,7 @@ extern "C" {
 #define HANDY_FRAMESKIP_LABEL_AR NULL
 #define HANDY_FRAMESKIP_INFO_0_AR NULL
 #define OPTION_VAL_AUTO_AR "تلقائي"
-#define OPTION_VAL_MANUAL_AR NULL
+#define OPTION_VAL_MANUAL_AR "يدوي"
 #define HANDY_FRAMESKIP_THRESHOLD_LABEL_AR NULL
 #define HANDY_FRAMESKIP_THRESHOLD_INFO_0_AR "عندما يتم تعيين 'Frameskip' إلى 'يدوي'، يحدد عتبة شغل التخزين المؤقت الصوتي (النسبة المئوية) التي سيتم تخطي الأطر أدناه. فارتفاع القيم يقلل من خطر التشويش بالتسبب في انخفاض الأطر بصورة أكثر تواترا."
 
@@ -357,11 +357,11 @@ struct retro_core_options_v2 options_ca = {
 #define HANDY_GFX_COLORS_INFO_0_CHS "指定屏幕显示的颜色数量。设置为「24 位」将极大提高性能开销，且仅部分平台可用。"
 #define OPTION_VAL_16BIT_CHS NULL
 #define OPTION_VAL_24BIT_CHS NULL
-#define HANDY_FRAMESKIP_LABEL_CHS NULL
-#define HANDY_FRAMESKIP_INFO_0_CHS NULL
+#define HANDY_FRAMESKIP_LABEL_CHS "跳帧"
+#define HANDY_FRAMESKIP_INFO_0_CHS "跳过帧以避免运行下的音频缓冲区(崩溃)。提高性能以牺牲视觉性能。 “自动”跳板帧在前端建议时。“手动”使用了“Frameskip 阈值(%)”设置。"
 #define OPTION_VAL_AUTO_CHS "自动"
 #define OPTION_VAL_MANUAL_CHS "手工"
-#define HANDY_FRAMESKIP_THRESHOLD_LABEL_CHS NULL
+#define HANDY_FRAMESKIP_THRESHOLD_LABEL_CHS "跳帧阈值(%)"
 #define HANDY_FRAMESKIP_THRESHOLD_INFO_0_CHS "当“跳帧”功能设置成“手动”，请在下方指定跳帧占音频缓存的比例（百分比）。更高的值可以降低因频繁丢帧而导致的爆音风险。"
 
 struct retro_core_option_v2_category option_cats_chs[] = {
@@ -2627,7 +2627,7 @@ struct retro_core_options_v2 options_oc = {
 #define HANDY_FRAMESKIP_INFO_0_PL NULL
 #define OPTION_VAL_AUTO_PL NULL
 #define OPTION_VAL_MANUAL_PL "Ręczny"
-#define HANDY_FRAMESKIP_THRESHOLD_LABEL_PL NULL
+#define HANDY_FRAMESKIP_THRESHOLD_LABEL_PL "Próg pominięcia ramki (%)"
 #define HANDY_FRAMESKIP_THRESHOLD_INFO_0_PL "Gdy 'Frameskip' jest ustawiony na 'Manual', określa próg zajęcia bufora audio (procent) poniżej którego ramki zostaną pominięte. Wyższe wartości zmniejszają ryzyko trzasków poprzez częstsze opuszczanie ramek."
 
 struct retro_core_option_v2_category option_cats_pl[] = {
@@ -2718,7 +2718,7 @@ struct retro_core_options_v2 options_pl = {
 /* RETRO_LANGUAGE_PT_BR */
 
 #define HANDY_ROT_LABEL_PT_BR "Rotação de tela"
-#define HANDY_ROT_INFO_0_PT_BR "Gire a tela do console virtual para alcançar o formato correto de jogos com orientação de 'retrato' para uma exibição convencional (paisagem)."
+#define HANDY_ROT_INFO_0_PT_BR "Gire a tela do console virtual para alcançar o formato correto de jogos com orientação de 'retrato' para uma exibição convencional (modo retrato)."
 #define OPTION_VAL_NONE_PT_BR "Nenhum"
 #define OPTION_VAL_270_PT_BR "Sentido horário"
 #define OPTION_VAL_90_PT_BR "Sentido anti-horário"
@@ -3644,16 +3644,16 @@ struct retro_core_options_v2 options_tr = {
 
 /* RETRO_LANGUAGE_UK */
 
-#define HANDY_ROT_LABEL_UK NULL
-#define HANDY_ROT_INFO_0_UK "Поверніть екран віртуальної консолі, для вірного відображення портретно-орієнтованих ігор на дисплеї з альбомною орієнтацією."
-#define OPTION_VAL_NONE_UK "Немає"
-#define OPTION_VAL_270_UK NULL
-#define OPTION_VAL_90_UK NULL
-#define HANDY_GFX_COLORS_LABEL_UK NULL
+#define HANDY_ROT_LABEL_UK "Обертання екрану"
+#define HANDY_ROT_INFO_0_UK "Повертає екран віртуальної консолі, для вірного відображення портретно-орієнтованих ігор на дисплеї з альбомною орієнтацією."
+#define OPTION_VAL_NONE_UK NULL
+#define OPTION_VAL_270_UK "За годин. стрілкою"
+#define OPTION_VAL_90_UK "Проти годин. стрілки"
+#define HANDY_GFX_COLORS_LABEL_UK "Глибина кольору (потрібен перезапуск)"
 #define HANDY_GFX_COLORS_INFO_0_UK "Вказує кількість кольорів, які будуть відображатись на екрані. 24-бітна палітра суттєво впливає на продуктивність та доступна не на всіх платформах."
 #define OPTION_VAL_16BIT_UK NULL
 #define OPTION_VAL_24BIT_UK NULL
-#define HANDY_FRAMESKIP_LABEL_UK NULL
+#define HANDY_FRAMESKIP_LABEL_UK "Пропуск кадру"
 #define HANDY_FRAMESKIP_INFO_0_UK "Пропускати кадри, щоб уникнути спустошення буферу (тріскіт). Покращує швидкодію, погіршуючи плавність зображення. 'Авто' пропускає кадри, керуючись командами зовнішньої оболонки. 'Ручний' використовує налаштування 'Межа пропуску кадрів (%)'."
 #define OPTION_VAL_AUTO_UK "Авто"
 #define OPTION_VAL_MANUAL_UK "Ручний"
@@ -3756,7 +3756,7 @@ struct retro_core_options_v2 options_uk = {
 #define HANDY_GFX_COLORS_INFO_0_VN "Chọn chế độ hiển thị màu trên màn hình. 24-bit làm tăng đáng kể hiệu suất và không hẳn có sẵn trên mọi nền tảng."
 #define OPTION_VAL_16BIT_VN NULL
 #define OPTION_VAL_24BIT_VN NULL
-#define HANDY_FRAMESKIP_LABEL_VN NULL
+#define HANDY_FRAMESKIP_LABEL_VN "Bỏ qua khung hình"
 #define HANDY_FRAMESKIP_INFO_0_VN NULL
 #define OPTION_VAL_AUTO_VN "Tự động"
 #define OPTION_VAL_MANUAL_VN "Thủ công"
