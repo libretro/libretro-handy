@@ -2099,20 +2099,20 @@ struct retro_core_options_v2 options_it = {
 
 /* RETRO_LANGUAGE_JA */
 
-#define HANDY_ROT_LABEL_JA NULL
+#define HANDY_ROT_LABEL_JA "ディスプレイの回転"
 #define HANDY_ROT_INFO_0_JA "仮想コンソール画面を回転させ, 従来の(横長画面) ディスプレイ上で縦長画面のゲームの正しいレイアウトを実現します."
 #define OPTION_VAL_NONE_JA "なし"
-#define OPTION_VAL_270_JA NULL
-#define OPTION_VAL_90_JA NULL
-#define HANDY_GFX_COLORS_LABEL_JA NULL
+#define OPTION_VAL_270_JA "時計回り"
+#define OPTION_VAL_90_JA "反時計回り"
+#define HANDY_GFX_COLORS_LABEL_JA "色深度 (再起動が必要)"
 #define HANDY_GFX_COLORS_INFO_0_JA "画面上に表示色数を指定します. 24ビットは負荷が大幅に増加するため, 利用できないプラットフォームもあります."
-#define OPTION_VAL_16BIT_JA NULL
-#define OPTION_VAL_24BIT_JA NULL
-#define HANDY_FRAMESKIP_LABEL_JA NULL
-#define HANDY_FRAMESKIP_INFO_0_JA NULL
+#define OPTION_VAL_16BIT_JA "数千 (16ビット)"
+#define OPTION_VAL_24BIT_JA "数百万 (24ビット)"
+#define HANDY_FRAMESKIP_LABEL_JA "フレームスキップ"
+#define HANDY_FRAMESKIP_INFO_0_JA "フレームをスキップしてオーディオバッファアンダーラン (音割れ) を回避します。視覚的な滑らかさを犠牲にしてパフォーマンスを向上させます。 「自動」は、フロントエンドにアドバイスされたときにフレームをスキップします。「マニュアル」は、「フレームスキップ閾値 (%)」設定を使用します。"
 #define OPTION_VAL_AUTO_JA "自動"
 #define OPTION_VAL_MANUAL_JA "手動"
-#define HANDY_FRAMESKIP_THRESHOLD_LABEL_JA NULL
+#define HANDY_FRAMESKIP_THRESHOLD_LABEL_JA "フレームスキップ閾値 (%)"
 #define HANDY_FRAMESKIP_THRESHOLD_INFO_0_JA "'フレームスキップ' が '手動' に設定されている場合, フレームがスキップされるオーディオバッファ占有しきい値 (%) を指定します. 値を大きくすると, フレームを頻繁に落とすことでクラッキングが発生するリスクが低下します."
 
 struct retro_core_option_v2_category option_cats_ja[] = {
