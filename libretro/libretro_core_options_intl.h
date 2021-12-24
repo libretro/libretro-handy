@@ -3026,13 +3026,13 @@ struct retro_core_options_v2 options_ro = {
 
 /* RETRO_LANGUAGE_RU */
 
-#define HANDY_ROT_LABEL_RU "Поворот дисплея"
-#define HANDY_ROT_INFO_0_RU "Поверните изображение для правильного отображения портретно-ориентированных игр на экране с альбомной ориентацией."
-#define OPTION_VAL_NONE_RU "Отключено"
+#define HANDY_ROT_LABEL_RU "Вращение экрана"
+#define HANDY_ROT_INFO_0_RU "Поворачивает виртуальный экран консоли для правильного расположения портретно-ориентированных игр при использовании ландшафтной ориентации."
+#define OPTION_VAL_NONE_RU "Нет"
 #define OPTION_VAL_270_RU "По часовой стрелке"
 #define OPTION_VAL_90_RU "Против часовой стрелки"
 #define HANDY_GFX_COLORS_LABEL_RU "Глубина цвета (перезапуск)"
-#define HANDY_GFX_COLORS_INFO_0_RU "Укажите количество цветов для вывода на экран. 24-битная палитра существенно влияет на производительность и недоступна для всех платформ."
+#define HANDY_GFX_COLORS_INFO_0_RU "Выбор количества цветов для отображения на экране. 24-битная палитра существенно повышает нагрузку на устройство и недоступна для всех платформ."
 #define OPTION_VAL_16BIT_RU "Тысячи (16 бит)"
 #define OPTION_VAL_24BIT_RU "Миллионы (24 бита)"
 #define HANDY_FRAMESKIP_LABEL_RU "Пропуск кадров"
@@ -3040,7 +3040,7 @@ struct retro_core_options_v2 options_ro = {
 #define OPTION_VAL_AUTO_RU "Авто"
 #define OPTION_VAL_MANUAL_RU "Вручную"
 #define HANDY_FRAMESKIP_THRESHOLD_LABEL_RU "Граница пропуска кадров (%)"
-#define HANDY_FRAMESKIP_THRESHOLD_INFO_0_RU "Устанавливает порог заполнения аудиобуфера (в процентах), ниже которого будет включаться пропуск кадров, если для параметра 'Пропуск кадров' выбран режим 'Вручную'. Большие значения снижают вероятность появления треска за счёт более частого пропуска кадров."
+#define HANDY_FRAMESKIP_THRESHOLD_INFO_0_RU "Устанавливает порог заполнения аудиобуфера (в процентах), ниже которого будет включаться пропуск кадров при установке опции 'Пропуск кадров' в режим 'Вручную'. Большие значения снижают вероятность появления треска за счёт более частого пропуска кадров."
 
 struct retro_core_option_v2_category option_cats_ru[] = {
    { NULL, NULL, NULL },
