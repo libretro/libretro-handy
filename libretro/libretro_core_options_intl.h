@@ -1186,7 +1186,7 @@ struct retro_core_options_v2 options_eo = {
 #define OPTION_VAL_AUTO_ES "Selección automática"
 #define OPTION_VAL_MANUAL_ES NULL
 #define HANDY_FRAMESKIP_THRESHOLD_LABEL_ES "Umbral de omisión de fotogramas (%)"
-#define HANDY_FRAMESKIP_THRESHOLD_INFO_0_ES "Cuando la omisión de fotogramas esté configurada como Manual, este ajuste especifica el umbral de ocupación del búfer de audio (en porcentaje) por el que se omitirán fotogramas si el valor es inferior. Un valor más elevado reduce el riesgo de chasquidos omitiendo fotogramas con una mayor frecuencia."
+#define HANDY_FRAMESKIP_THRESHOLD_INFO_0_ES "Cuando la omisión de fotogramas esté configurada como Manual, este ajuste especifica el umbral de ocupación del búfer de audio (en porcentaje) por debajo del cual se omitirán fotogramas si el valor. Un valor más elevado reduce el riesgo de chasquidos omitiendo fotogramas con una mayor frecuencia."
 
 struct retro_core_option_v2_category option_cats_es[] = {
    { NULL, NULL, NULL },
@@ -3440,8 +3440,8 @@ struct retro_core_options_v2 options_sr = {
 
 #define HANDY_ROT_LABEL_SV NULL
 #define HANDY_ROT_INFO_0_SV "Rotera den virtuella konsolskärmen för att uppnå rätt layout av \"porträtt\" orienterade spel på en konventionell (landskap) skärm."
-#define OPTION_VAL_NONE_SV NULL
-#define OPTION_VAL_270_SV NULL
+#define OPTION_VAL_NONE_SV "Ingen"
+#define OPTION_VAL_270_SV "Medurs"
 #define OPTION_VAL_90_SV NULL
 #define HANDY_GFX_COLORS_LABEL_SV NULL
 #define HANDY_GFX_COLORS_INFO_0_SV "Ange antal färger att visa på skärmen. 24-bitars ökar prestandakraven och finns inte på alla plattformar."
