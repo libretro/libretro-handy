@@ -2509,6 +2509,109 @@ struct retro_core_options_v2 options_nl = {
    option_defs_nl
 };
 
+/* RETRO_LANGUAGE_NO */
+
+#define HANDY_ROT_LABEL_NO NULL
+#define HANDY_ROT_INFO_0_NO NULL
+#define OPTION_VAL_NONE_NO NULL
+#define OPTION_VAL_270_NO NULL
+#define OPTION_VAL_90_NO NULL
+#define HANDY_GFX_COLORS_LABEL_NO NULL
+#define HANDY_GFX_COLORS_INFO_0_NO NULL
+#define OPTION_VAL_16BIT_NO NULL
+#define OPTION_VAL_24BIT_NO NULL
+#define HANDY_FRAMESKIP_LABEL_NO NULL
+#define HANDY_FRAMESKIP_INFO_0_NO NULL
+#define OPTION_VAL_AUTO_NO NULL
+#define OPTION_VAL_MANUAL_NO NULL
+#define HANDY_FRAMESKIP_THRESHOLD_LABEL_NO NULL
+#define HANDY_FRAMESKIP_THRESHOLD_INFO_0_NO NULL
+
+struct retro_core_option_v2_category option_cats_no[] = {
+   { NULL, NULL, NULL },
+};
+struct retro_core_option_v2_definition option_defs_no[] = {
+   {
+      "handy_rot",
+      HANDY_ROT_LABEL_NO,
+      NULL,
+      HANDY_ROT_INFO_0_NO,
+      NULL,
+      NULL,
+      {
+         { "None", OPTION_VAL_NONE_NO },
+         { "270",  OPTION_VAL_270_NO },
+         { "90",   OPTION_VAL_90_NO },
+         { NULL, NULL },
+      },
+      "None"
+   },
+#if defined(FRONTEND_SUPPORTS_XRGB8888)
+   {
+      "handy_gfx_colors",
+      HANDY_GFX_COLORS_LABEL_NO,
+      NULL,
+      HANDY_GFX_COLORS_INFO_0_NO,
+      NULL,
+      NULL,
+      {
+         { "16bit", OPTION_VAL_16BIT_NO },
+         { "24bit", OPTION_VAL_24BIT_NO },
+         { NULL,    NULL },
+      },
+      "16bit"
+   },
+#endif
+   {
+      "handy_frameskip",
+      HANDY_FRAMESKIP_LABEL_NO,
+      NULL,
+      HANDY_FRAMESKIP_INFO_0_NO,
+      NULL,
+      NULL,
+      {
+         { "disabled", NULL },
+         { "auto",     OPTION_VAL_AUTO_NO },
+         { "manual",   OPTION_VAL_MANUAL_NO },
+         { NULL, NULL },
+      },
+      "disabled"
+   },
+   {
+      "handy_frameskip_threshold",
+      HANDY_FRAMESKIP_THRESHOLD_LABEL_NO,
+      NULL,
+      HANDY_FRAMESKIP_THRESHOLD_INFO_0_NO,
+      NULL,
+      NULL,
+      {
+         { "15", NULL },
+         { "18", NULL },
+         { "21", NULL },
+         { "24", NULL },
+         { "27", NULL },
+         { "30", NULL },
+         { "33", NULL },
+         { "36", NULL },
+         { "39", NULL },
+         { "42", NULL },
+         { "45", NULL },
+         { "48", NULL },
+         { "51", NULL },
+         { "54", NULL },
+         { "57", NULL },
+         { "60", NULL },
+         { NULL, NULL },
+      },
+      "33"
+   },
+   { NULL, NULL, NULL, NULL, NULL, NULL, {{0}}, NULL },
+};
+struct retro_core_options_v2 options_no = {
+   option_cats_no,
+   option_defs_no
+};
+
 /* RETRO_LANGUAGE_OC */
 
 #define HANDY_ROT_LABEL_OC NULL
