@@ -149,8 +149,8 @@ struct retro_core_options_v2 options_ar = {
 #define OPTION_VAL_90_AST NULL
 #define HANDY_GFX_COLORS_LABEL_AST NULL
 #define HANDY_GFX_COLORS_INFO_0_AST "Especifica'l númberu de colores a amosar na pantalla. Los 24 bits aumenten significativamente les sobrecargues nel rindimientu y nun tán disponibles en toles plataformes."
-#define OPTION_VAL_16BIT_AST NULL
-#define OPTION_VAL_24BIT_AST NULL
+#define OPTION_VAL_16BIT_AST "Miles (16 bits)"
+#define OPTION_VAL_24BIT_AST "Millones (24 bits)"
 #define HANDY_FRAMESKIP_LABEL_AST NULL
 #define HANDY_FRAMESKIP_INFO_0_AST NULL
 #define OPTION_VAL_AUTO_AST NULL
@@ -348,15 +348,15 @@ struct retro_core_options_v2 options_ca = {
 
 /* RETRO_LANGUAGE_CHS */
 
-#define HANDY_ROT_LABEL_CHS NULL
+#define HANDY_ROT_LABEL_CHS "显示旋转"
 #define HANDY_ROT_INFO_0_CHS "如果想要在横屏的显示器上竖屏显示游戏，请旋转你的模拟器屏幕。"
 #define OPTION_VAL_NONE_CHS "无"
 #define OPTION_VAL_270_CHS "顺时针"
 #define OPTION_VAL_90_CHS "逆时针"
-#define HANDY_GFX_COLORS_LABEL_CHS NULL
+#define HANDY_GFX_COLORS_LABEL_CHS "色深(需要重启)"
 #define HANDY_GFX_COLORS_INFO_0_CHS "指定屏幕显示的颜色数量。设置为「24 位」将极大提高性能开销，且仅部分平台可用。"
-#define OPTION_VAL_16BIT_CHS NULL
-#define OPTION_VAL_24BIT_CHS NULL
+#define OPTION_VAL_16BIT_CHS "千位级(16-bit)"
+#define OPTION_VAL_24BIT_CHS "百万位级(24-bit)"
 #define HANDY_FRAMESKIP_LABEL_CHS "跳帧"
 #define HANDY_FRAMESKIP_INFO_0_CHS "跳过帧以避免运行下的音频缓冲区(崩溃)。提高性能以牺牲视觉性能。 “自动”跳板帧在前端建议时。“手动”使用了“Frameskip 阈值(%)”设置。"
 #define OPTION_VAL_AUTO_CHS "自动"
@@ -977,8 +977,8 @@ struct retro_core_options_v2 options_de = {
 #define OPTION_VAL_24BIT_EL NULL
 #define HANDY_FRAMESKIP_LABEL_EL NULL
 #define HANDY_FRAMESKIP_INFO_0_EL NULL
-#define OPTION_VAL_AUTO_EL NULL
-#define OPTION_VAL_MANUAL_EL NULL
+#define OPTION_VAL_AUTO_EL "Αυτόματο"
+#define OPTION_VAL_MANUAL_EL "Χειροκίνητο"
 #define HANDY_FRAMESKIP_THRESHOLD_LABEL_EL NULL
 #define HANDY_FRAMESKIP_THRESHOLD_INFO_0_EL NULL
 
@@ -2717,7 +2717,7 @@ struct retro_core_options_v2 options_oc = {
 
 /* RETRO_LANGUAGE_PL */
 
-#define HANDY_ROT_LABEL_PL NULL
+#define HANDY_ROT_LABEL_PL "Obrót ekranu"
 #define HANDY_ROT_INFO_0_PL "Obróć wirtualny ekran konsoli, aby osiągnąć prawidłowy układ gier zorientowanych pionowo na konwencjonalnym wyświetlaczu (pejzaż)."
 #define OPTION_VAL_NONE_PL "Brak"
 #define OPTION_VAL_270_PL NULL
@@ -2826,9 +2826,9 @@ struct retro_core_options_v2 options_pl = {
 #define OPTION_VAL_270_PT_BR "Sentido horário"
 #define OPTION_VAL_90_PT_BR "Sentido anti-horário"
 #define HANDY_GFX_COLORS_LABEL_PT_BR "Profundidade de cor (requer reinício)"
-#define HANDY_GFX_COLORS_INFO_0_PT_BR "Especifica o quantidade de cores a serem exibidas na tela. 24-bit aumenta significativamente as sobrecarga de desempenho e não está disponível em todas as plataformas."
-#define OPTION_VAL_16BIT_PT_BR "Milhares (16-bit)"
-#define OPTION_VAL_24BIT_PT_BR "Milhões (24-bit)"
+#define HANDY_GFX_COLORS_INFO_0_PT_BR "Determina a quantidade de cores que será exibida na tela. 24 bits aumentam significativamente a sobrecarga do desempenho e não estão disponíveis em todas as plataformas."
+#define OPTION_VAL_16BIT_PT_BR "Milhares (16 bits)"
+#define OPTION_VAL_24BIT_PT_BR "Milhões (24 bits)"
 #define HANDY_FRAMESKIP_LABEL_PT_BR "Pulo de quadro"
 #define HANDY_FRAMESKIP_INFO_0_PT_BR "Ignora quadros para evitar o esvaziamento do buffer do áudio (corte no áudio). Melhora o desempenho ao custo da suavidade visual. A opção 'Automático' ignora os quadros quando aconselhado pela interface. Já 'Manual' utiliza a configuração 'Limite de pulo de quadro (%)'."
 #define OPTION_VAL_AUTO_PT_BR "Automático"
