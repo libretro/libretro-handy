@@ -3852,7 +3852,7 @@ struct retro_core_options_v2 options_uk = {
 
 #define HANDY_ROT_LABEL_VAL NULL
 #define HANDY_ROT_INFO_0_VAL NULL
-#define OPTION_VAL_NONE_VAL NULL
+#define OPTION_VAL_NONE_VAL "Cap"
 #define OPTION_VAL_270_VAL NULL
 #define OPTION_VAL_90_VAL NULL
 #define HANDY_GFX_COLORS_LABEL_VAL NULL
