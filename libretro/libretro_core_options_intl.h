@@ -966,15 +966,15 @@ struct retro_core_options_v2 options_de = {
 
 /* RETRO_LANGUAGE_EL */
 
-#define HANDY_ROT_LABEL_EL NULL
+#define HANDY_ROT_LABEL_EL "Περιστροφή Οθόνης"
 #define HANDY_ROT_INFO_0_EL "Περιστρέφει την οθόνη της εικονικής κονσόλας για να επιτύχει τη σωστή διάταξη των παιχνιδιών όπου έχουν προσανατολισμό «πορτρέτο» σε συμβατική οθόνη (landscape)."
 #define OPTION_VAL_NONE_EL "Κανείς"
 #define OPTION_VAL_270_EL NULL
 #define OPTION_VAL_90_EL NULL
-#define HANDY_GFX_COLORS_LABEL_EL NULL
+#define HANDY_GFX_COLORS_LABEL_EL "Βάθος Χρώματος (Απαιτείται Επανεκκίνηση)"
 #define HANDY_GFX_COLORS_INFO_0_EL "Καθορίστε τον αριθμό των χρωμάτων που θα εμφανίζονται στην οθόνη. Τα 24-bit μειώνουν σημαντικά την απόδοση και δεν είναι διαθέσιμα σε όλες τις πλατφόρμες."
-#define OPTION_VAL_16BIT_EL NULL
-#define OPTION_VAL_24BIT_EL NULL
+#define OPTION_VAL_16BIT_EL "Χιλιάδες (16-bit)"
+#define OPTION_VAL_24BIT_EL "Εκατομμύρια (24-bit)"
 #define HANDY_FRAMESKIP_LABEL_EL NULL
 #define HANDY_FRAMESKIP_INFO_0_EL NULL
 #define OPTION_VAL_AUTO_EL "Αυτόματο"
