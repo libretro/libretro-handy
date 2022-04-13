@@ -198,6 +198,7 @@ class CMikie : public CLynxBase
 
       ULONG	DisplayRenderLine(void);
       ULONG	DisplayEndOfFrame(void);
+      void	AudioEndOfFrame(void);
 
       inline void SetCPUSleep(void) {gSystemCPUSleep=TRUE;};
       inline void ClearCPUSleep(void) {gSystemCPUSleep=FALSE;gSystemCPUSleep_Saved=FALSE;};

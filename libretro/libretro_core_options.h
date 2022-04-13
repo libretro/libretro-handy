@@ -56,6 +56,23 @@ struct retro_core_option_v2_category option_cats_us[] = {
 
 struct retro_core_option_v2_definition option_defs_us[] = {
    {
+      "handy_refresh_rate",
+      "Video Refresh Rate",
+      NULL,
+      "Set video update frequency. Internally, the Lynx renders at a variable rate from 0 to 75Hz. Frames that occur between video update events will be dropped. Higher rates may increase video smoothness (depending on actual game frame rate) but can cause tearing on 60Hz displays.",
+      NULL,
+      NULL,
+      {
+         { "50",  "50Hz" },
+         { "60",  "60Hz" },
+         { "75",  "75Hz" },
+         { "100", "100Hz" },
+         { "120", "120Hz" },
+         { NULL, NULL },
+      },
+      "60"
+   },
+   {
       "handy_rot",
       "Display Rotation",
       NULL,

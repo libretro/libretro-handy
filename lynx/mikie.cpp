@@ -1302,10 +1302,14 @@ ULONG CMikie::DisplayEndOfFrame(void)
          break;
    }
 
+   return 0;
+}
+
+void	CMikie::AudioEndOfFrame(void)
+{
    mikbuf.end_frame((gSystemCycleCount - gAudioLastUpdateCycle) / 4);
    gAudioBufferPointer = mikbuf.read_samples((blip_sample_t*) gAudioBuffer, HANDY_AUDIO_BUFFER_SIZE / 2);
-
-   return 0;
+   gAudioLastUpdateCycle = gSystemCycleCount;
 }
 
 // Peek/Poke memory handlers
@@ -2422,6 +2426,7 @@ inline void CMikie::Update(void)
 
    if(gSystemCycleCount>0xf0000000) {
       gSystemCycleCount-=0x80000000;
+      gLastRunCycleCount-=0x80000000;
       gThrottleNextCycleCheckpoint-=0x80000000;
       gAudioLastUpdateCycle-=0x80000000;
       mTIM_0_LAST_COUNT-=0x80000000;

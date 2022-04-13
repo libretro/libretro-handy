@@ -7,6 +7,11 @@
 
 #include "handy.h"
 
+#ifdef _3DS
+extern "C" void* linearMemAlign(size_t size, size_t alignment);
+extern "C" void linearFree(void* mem);
+#endif
+
 static retro_log_printf_t log_cb;
 static retro_video_refresh_t video_cb;
 static retro_audio_sample_batch_t audio_batch_cb;
@@ -20,14 +25,31 @@ static int16_t *soundBuffer = NULL;
 
 #define RETRO_LYNX_WIDTH  160
 #define RETRO_LYNX_HEIGHT 102
-#define RETRO_LYNX_FPS    75.0
+
+/* Note: Set 75Hz here to reflect the nominal
+ * maximum of the Lynx hardware; actual 'core
+ * options' default is 60Hz */
+static uint16_t retro_refresh_rate  = 75;
+static ULONG retro_cycles_per_frame = (HANDY_SYSTEM_FREQ / 75);
+
+static bool retro_refresh_rate_updated = false;
 
 // core options
-static uint8_t lynx_rot    = MIKIE_NO_ROTATE;
-static uint8_t lynx_width  = RETRO_LYNX_WIDTH;
-static uint8_t lynx_height = RETRO_LYNX_HEIGHT;
+static uint8_t lynx_rot         = MIKIE_NO_ROTATE;
+static uint8_t lynx_width       = RETRO_LYNX_WIDTH;
+static uint8_t lynx_height      = RETRO_LYNX_HEIGHT;
+static uint8_t lynx_width_next  = RETRO_LYNX_WIDTH;
+static uint8_t lynx_height_next = RETRO_LYNX_HEIGHT;
 
-static bool lynx_rot_updated = false;
+typedef enum
+{
+   ROTATION_PENDING_NONE = 0,
+   ROTATION_PENDING_CORE,
+   ROTATION_PENDING_FRONTEND
+} lynx_rotation_pending_t;
+
+static lynx_rotation_pending_t lynx_rotation_pending = ROTATION_PENDING_NONE;
+bool lynx_rotation_button_down = false;
 
 static int RETRO_PIX_BYTES = 2;
 #if defined(FRONTEND_SUPPORTS_RGB565)
@@ -36,10 +58,11 @@ static int RETRO_PIX_DEPTH = 16;
 static int RETRO_PIX_DEPTH = 15;
 #endif
 
-static uint8_t framebuffer[RETRO_LYNX_WIDTH*RETRO_LYNX_WIDTH*4];
+static uint8_t *framebuffer = NULL;
 
-static bool newFrame = false;
-static bool initialized = false;
+static bool frame_available   = false;
+static bool initialized       = false;
+static bool video_out_enabled = false;
 
 struct map { unsigned retro; unsigned lynx; };
 
@@ -132,19 +155,22 @@ static void init_frameskip(void)
       {
          /* Frameskip is enabled - increase frontend
           * audio latency to minimise potential
-          * buffer underruns */
-         float frame_time_msec = 1000.0f / (float)RETRO_LYNX_FPS;
+          * buffer underruns
+          * > Note: The core can run at a variety of
+          *   (frontend) display refresh rates, and
+          *   internally frames can be generated at
+          *   any rate from 0 to 75Hz (possibly 79Hz).
+          *   This makes it difficult to determine
+          *   an appropriate audio latency level; for
+          *   simplicity, assume that we are running
+          *   at the default display refresh rate of
+          *   60Hz (ultimately this will translate to
+          *   a latency of 128ms, which should be
+          *   sufficient in all cases) */
+         float frame_time_msec = 1000.0f / 60.0f;
 
-         /* Set latency to 8x current frame time...
-          * (for 60Hz cores we normally use a 6x
-          * multiplier - but the Lynx runs
-          * at an unusually high frame rate, which
-          * seems to place greater demands on the
-          * frontend. Increasing the multiplier to
-          * 8x gives the frontend more room to
-          * manoeuvre, and improves the efficacy of
-          * the 'Auto' frameskip setting) */
-         audio_latency = (unsigned)((8.0f * frame_time_msec) + 0.5f);
+         /* Set latency to 6x current frame time */
+         audio_latency = (unsigned)((6.0f * frame_time_msec) + 0.5f);
 
          /* ...then round up to nearest multiple of 32 */
          audio_latency = (audio_latency + 0x1F) & ~0x1F;
@@ -251,96 +277,153 @@ unsigned retro_api_version(void)
 static void update_geometry(void)
 {
    struct retro_system_av_info info;
-
    retro_get_system_av_info(&info);
    environ_cb(RETRO_ENVIRONMENT_SET_GEOMETRY, &info);
 }
 
+static void update_timing(void)
+{
+   struct retro_system_av_info info;
+   retro_get_system_av_info(&info);
+   environ_cb(RETRO_ENVIRONMENT_SET_SYSTEM_AV_INFO, &info);
+}
+
+static void lynx_rotate(void);
+
 static UBYTE* lynx_display_callback(ULONG objref)
 {
-   int total;
-   if(!initialized)
+   if(!video_out_enabled)
       return (UBYTE*)framebuffer;
 
-   video_cb((bool)gSkipFrame ? NULL : framebuffer,
-         lynx_width, lynx_height, RETRO_LYNX_WIDTH*RETRO_PIX_BYTES);
+   /* lynx_display_callback() may be called multiple
+    * times per retro_run(). Ensure that video_cb()
+    * is only called once per retro_run(). */
+   if (!frame_available)
+   {
+      /* Check whether current frame has a different
+       * rotation from the previous one; if so,
+       * notify the frontend before drawing it */
+      if (!gSkipFrame &&
+          (lynx_rotation_pending == ROTATION_PENDING_FRONTEND))
+      {
+         lynx_rotation_pending = ROTATION_PENDING_NONE;
+         lynx_width            = lynx_width_next;
+         lynx_height           = lynx_height_next;
+         update_geometry();
+      }
 
-   /* Divide gAudioBufferPointer by number of channels */
-   audio_batch_cb(soundBuffer, gAudioBufferPointer >> 1);
-   gAudioBufferPointer = 0;
+      video_cb((bool)gSkipFrame ? NULL : framebuffer,
+            lynx_width, lynx_height,
+            RETRO_LYNX_WIDTH * RETRO_PIX_BYTES);
 
-   newFrame = true;
+      /* Check whether the next frame should be
+       * rendered with a change in rotation */
+      if (lynx_rotation_pending == ROTATION_PENDING_CORE)
+      {
+         lynx_rotation_pending = ROTATION_PENDING_FRONTEND;
+         /* An annoyance: lynx_rotate() ends up calling
+          * lynx_display_callback(), so to avoid infinite
+          * circular recursion we must temporarily disable
+          * lynx_display_callback()... */
+         video_out_enabled = false;
+         lynx_rotate();
+         video_out_enabled = true;
+      }
+
+      frame_available = true;
+      /* Must unset gSkipFrame here since the next
+       * frame may be (partially) drawn before the
+       * current retro_run() returns, and we will not
+       * know if this frame is needed until the *next*
+       * call of retro_run()... */
+      gSkipFrame = 0;
+   }
 
    return (UBYTE*)framebuffer;
 }
 
 static void lynx_rotate(void)
 {
-   if(!lynx)
+   if (!lynx)
       return;
 
-   switch(lynx_rot)
+   switch (lynx_rot)
    {
       default:
          lynx_rot = MIKIE_NO_ROTATE;
          // intentional fall-through
 
       case MIKIE_NO_ROTATE:
-         lynx_width  = RETRO_LYNX_WIDTH;
-         lynx_height = RETRO_LYNX_HEIGHT;
-         btn_map     = btn_map_no_rot;
+         lynx_width_next  = RETRO_LYNX_WIDTH;
+         lynx_height_next = RETRO_LYNX_HEIGHT;
+         btn_map          = btn_map_no_rot;
          break;
 
       case MIKIE_ROTATE_R:
-         lynx_width  = RETRO_LYNX_HEIGHT;
-         lynx_height = RETRO_LYNX_WIDTH;
-         btn_map     = btn_map_rot_90;
+         lynx_width_next  = RETRO_LYNX_HEIGHT;
+         lynx_height_next = RETRO_LYNX_WIDTH;
+         btn_map          = btn_map_rot_90;
          break;
 
       case MIKIE_ROTATE_L:
-         lynx_width  = RETRO_LYNX_HEIGHT;
-         lynx_height = RETRO_LYNX_WIDTH;
-         btn_map     = btn_map_rot_270;
+         lynx_width_next  = RETRO_LYNX_HEIGHT;
+         lynx_height_next = RETRO_LYNX_WIDTH;
+         btn_map          = btn_map_rot_270;
          break;
    }
 
    switch (RETRO_PIX_DEPTH)
    {
       case 15:
-         lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_16BPP_555, RETRO_LYNX_WIDTH*2, lynx_display_callback, (ULONG)0);
+         lynx->DisplaySetAttributes(lynx_rot,
+               MIKIE_PIXEL_FORMAT_16BPP_555,
+               RETRO_LYNX_WIDTH * 2,
+               lynx_display_callback, (ULONG)0);
          break;
 #if defined(ABGR1555)
       case 16:
-         lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_16BPP_BGR555, RETRO_LYNX_WIDTH*2, lynx_display_callback, (ULONG)0);
+         lynx->DisplaySetAttributes(lynx_rot,
+               MIKIE_PIXEL_FORMAT_16BPP_BGR555,
+               RETRO_LYNX_WIDTH * 2,
+               lynx_display_callback, (ULONG)0);
          break;
 #else
       case 16:
-         lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_16BPP_565, RETRO_LYNX_WIDTH*2, lynx_display_callback, (ULONG)0);
+         lynx->DisplaySetAttributes(lynx_rot,
+               MIKIE_PIXEL_FORMAT_16BPP_565,
+               RETRO_LYNX_WIDTH * 2,
+               lynx_display_callback, (ULONG)0);
          break;
 #endif
       case 24:
-         lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_32BPP,     RETRO_LYNX_WIDTH*4, lynx_display_callback, (ULONG)0);
+         lynx->DisplaySetAttributes(lynx_rot,
+               MIKIE_PIXEL_FORMAT_32BPP,
+               RETRO_LYNX_WIDTH * 4,
+               lynx_display_callback, (ULONG)0);
          break;
       default:
-         lynx->DisplaySetAttributes(lynx_rot, MIKIE_PIXEL_FORMAT_32BPP,     RETRO_LYNX_WIDTH*4, lynx_display_callback, (ULONG)0);
+         lynx->DisplaySetAttributes(lynx_rot,
+               MIKIE_PIXEL_FORMAT_32BPP,
+               RETRO_LYNX_WIDTH * 4,
+               lynx_display_callback, (ULONG)0);
          break;
    }
-
-   update_geometry();
-   lynx_rot_updated = true;
 }
 
 static void check_variables(void)
 {
    struct retro_variable var = {0};
+   unsigned old_lynx_rot;
    unsigned old_frameskip_type;
+   uint16_t old_retro_refresh_rate;
 
-   var.key = "handy_rot";
-   var.value = NULL;
+   old_lynx_rot = lynx_rot;
+   lynx_rot     = MIKIE_NO_ROTATE;
+   var.key      = "handy_rot";
+   var.value    = NULL;
 
-   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
-      unsigned old_rotate = lynx_rot;
-
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
       if (strcmp(var.value, "None") == 0)
          lynx_rot = MIKIE_NO_ROTATE;
       else if (strcmp(var.value, "90") == 0)
@@ -348,8 +431,9 @@ static void check_variables(void)
       else if (strcmp(var.value, "270") == 0)
          lynx_rot = MIKIE_ROTATE_L;
 
-      if (old_rotate != lynx_rot)
-         lynx_rotate();
+      if (initialized &&
+          (lynx_rot != old_lynx_rot))
+         lynx_rotation_pending = ROTATION_PENDING_CORE;
    }
 
 #if defined(FRONTEND_SUPPORTS_XRGB8888)
@@ -395,6 +479,25 @@ static void check_variables(void)
    /* Reinitialise frameskipping, if required */
    if ((frameskip_type != old_frameskip_type) && initialized)
       init_frameskip();
+
+   old_retro_refresh_rate = retro_refresh_rate;
+   retro_refresh_rate     = 75;
+   var.key                = "handy_refresh_rate";
+   var.value              = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      retro_refresh_rate = strtol(var.value, NULL, 10);
+      retro_refresh_rate = (retro_refresh_rate < 50)  ? 50 : retro_refresh_rate;
+      retro_refresh_rate = (retro_refresh_rate > 120) ? 50 : retro_refresh_rate;
+   }
+
+   retro_cycles_per_frame = (HANDY_SYSTEM_FREQ / retro_refresh_rate);
+
+   /* Notify frontend if timing has changed */
+   if (initialized &&
+       (retro_refresh_rate != old_retro_refresh_rate))
+      retro_refresh_rate_updated = true;
 }
 
 void retro_init(void)
@@ -432,8 +535,6 @@ void retro_reset(void)
 
 void retro_deinit(void)
 {
-   initialized = false;
-
    if(lynx)
    {
       lynx->SaveEEPROM();
@@ -441,7 +542,24 @@ void retro_deinit(void)
       lynx=0;
    }
 
+   if (framebuffer)
+#if defined(_3DS)
+      linearFree(framebuffer);
+#else
+      free(framebuffer);
+#endif
+   framebuffer = NULL;
+
    libretro_supports_input_bitmasks = false;
+   lynx_rotation_pending            = ROTATION_PENDING_NONE;
+   lynx_rotation_button_down        = false;
+   lynx_rot                         = MIKIE_NO_ROTATE;
+   lynx_width                       = RETRO_LYNX_WIDTH;
+   lynx_height                      = RETRO_LYNX_HEIGHT;
+   lynx_width_next                  = RETRO_LYNX_WIDTH;
+   lynx_height_next                 = RETRO_LYNX_HEIGHT;
+   initialized                      = false;
+   video_out_enabled                = false;
 }
 
 void retro_set_environment(retro_environment_t cb)
@@ -511,18 +629,21 @@ void retro_get_system_info(struct retro_system_info *info)
 
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
-   struct retro_game_geometry geom   = { lynx_width, lynx_height, RETRO_LYNX_WIDTH, RETRO_LYNX_WIDTH, (float) lynx_width / (float) lynx_height };
-   struct retro_system_timing timing = { RETRO_LYNX_FPS, (float) HANDY_AUDIO_SAMPLE_FREQ };
-
    memset(info, 0, sizeof(*info));
-   info->geometry = geom;
-   info->timing   = timing;
+
+   info->timing.fps            = (double)retro_refresh_rate;
+   info->timing.sample_rate    = (double)HANDY_AUDIO_SAMPLE_FREQ;
+
+   info->geometry.base_width   = lynx_width;
+   info->geometry.base_height  = lynx_height;
+   info->geometry.max_width    = RETRO_LYNX_WIDTH;
+   info->geometry.max_height   = RETRO_LYNX_WIDTH;
+   info->geometry.aspect_ratio = (float)lynx_width / (float)lynx_height;
 }
 
 void retro_run(void)
 {
    unsigned i, res = 0;
-   static bool select_pressed_last_frame = false;
    bool updated = false;
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
       check_variables();
@@ -546,18 +667,23 @@ void retro_run(void)
    }
    lynx->SetButtonData(res);
 
-   if (select_button && !select_pressed_last_frame)
+   if (select_button && !lynx_rotation_button_down)
    {
       lynx_rot++;
-      lynx_rotate();
+      lynx_rotation_pending = ROTATION_PENDING_CORE;
    }
-   
-   select_pressed_last_frame = select_button;
-   gAudioLastUpdateCycle     = gSystemCycleCount;
+   lynx_rotation_button_down = select_button;
 
-   /* Check whether current frame should be skipped */
-   gSkipFrame = 0;
-   if ((frameskip_type > 0) && retro_audio_buff_active)
+   /* Check whether current frame should be skipped
+    * > Note: if gSkipFrame is already set, then it
+    *   means a frameskip was requested on the last
+    *   call of retro_run() but no end of frame
+    *   event occurred. We must therefore keep
+    *   gSkipFrame latched on, since any partial frame
+    *   from the previous retro_run() will be incomplete */
+   if ((frameskip_type > 0) &&
+       !gSkipFrame &&
+       retro_audio_buff_active)
    {
       switch (frameskip_type)
       {
@@ -572,11 +698,8 @@ void retro_run(void)
             break;
       }
 
-      /* Note: We cannot skip this frame if the display
-       * dimensions have changed (due to screen rotation) */
       if (!gSkipFrame ||
-          (frameskip_counter >= FRAMESKIP_MAX) ||
-          lynx_rot_updated)
+          (frameskip_counter >= FRAMESKIP_MAX))
       {
          gSkipFrame        = 0;
          frameskip_counter = 0;
@@ -594,11 +717,29 @@ void retro_run(void)
       update_audio_latency = false;
    }
 
-   while (!newFrame)
+   if (retro_refresh_rate_updated)
+   {
+      update_timing();
+      retro_refresh_rate_updated = false;
+   }
+
+   gLastRunCycleCount = gSystemCycleCount;
+   frame_available = false;
+
+   while (gSystemCycleCount - gLastRunCycleCount < retro_cycles_per_frame)
       lynx->Update();
 
-   newFrame = false;
-   lynx_rot_updated = false;
+   /* If no end of frame event was produced on this
+    * run, upload NULL */
+   if (!frame_available)
+      video_cb(NULL, lynx_width, lynx_height,
+            RETRO_LYNX_WIDTH * RETRO_PIX_BYTES);
+
+   lynx->FetchAudioSamples();
+
+   /* Divide gAudioBufferPointer by number of channels */
+   audio_batch_cb(soundBuffer, gAudioBufferPointer >> 1);
+   gAudioBufferPointer = 0;
 }
 
 size_t retro_serialize_size(void)
@@ -664,6 +805,17 @@ bool retro_load_game(const struct retro_game_info *info)
 
    bios_file[0]   = '\0';
    eeprom_file[0] = '\0';
+
+   /* Allocate video buffer */
+#if defined(_3DS)
+   framebuffer = (uint8_t*)linearMemAlign(
+         RETRO_LYNX_WIDTH * RETRO_LYNX_WIDTH * 4 * sizeof(uint8_t), 128);
+#else
+   framebuffer = (uint8_t*)calloc(1,
+         RETRO_LYNX_WIDTH * RETRO_LYNX_WIDTH * 4 * sizeof(uint8_t));
+#endif
+   if (!framebuffer)
+      return false;
 
    environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
 
@@ -744,9 +896,17 @@ bool retro_load_game(const struct retro_game_info *info)
    gAudioEnabled = true;
    soundBuffer   = (int16_t *)&gAudioBuffer;
    btn_map       = btn_map_no_rot;
-   lynx_rotate();
 
-   initialized = true;
+   /* Apply initial rotation
+    * > Effect is immediate, so update actual
+    *   lynx_width/lynx_height values here */
+   lynx_rotate();
+   lynx_width  = lynx_width_next;
+   lynx_height = lynx_height_next;
+
+   gSkipFrame        = 0;
+   initialized       = true;
+   video_out_enabled = true;
 
    return true;
 }
