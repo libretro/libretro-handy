@@ -353,6 +353,7 @@ void CSystem::HLE_BIOS_FF80(void)
 void CSystem::Reset(void)
 {
    gSystemCycleCount=0;
+   gLastRunCycleCount=0;
    gNextTimerEvent=0;
    gCPUBootAddress=0;
    gBreakpointHit=FALSE;

@@ -75,6 +75,7 @@
 
 #ifdef SYSTEM_CPP
 ULONG   gSystemCycleCount=0;
+ULONG   gLastRunCycleCount=0;
 ULONG   gNextTimerEvent=0;
 ULONG   gCPUWakeupTime=0;
 ULONG   gIRQEntryCycle=0;
@@ -104,6 +105,7 @@ CErrorInterface *gError=NULL;
 #else
 
 extern ULONG    gSystemCycleCount;
+extern ULONG    gLastRunCycleCount;
 extern ULONG    gNextTimerEvent;
 extern ULONG    gCPUWakeupTime;
 extern ULONG    gIRQEntryCycle;
@@ -209,6 +211,11 @@ class CSystem : public CSystemBase
          // If the CPU is asleep then skip to the next timer event
          if(gSystemCPUSleep)
             gSystemCycleCount=gNextTimerEvent;
+      }
+
+      inline void FetchAudioSamples(void)
+      {
+         mMikie->AudioEndOfFrame();
       }
 
       //
