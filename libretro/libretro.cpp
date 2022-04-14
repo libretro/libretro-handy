@@ -753,12 +753,14 @@ size_t retro_serialize_size(void)
 bool retro_serialize(void *data, size_t size)
 {
    LSS_FILE fp;
+
    if(!lynx)
       return false;
 
-   fp.memptr      = (UBYTE *) data;
+   fp.memptr      = (UBYTE *)data;
    fp.index       = 0;
    fp.index_limit = size;
+   fp.nul_stream  = 0;
 
    return lynx->ContextSave(&fp);
 }
@@ -766,12 +768,14 @@ bool retro_serialize(void *data, size_t size)
 bool retro_unserialize(const void *data, size_t size)
 {
    LSS_FILE fp;
+
    if(!lynx)
       return false;
 
-   fp.memptr      = (UBYTE *) data;
+   fp.memptr      = (UBYTE *)data;
    fp.index       = 0;
    fp.index_limit = size;
+   fp.nul_stream  = 0;
 
    return lynx->ContextLoad(&fp);
 }

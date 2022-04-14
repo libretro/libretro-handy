@@ -139,6 +139,7 @@ typedef struct lssfile
    UBYTE *memptr;
    ULONG index;
    ULONG index_limit;
+   UBYTE nul_stream;
 } LSS_FILE;
 
 int lss_read(void* dest, int varsize, int varcount, LSS_FILE *fp);
