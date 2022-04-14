@@ -104,6 +104,22 @@ struct retro_core_option_v2_definition option_defs_us[] = {
    },
 #endif
    {
+      "handy_lcd_ghosting",
+      "LCD Ghosting Filter",
+      NULL,
+      "Apply an image 'ghosting' effect by blending multiple successive video frames. Mimics the display characteristics of the Lynx's LCD panel and helps to smooth the appearance of low frame rate games. Higher frame counts improve the effect at the expense of increased performance overheads.",
+      NULL,
+      NULL,
+      {
+         { "disabled", NULL },
+         { "2frames",  "2 Frames" },
+         { "3frames",  "3 Frames" },
+         { "4frames",  "4 Frames" },
+         { NULL, NULL },
+      },
+      "disabled"
+   },
+   {
       "handy_frameskip",
       "Frameskip",
       NULL,

@@ -187,6 +187,288 @@ static void init_frameskip(void)
 
 /* Frameskipping Support END */
 
+/* LCD ghosting START */
+
+#define COLOR_MIX_LSB_555 0x521
+#define COLOR_MIX_LSB_565 0x821
+#define COLOR_MIX_LSB_888 0x10101
+
+static uint8_t *framebuffer_history_1 = NULL;
+static uint8_t *framebuffer_history_2 = NULL;
+static uint8_t *framebuffer_history_3 = NULL;
+
+typedef enum
+{
+   LCD_GHOSTING_NONE = 0,
+   LCD_GHOSTING_2FRAMES,
+   LCD_GHOSTING_3FRAMES,
+   LCD_GHOSTING_4FRAMES
+} lynx_lcd_ghosting_t;
+
+static lynx_lcd_ghosting_t lynx_lcd_ghosting = LCD_GHOSTING_NONE;
+
+#define LCD_GHOSTING_APPLY_2FRAMES(typename_t, color_mix_lsb) \
+{ \
+   typename_t *video_a = (typename_t*)framebuffer; \
+   typename_t *video_b = (typename_t*)framebuffer_history_1; \
+   size_t i; \
+\
+   for (i = 0; i < HANDY_SCREEN_WIDTH * HANDY_SCREEN_HEIGHT; i++) \
+   { \
+      typename_t color_a   = *video_a; \
+      typename_t color_b   = *video_b; \
+      /* ab */ \
+      typename_t color_mix = (color_a  + color_b  - ((color_a  ^ color_b)  & color_mix_lsb)) >> 1; \
+\
+      /* Result: 0.5a + 0.5b */ \
+      *video_a++ = color_mix; \
+      *video_b++ = color_a; \
+   } \
+}
+
+#define LCD_GHOSTING_APPLY_3FRAMES(typename_t, color_mix_lsb) \
+{ \
+   typename_t *video_a = (typename_t*)framebuffer; \
+   typename_t *video_b = (typename_t*)framebuffer_history_1; \
+   typename_t *video_c = (typename_t*)framebuffer_history_2; \
+   size_t i; \
+\
+   for (i = 0; i < HANDY_SCREEN_WIDTH * HANDY_SCREEN_HEIGHT; i++) \
+   { \
+      typename_t color_a   = *video_a; \
+      typename_t color_b   = *video_b; \
+      typename_t color_c   = *video_c; \
+      typename_t color_ab  = (color_a  + color_b  - ((color_a  ^ color_b)  & color_mix_lsb)) >> 1; \
+      typename_t color_bc  = (color_b  + color_c  - ((color_b  ^ color_c)  & color_mix_lsb)) >> 1; \
+      /* ab|bc */ \
+      typename_t color_mix = (color_ab + color_bc + ((color_ab ^ color_bc) & color_mix_lsb)) >> 1; \
+\
+      /* Result: 0.25a + 0.5b + 0.25c */ \
+      *video_a++ = color_mix; \
+      *video_b++ = color_a; \
+      *video_c++ = color_b; \
+   } \
+}
+
+#define LCD_GHOSTING_APPLY_4FRAMES(typename_t, color_mix_lsb) \
+{ \
+   typename_t *video_a = (typename_t*)framebuffer; \
+   typename_t *video_b = (typename_t*)framebuffer_history_1; \
+   typename_t *video_c = (typename_t*)framebuffer_history_2; \
+   typename_t *video_d = (typename_t*)framebuffer_history_3; \
+   size_t i; \
+\
+   for (i = 0; i < HANDY_SCREEN_WIDTH * HANDY_SCREEN_HEIGHT; i++) \
+   { \
+      typename_t color_a   = *video_a; \
+      typename_t color_b   = *video_b; \
+      typename_t color_c   = *video_c; \
+      typename_t color_d   = *video_d; \
+      typename_t color_ab  = (color_a   + color_b  - ((color_a   ^ color_b)  & color_mix_lsb)) >> 1; \
+      typename_t color_bc  = (color_b   + color_c  - ((color_b   ^ color_c)  & color_mix_lsb)) >> 1; \
+      typename_t color_cd  = (color_c   + color_d  - ((color_c   ^ color_d)  & color_mix_lsb)) >> 1; \
+      /* bc|cd */ \
+      typename_t color_mix = (color_bc  + color_cd + ((color_bc  ^ color_cd) & color_mix_lsb)) >> 1; \
+      /* (bc|cd)|ab */ \
+      color_mix            = (color_mix + color_ab + ((color_mix ^ color_ab) & color_mix_lsb)) >> 1; \
+\
+      /* Result: 0.25a + 0.375b + 0.25c +  0.125d */ \
+      *video_a++ = color_mix; \
+      *video_b++ = color_a; \
+      *video_c++ = color_b; \
+      *video_d++ = color_c; \
+   } \
+}
+
+static void lcd_ghosting_apply_2frames_555(void)
+{
+   LCD_GHOSTING_APPLY_2FRAMES(uint16_t, COLOR_MIX_LSB_555);
+}
+
+static void lcd_ghosting_apply_2frames_565(void)
+{
+   LCD_GHOSTING_APPLY_2FRAMES(uint16_t, COLOR_MIX_LSB_565);
+}
+
+static void lcd_ghosting_apply_2frames_888(void)
+{
+   LCD_GHOSTING_APPLY_2FRAMES(uint32_t, COLOR_MIX_LSB_888);
+}
+
+static void lcd_ghosting_apply_3frames_555(void)
+{
+   LCD_GHOSTING_APPLY_3FRAMES(uint16_t, COLOR_MIX_LSB_555);
+}
+
+static void lcd_ghosting_apply_3frames_565(void)
+{
+   LCD_GHOSTING_APPLY_3FRAMES(uint16_t, COLOR_MIX_LSB_565);
+}
+
+static void lcd_ghosting_apply_3frames_888(void)
+{
+   LCD_GHOSTING_APPLY_3FRAMES(uint32_t, COLOR_MIX_LSB_888);
+}
+
+static void lcd_ghosting_apply_4frames_555(void)
+{
+   LCD_GHOSTING_APPLY_4FRAMES(uint16_t, COLOR_MIX_LSB_555);
+}
+
+static void lcd_ghosting_apply_4frames_565(void)
+{
+   LCD_GHOSTING_APPLY_4FRAMES(uint16_t, COLOR_MIX_LSB_565);
+}
+
+static void lcd_ghosting_apply_4frames_888(void)
+{
+   LCD_GHOSTING_APPLY_4FRAMES(uint32_t, COLOR_MIX_LSB_888);
+}
+
+static void (*lcd_ghosting_apply)(void) = NULL;
+
+static void lcd_ghosting_init(void)
+{
+   size_t history_buffer_size =
+         RETRO_LYNX_WIDTH * RETRO_LYNX_WIDTH * sizeof(uint8_t);
+
+   /* Disable ghosting by default */
+   lcd_ghosting_apply = NULL;
+
+   if (lynx_lcd_ghosting == LCD_GHOSTING_NONE)
+      return;
+
+   /* History buffer size depends on pixel format
+    * (set at startup, cannot change) */
+   history_buffer_size *= (RETRO_PIX_DEPTH == 24) ? 4 : 2;
+
+   /* Allocate all required history buffers */
+   if (lynx_lcd_ghosting >= LCD_GHOSTING_2FRAMES)
+   {
+      if (!framebuffer_history_1)
+         framebuffer_history_1 = (uint8_t *)malloc(history_buffer_size);
+      if (!framebuffer_history_1)
+         goto error;
+      memset(framebuffer_history_1, 0, history_buffer_size);
+   }
+
+   if (lynx_lcd_ghosting >= LCD_GHOSTING_3FRAMES)
+   {
+      if (!framebuffer_history_2)
+         framebuffer_history_2 = (uint8_t *)malloc(history_buffer_size);
+      if (!framebuffer_history_2)
+         goto error;
+      memset(framebuffer_history_2, 0, history_buffer_size);
+   }
+
+   if (lynx_lcd_ghosting >= LCD_GHOSTING_4FRAMES)
+   {
+      if (!framebuffer_history_3)
+         framebuffer_history_3 = (uint8_t *)malloc(history_buffer_size);
+      if (!framebuffer_history_3)
+         goto error;
+      memset(framebuffer_history_3, 0, history_buffer_size);
+   }
+
+   /* Assign ghosting function pointer */
+   switch (RETRO_PIX_DEPTH)
+   {
+      case 24:
+         switch (lynx_lcd_ghosting)
+         {
+            case LCD_GHOSTING_2FRAMES:
+               lcd_ghosting_apply = lcd_ghosting_apply_2frames_888;
+               break;
+            case LCD_GHOSTING_3FRAMES:
+               lcd_ghosting_apply = lcd_ghosting_apply_3frames_888;
+               break;
+            case LCD_GHOSTING_4FRAMES:
+               lcd_ghosting_apply = lcd_ghosting_apply_4frames_888;
+               break;
+            default:
+               goto error;
+         }
+         break;
+      case 15:
+         switch (lynx_lcd_ghosting)
+         {
+            case LCD_GHOSTING_2FRAMES:
+               lcd_ghosting_apply = lcd_ghosting_apply_2frames_555;
+               break;
+            case LCD_GHOSTING_3FRAMES:
+               lcd_ghosting_apply = lcd_ghosting_apply_3frames_555;
+               break;
+            case LCD_GHOSTING_4FRAMES:
+               lcd_ghosting_apply = lcd_ghosting_apply_4frames_555;
+               break;
+            default:
+               goto error;
+         }
+         break;
+      case 16:
+      default:
+#if defined(ABGR1555)
+         switch (lynx_lcd_ghosting)
+         {
+            case LCD_GHOSTING_2FRAMES:
+               lcd_ghosting_apply = lcd_ghosting_apply_2frames_555;
+               break;
+            case LCD_GHOSTING_3FRAMES:
+               lcd_ghosting_apply = lcd_ghosting_apply_3frames_555;
+               break;
+            case LCD_GHOSTING_4FRAMES:
+               lcd_ghosting_apply = lcd_ghosting_apply_4frames_555;
+               break;
+            default:
+               goto error;
+         }
+#else
+         switch (lynx_lcd_ghosting)
+         {
+            case LCD_GHOSTING_2FRAMES:
+               lcd_ghosting_apply = lcd_ghosting_apply_2frames_565;
+               break;
+            case LCD_GHOSTING_3FRAMES:
+               lcd_ghosting_apply = lcd_ghosting_apply_3frames_565;
+               break;
+            case LCD_GHOSTING_4FRAMES:
+               lcd_ghosting_apply = lcd_ghosting_apply_4frames_565;
+               break;
+            default:
+               goto error;
+         }
+#endif
+         break;
+   }
+
+   return;
+
+error:
+   lynx_lcd_ghosting  = LCD_GHOSTING_NONE;
+   lcd_ghosting_apply = NULL;
+   return;
+}
+
+static void lcd_ghosting_deinit(void)
+{
+   if (framebuffer_history_1)
+      free(framebuffer_history_1);
+   framebuffer_history_1 = NULL;
+
+   if (framebuffer_history_2)
+      free(framebuffer_history_2);
+   framebuffer_history_2 = NULL;
+
+   if (framebuffer_history_3)
+      free(framebuffer_history_3);
+   framebuffer_history_3 = NULL;
+
+   lynx_lcd_ghosting  = LCD_GHOSTING_NONE;
+   lcd_ghosting_apply = NULL;
+}
+
+/* LCD ghosting END */
+
 void handy_log(enum retro_log_level level, const char *format, ...)
 {
    char msg[512];
@@ -300,21 +582,28 @@ static UBYTE* lynx_display_callback(ULONG objref)
     * is only called once per retro_run(). */
    if (!frame_available)
    {
-      /* Check whether current frame has a different
-       * rotation from the previous one; if so,
-       * notify the frontend before drawing it */
-      if (!gSkipFrame &&
-          (lynx_rotation_pending == ROTATION_PENDING_FRONTEND))
+      if (gSkipFrame)
+         video_cb(NULL, lynx_width, lynx_height,
+               RETRO_LYNX_WIDTH * RETRO_PIX_BYTES);
+      else
       {
-         lynx_rotation_pending = ROTATION_PENDING_NONE;
-         lynx_width            = lynx_width_next;
-         lynx_height           = lynx_height_next;
-         update_geometry();
-      }
+         /* Check whether current frame has a different
+          * rotation from the previous one; if so,
+          * notify the frontend before drawing it */
+         if (lynx_rotation_pending == ROTATION_PENDING_FRONTEND)
+         {
+            lynx_rotation_pending = ROTATION_PENDING_NONE;
+            lynx_width            = lynx_width_next;
+            lynx_height           = lynx_height_next;
+            update_geometry();
+         }
 
-      video_cb((bool)gSkipFrame ? NULL : framebuffer,
-            lynx_width, lynx_height,
-            RETRO_LYNX_WIDTH * RETRO_PIX_BYTES);
+         if (lcd_ghosting_apply)
+            lcd_ghosting_apply();
+
+         video_cb(framebuffer, lynx_width, lynx_height,
+               RETRO_LYNX_WIDTH * RETRO_PIX_BYTES);
+      }
 
       /* Check whether the next frame should be
        * rendered with a change in rotation */
@@ -416,6 +705,7 @@ static void check_variables(void)
    unsigned old_lynx_rot;
    unsigned old_frameskip_type;
    uint16_t old_retro_refresh_rate;
+   lynx_lcd_ghosting_t old_lynx_lcd_ghosting;
 
    old_lynx_rot = lynx_rot;
    lynx_rot     = MIKIE_NO_ROTATE;
@@ -498,6 +788,25 @@ static void check_variables(void)
    if (initialized &&
        (retro_refresh_rate != old_retro_refresh_rate))
       retro_refresh_rate_updated = true;
+
+   old_lynx_lcd_ghosting = lynx_lcd_ghosting;
+   lynx_lcd_ghosting     = LCD_GHOSTING_NONE;
+   var.key               = "handy_lcd_ghosting";
+   var.value             = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      if (strcmp(var.value, "2frames") == 0)
+         lynx_lcd_ghosting = LCD_GHOSTING_2FRAMES;
+      else if (strcmp(var.value, "3frames") == 0)
+         lynx_lcd_ghosting = LCD_GHOSTING_3FRAMES;
+      else if (strcmp(var.value, "4frames") == 0)
+         lynx_lcd_ghosting = LCD_GHOSTING_4FRAMES;
+   }
+
+   if (initialized &&
+       (lynx_lcd_ghosting != old_lynx_lcd_ghosting))
+      lcd_ghosting_init();
 }
 
 void retro_init(void)
@@ -549,6 +858,8 @@ void retro_deinit(void)
       free(framebuffer);
 #endif
    framebuffer = NULL;
+
+   lcd_ghosting_deinit();
 
    libretro_supports_input_bitmasks = false;
    lynx_rotation_pending            = ROTATION_PENDING_NONE;
@@ -887,6 +1198,7 @@ bool retro_load_game(const struct retro_game_info *info)
    check_variables();
    check_color_depth();
    init_frameskip();
+   lcd_ghosting_init();
 
    if (lynx)
    {
