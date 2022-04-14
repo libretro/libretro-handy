@@ -66,9 +66,11 @@ extern void lynx_decrypt(unsigned char * result, const unsigned char * encrypted
 int lss_read(void* dest, int varsize, int varcount, LSS_FILE *fp)
 {
    ULONG copysize=varsize*varcount;
-   if((fp->index + copysize) > fp->index_limit)
-      copysize=fp->index_limit - fp->index;
-   memcpy(dest,fp->memptr+fp->index,copysize);
+   if (!fp->nul_stream) {
+      if((fp->index + copysize) > fp->index_limit)
+         copysize=fp->index_limit - fp->index;
+      memcpy(dest,fp->memptr+fp->index,copysize);
+   }
    fp->index+=copysize;
    return copysize;
 }
@@ -76,7 +78,11 @@ int lss_read(void* dest, int varsize, int varcount, LSS_FILE *fp)
 int lss_write(void* src, int varsize, int varcount, LSS_FILE *fp)
 {
    ULONG copysize=varsize*varcount;
-   memcpy(fp->memptr+fp->index,src,copysize);
+   if (!fp->nul_stream) {
+      if((fp->index + copysize) > fp->index_limit)
+         copysize=fp->index_limit - fp->index;
+      memcpy(fp->memptr+fp->index,src,copysize);
+   }
    fp->index+=copysize;
    return copysize;
 }
@@ -84,7 +90,11 @@ int lss_write(void* src, int varsize, int varcount, LSS_FILE *fp)
 int lss_printf(LSS_FILE *fp, const char *str)
 {
    ULONG copysize=strlen(str);
-   memcpy(fp->memptr+fp->index,str,copysize);
+   if (!fp->nul_stream) {
+      if((fp->index + copysize) > fp->index_limit)
+         copysize=fp->index_limit - fp->index;
+      memcpy(fp->memptr+fp->index,str,copysize);
+   }
    fp->index+=copysize;
    return copysize;
 }
@@ -422,15 +432,14 @@ void CSystem::Reset(void)
 size_t CSystem::ContextSize()
 {
    LSS_FILE fp;
-   const int max_size = 0x40000 + HANDY_AUDIO_BUFFER_SIZE;
 
-   fp.memptr = (UBYTE *) malloc(max_size);
-   fp.index = 0;
-   fp.index_limit = max_size;
+   fp.memptr      = NULL;
+   fp.index       = 0;
+   fp.index_limit = 0;
+   fp.nul_stream  = 1;
 
    ContextSave(&fp);
 
-   free(fp.memptr);
    return fp.index;
 }
 
