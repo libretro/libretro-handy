@@ -10,13 +10,18 @@ endif
 
 ifeq ($(platform),)
 	platform = unix
-	ifeq ($(shell uname -a),)
+	ifeq ($(shell uname -s),)
 		platform = win
-	else ifneq ($(findstring MINGW,$(shell uname -a)),)
-		platform = win
-	else ifneq ($(findstring Darwin,$(shell uname -a)),)
+	else ifneq ($(findstring Darwin,$(shell uname -s)),)
 		platform = osx
-	else ifneq ($(findstring win,$(shell uname -a)),)
+		arch = intel
+		ifeq ($(shell uname -p),arm64)
+			arch = arm
+		endif
+		ifeq ($(shell uname -p),powerpc)
+			arch = ppc
+		endif
+	else ifneq ($(findstring MINGW,$(shell uname -s)),)
 		platform = win
 	endif
 endif
@@ -64,17 +69,18 @@ else ifeq ($(platform),osx)
 	LIBS :=
 	OSXVER = `sw_vers -productVersion | cut -d. -f 2`
 	OSX_LT_MAVERICKS = `(( $(OSXVER) <= 9)) && echo "YES"`
+	MINVERSION += -mmacosx-version-min=10.7
 ifeq ($(OSX_LT_MAVERICKS),"YES")
-	fpic += -mmacosx-version-min=10.1
 else
-	fpic += -mmacosx-version-min=10.7 -stdlib=libc++
+	fpic +=  -stdlib=libc++
 endif
-	ifndef ($(NOUNIVERSAL))
+	ifeq ($(CROSS_COMPILE),1)
+		TARGET_RULE = -target $(LIBRETRO_APPLE_PLATFORM) -isysroot $(LIBRETRO_APPLE_ISYSROOT)
 		CFLAGS  += $(ARCHFLAGS)
 		CXXFLAGS  += $(ARCHFLAGS)
 		LDFLAGS += $(ARCHFLAGS)
 	endif
-
+	fpic += $(MINVERSION)
 # iOS
 else ifneq (,$(findstring ios,$(platform)))
 
