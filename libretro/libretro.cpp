@@ -26,6 +26,8 @@ static int16_t *soundBuffer = NULL;
 #define RETRO_LYNX_WIDTH  160
 #define RETRO_LYNX_HEIGHT 102
 
+#define RETRO_LYNX_ROTATE_AUTO 255
+
 /* Note: Set 75Hz here to reflect the nominal
  * maximum of the Lynx hardware; actual 'core
  * options' default is 60Hz */
@@ -35,7 +37,7 @@ static ULONG retro_cycles_per_frame = (HANDY_SYSTEM_FREQ / 75);
 static bool retro_refresh_rate_updated = false;
 
 // core options
-static uint8_t lynx_rot         = MIKIE_NO_ROTATE;
+static uint8_t lynx_rot         = RETRO_LYNX_ROTATE_AUTO;
 static uint8_t lynx_width       = RETRO_LYNX_WIDTH;
 static uint8_t lynx_height      = RETRO_LYNX_HEIGHT;
 static uint8_t lynx_width_next  = RETRO_LYNX_WIDTH;
@@ -636,6 +638,16 @@ static void lynx_rotate(void)
    if (!lynx)
       return;
 
+   if (lynx_rot == RETRO_LYNX_ROTATE_AUTO)
+   {
+      switch (lynx->CartGetRotate())
+      {
+         case CART_ROTATE_LEFT: lynx_rot = MIKIE_ROTATE_L; break;
+         case CART_ROTATE_RIGHT: lynx_rot = MIKIE_ROTATE_R; break;
+         default: lynx_rot = MIKIE_NO_ROTATE; break;
+      }
+   }
+
    switch (lynx_rot)
    {
       default:
@@ -708,7 +720,7 @@ static void check_variables(void)
    lynx_lcd_ghosting_t old_lynx_lcd_ghosting;
 
    old_lynx_rot = lynx_rot;
-   lynx_rot     = MIKIE_NO_ROTATE;
+   lynx_rot     = RETRO_LYNX_ROTATE_AUTO;
    var.key      = "handy_rot";
    var.value    = NULL;
 
@@ -720,6 +732,8 @@ static void check_variables(void)
          lynx_rot = MIKIE_ROTATE_R; 
       else if (strcmp(var.value, "270") == 0)
          lynx_rot = MIKIE_ROTATE_L;
+      else if (strcmp(var.value, "Auto") == 0)
+         lynx_rot = RETRO_LYNX_ROTATE_AUTO;
 
       if (initialized &&
           (lynx_rot != old_lynx_rot))
@@ -864,7 +878,7 @@ void retro_deinit(void)
    libretro_supports_input_bitmasks = false;
    lynx_rotation_pending            = ROTATION_PENDING_NONE;
    lynx_rotation_button_down        = false;
-   lynx_rot                         = MIKIE_NO_ROTATE;
+   lynx_rot                         = RETRO_LYNX_ROTATE_AUTO;
    lynx_width                       = RETRO_LYNX_WIDTH;
    lynx_height                      = RETRO_LYNX_HEIGHT;
    lynx_width_next                  = RETRO_LYNX_WIDTH;

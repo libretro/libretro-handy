@@ -80,12 +80,13 @@ struct retro_core_option_v2_definition option_defs_us[] = {
       NULL,
       NULL,
       {
-         { "None", "disabled" },
+         { "Auto", "Auto" },
+         { "None", "Disabled" },
          { "270",  "Clockwise" },
          { "90",   "Anticlockwise" },
          { NULL, NULL },
       },
-      "None"
+      "Auto"
    },
 #if defined(FRONTEND_SUPPORTS_XRGB8888)
    {
