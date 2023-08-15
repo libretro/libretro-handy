@@ -70,6 +70,16 @@ enum CTYPE {UNUSED,C64K,C128K,C256K,C512K,C1024K};
 #define CART_ROTATE_LEFT	1
 #define	CART_ROTATE_RIGHT	2
 
+#define CART_AUDIN  1
+
+#define CART_EEPROM_93C46  1
+#define CART_EEPROM_93C56  2
+#define CART_EEPROM_93C66  3
+#define CART_EEPROM_93C76  4
+#define CART_EEPROM_93C86  5
+#define CART_EEPROM_SD     0x40
+#define CART_EEPROM_8BIT   0x80
+
 typedef struct
 {
    UBYTE   magic[4];
@@ -82,7 +92,19 @@ typedef struct
    UBYTE   aud_bits; 
    UBYTE   eeprom;
    UBYTE   spare[3];
-}LYNX_HEADER;
+} LYNX_HEADER;
+
+typedef struct
+{
+   ULONG   crc32;
+   const char *name;
+   ULONG   filesize;
+   UWORD   bank0;
+   UWORD   bank1;
+   UBYTE   rotation;
+   UBYTE   audin;
+   UBYTE   eeprom;
+} LYNX_DB;
 
 
 class CCart : public CLynxBase

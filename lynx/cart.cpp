@@ -50,11 +50,12 @@
 #include "cart.h"
 #include "scrc32.h"
 #include "handy.h"
+#include "cart_db.h"
 
 CCart::CCart(const UBYTE *gamedata, ULONG gamesize)
 {
    int headersize=0;
-   LYNX_HEADER	header;
+   LYNX_HEADER header;
 
    mWriteEnableBank0=FALSE;
    mWriteEnableBank1=FALSE;
@@ -75,6 +76,34 @@ CCart::CCart(const UBYTE *gamedata, ULONG gamesize)
       header.page_size_bank1 = ((header.page_size_bank1>>8) | (header.page_size_bank1<<8));
       header.version         = ((header.version>>8) | (header.version<<8));
 #endif
+
+      if(header.magic[0]!='L' || header.magic[1]!='Y' || header.magic[2]!='N' || header.magic[3]!='X' || header.version!=1) {
+         unsigned i = 0;
+
+         while(lynxDB[i].crc32 != 0) {
+            if(lynxDB[i].crc32 == mCRC32 && lynxDB[i].filesize == gamesize) {
+               header.magic[0] = 'L';
+               header.magic[1] = 'Y';
+               header.magic[2] = 'N';
+               header.magic[3] = 'X';
+
+               strncpy((char*)&header.cartname, "NO HEADER", 32);
+               strncpy((char*)&header.manufname, "HANDY", 16);
+               header.version = 1;
+
+               header.page_size_bank0 = (lynxDB[i].bank0 ? 1<<(lynxDB[i].bank0-1) : 0) * 0x100;
+               header.page_size_bank1 = (lynxDB[i].bank1 ? 1<<(lynxDB[i].bank1-1) : 0) * 0x100;
+
+               header.rotation = lynxDB[i].rotation;
+               header.aud_bits = lynxDB[i].audin;
+               header.eeprom = lynxDB[i].eeprom;
+
+               break;
+            }
+            i++;
+         }
+      }
+
       // Sanity checks on the header
 
       if(header.magic[0]!='L' || header.magic[1]!='Y' || header.magic[2]!='N' || header.magic[3]!='X' || header.version!=1) {
@@ -83,7 +112,7 @@ CCart::CCart(const UBYTE *gamedata, ULONG gamesize)
         strncpy((char*)&header.cartname,"NO HEADER",32);
         strncpy((char*)&header.manufname,"HANDY",16);
         header.page_size_bank0=gamesize>>8;// Hard workaround...
-      } else {
+      } else if(strcmp((char *)&header.cartname,"NO HEADER")!=0 || strcmp((char *)&header.manufname,"HANDY")!=0) {
          headersize=sizeof(LYNX_HEADER);
       }
 
