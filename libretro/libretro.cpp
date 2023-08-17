@@ -92,6 +92,18 @@ static map btn_map_rot_270[] = {
    { RETRO_DEVICE_ID_JOYPAD_START, BUTTON_PAUSE },
 };
 
+static map btn_map_rot_180[] = {
+   { RETRO_DEVICE_ID_JOYPAD_A, BUTTON_A },
+   { RETRO_DEVICE_ID_JOYPAD_B, BUTTON_B },
+   { RETRO_DEVICE_ID_JOYPAD_RIGHT, BUTTON_LEFT },
+   { RETRO_DEVICE_ID_JOYPAD_LEFT, BUTTON_RIGHT },
+   { RETRO_DEVICE_ID_JOYPAD_UP, BUTTON_DOWN },
+   { RETRO_DEVICE_ID_JOYPAD_DOWN, BUTTON_UP },
+   { RETRO_DEVICE_ID_JOYPAD_L, BUTTON_OPT1 },
+   { RETRO_DEVICE_ID_JOYPAD_R, BUTTON_OPT2 },
+   { RETRO_DEVICE_ID_JOYPAD_START, BUTTON_PAUSE },
+};
+
 static map btn_map_rot_90[] = {
    { RETRO_DEVICE_ID_JOYPAD_A, BUTTON_A },
    { RETRO_DEVICE_ID_JOYPAD_B, BUTTON_B },
@@ -666,6 +678,12 @@ static void lynx_rotate(void)
          btn_map          = btn_map_rot_90;
          break;
 
+      case MIKIE_ROTATE_B:
+         lynx_width_next  = RETRO_LYNX_WIDTH;
+         lynx_height_next = RETRO_LYNX_HEIGHT;
+         btn_map          = btn_map_rot_180;
+         break;
+
       case MIKIE_ROTATE_L:
          lynx_width_next  = RETRO_LYNX_HEIGHT;
          lynx_height_next = RETRO_LYNX_WIDTH;
@@ -730,6 +748,8 @@ static void check_variables(void)
          lynx_rot = MIKIE_NO_ROTATE;
       else if (strcmp(var.value, "90") == 0)
          lynx_rot = MIKIE_ROTATE_R; 
+      else if (strcmp(var.value, "180") == 0)
+         lynx_rot = MIKIE_ROTATE_B; 
       else if (strcmp(var.value, "270") == 0)
          lynx_rot = MIKIE_ROTATE_L;
       else if (strcmp(var.value, "Auto") == 0)

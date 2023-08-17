@@ -83,6 +83,7 @@ struct retro_core_option_v2_definition option_defs_us[] = {
          { "Auto", "Auto" },
          { "None", "Disabled" },
          { "270",  "Clockwise" },
+         { "180",  "Bottom" },
          { "90",   "Anticlockwise" },
          { NULL, NULL },
       },
