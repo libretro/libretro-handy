@@ -215,7 +215,7 @@ static lynx_lcd_ghosting_t lynx_lcd_ghosting = LCD_GHOSTING_NONE;
    typename_t *video_b = (typename_t*)framebuffer_history_1; \
    size_t i; \
 \
-   for (i = 0; i < HANDY_SCREEN_WIDTH * HANDY_SCREEN_HEIGHT; i++) \
+   for (i = 0; i < HANDY_SCREEN_WIDTH * HANDY_SCREEN_WIDTH; i++) \
    { \
       typename_t color_a   = *video_a; \
       typename_t color_b   = *video_b; \
@@ -235,7 +235,7 @@ static lynx_lcd_ghosting_t lynx_lcd_ghosting = LCD_GHOSTING_NONE;
    typename_t *video_c = (typename_t*)framebuffer_history_2; \
    size_t i; \
 \
-   for (i = 0; i < HANDY_SCREEN_WIDTH * HANDY_SCREEN_HEIGHT; i++) \
+   for (i = 0; i < HANDY_SCREEN_WIDTH * HANDY_SCREEN_WIDTH; i++) \
    { \
       typename_t color_a   = *video_a; \
       typename_t color_b   = *video_b; \
@@ -260,7 +260,7 @@ static lynx_lcd_ghosting_t lynx_lcd_ghosting = LCD_GHOSTING_NONE;
    typename_t *video_d = (typename_t*)framebuffer_history_3; \
    size_t i; \
 \
-   for (i = 0; i < HANDY_SCREEN_WIDTH * HANDY_SCREEN_HEIGHT; i++) \
+   for (i = 0; i < HANDY_SCREEN_WIDTH * HANDY_SCREEN_WIDTH; i++) \
    { \
       typename_t color_a   = *video_a; \
       typename_t color_b   = *video_b; \
