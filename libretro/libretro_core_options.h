@@ -122,6 +122,32 @@ struct retro_core_option_v2_definition option_defs_us[] = {
       "disabled"
    },
    {
+      "handy_overclock",
+      "CPU Overclock Multiplier",
+      NULL,
+      "Higher values can reduce slowdowns in games. WARNING: Can cause glitches and crashes.",
+      NULL,
+      NULL,
+      {
+         { "1", NULL },
+         { "2", NULL },
+         { "3", NULL },
+         { "4", NULL },
+         { "5", NULL },
+         { "6", NULL },
+         { "7", NULL },
+         { "8", NULL },
+         { "9", NULL },
+         { "10", NULL },
+         { "20", NULL },
+         { "30", NULL },
+         { "40", NULL },
+         { "50", NULL },
+         { NULL, NULL},
+      },
+      "1"
+   },
+   {
       "handy_frameskip",
       "Frameskip",
       NULL,

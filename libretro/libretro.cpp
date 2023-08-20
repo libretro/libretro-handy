@@ -139,6 +139,8 @@ static bool update_audio_latency           = false;
 
 static bool libretro_supports_option_categories = false;
 
+static unsigned retro_overclock = 1;
+
 static void retro_audio_buff_status_cb(
       bool active, unsigned occupancy, bool underrun_likely)
 {
@@ -841,6 +843,13 @@ static void check_variables(void)
    if (initialized &&
        (lynx_lcd_ghosting != old_lynx_lcd_ghosting))
       lcd_ghosting_init();
+
+   var.key               = "handy_overclock";
+   var.value             = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
+      retro_overclock = atoi(var.value);
+   }
 }
 
 void retro_init(void)
@@ -1071,8 +1080,12 @@ void retro_run(void)
    gLastRunCycleCount = gSystemCycleCount;
    frame_available = false;
 
-   while (gSystemCycleCount - gLastRunCycleCount < retro_cycles_per_frame)
+   while (gSystemCycleCount - gLastRunCycleCount < retro_cycles_per_frame) {
       lynx->Update();
+
+      for (int lcv = 1; lcv < retro_overclock; lcv++)
+         lynx->Overclock();
+   }
 
    /* If no end of frame event was produced on this
     * run, upload NULL */
