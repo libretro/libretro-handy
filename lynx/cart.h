@@ -52,14 +52,14 @@
 #define __max(a,b) \
    ({ __typeof__ (a) _a = (a); \
     __typeof__ (b) _b = (b); \
-    _a > _b ? _a : _b; })
+    (_a > _b) ? _a : _b; })
 #endif
 
 #ifndef __min
 #define __min(a,b) \
    ({ __typeof__ (a) _a = (a); \
        __typeof__ (b) _b = (b); \
-     _a > _b ? _b : _a; })
+     (_a > _b) ? _b : _a; })
 #endif
 
 #define DEFAULT_CART_CONTENTS	0xFF

@@ -21,7 +21,7 @@
 #define __min(a,b) \
    ({ __typeof__ (a) _a = (a); \
        __typeof__ (b) _b = (b); \
-     _a > _b ? _b : _a; })
+     (_a > _b) ? _b : _a; })
 #endif
 
 enum {EE_NONE=0, EE_START, EE_DATA, EE_BUSY, EE_WAIT};
