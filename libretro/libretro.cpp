@@ -921,7 +921,7 @@ void retro_set_environment(retro_environment_t cb)
    struct retro_vfs_interface_info vfs_iface_info;
    static const struct retro_system_content_info_override content_overrides[] = {
       {
-         "lnx|o", /* extensions */
+         "lnx|lyx|o", /* extensions */
          false,   /* need_fullpath */
          false    /* persistent_data */
       },
