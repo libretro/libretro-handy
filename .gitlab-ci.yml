@@ -58,6 +58,10 @@ include:
   - project: 'libretro-infrastructure/ci-templates'
     file: '/ios9.yml'
 
+  # iOS arm64
+  - project: 'libretro-infrastructure/ci-templates'
+    file: '/ios-arm64.yml'
+
   ################################## CONSOLES ################################
   # PlayStation Portable
   - project: 'libretro-infrastructure/ci-templates'
@@ -98,6 +102,10 @@ include:
   # OpenDingux (ARM)
   - project: 'libretro-infrastructure/ci-templates'
     file: '/dingux-arm32.yml'
+
+  # tvOS
+  - project: 'libretro-infrastructure/ci-templates'
+    file: '/tvos-arm64.yml'
 
   #################################### MISC ##################################
   # Emscripten
@@ -200,6 +208,12 @@ libretro-build-ios9:
     - .libretro-ios9-make-default
     - .core-defs
 
+# iOS arm64
+libretro-build-ios-arm64:
+  extends:
+    - .libretro-ios-arm64-make-default
+    - .core-defs
+
 ################################### CONSOLES ################################# 
 # PlayStation Portable
 libretro-build-psp:
@@ -277,6 +291,12 @@ libretro-build-retrofw-mips32:
 libretro-build-miyoo-arm32:
   extends:
     - .libretro-miyoo-arm32-make-default
+    - .core-defs
+
+# tvOS
+libretro-build-tvos-arm64:
+  extends:
+    - .libretro-tvos-arm64-make-default
     - .core-defs
 
 #################################### MISC ##################################

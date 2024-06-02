@@ -1143,6 +1143,95 @@ ULONG CMikie::DisplayRenderLine(void)
                mpDisplayCurrent-=sizeof(ULONG);
             }
             break;
+         case MIKIE_ROTATE_B:
+            if(mDisplayFormat==MIKIE_PIXEL_FORMAT_8BPP) {
+               for(loop=0;loop<SCREEN_WIDTH/2;loop++) {
+                  source=mpRamPointer[mLynxAddr];
+                  if(mDISPCTL_Flip) {
+                     mLynxAddr--;
+                     *(bitmap_tmp)=(UBYTE)mColourMap[mPalette[source&0x0f].Index];
+                     bitmap_tmp-=sizeof(UBYTE);
+                     *(bitmap_tmp)=(UBYTE)mColourMap[mPalette[source>>4].Index];
+                     bitmap_tmp-=sizeof(UBYTE);
+                  } else {
+                     mLynxAddr++;
+                     *(bitmap_tmp)=(UBYTE)mColourMap[mPalette[source>>4].Index];
+                     bitmap_tmp-=sizeof(UBYTE);
+                     *(bitmap_tmp)=(UBYTE)mColourMap[mPalette[source&0x0f].Index];
+                     bitmap_tmp-=sizeof(UBYTE);
+                  }
+               }
+            } else if(mDisplayFormat==MIKIE_PIXEL_FORMAT_16BPP_BGR555 || mDisplayFormat==MIKIE_PIXEL_FORMAT_16BPP_555 || mDisplayFormat==MIKIE_PIXEL_FORMAT_16BPP_565) {
+               for(loop=0;loop<SCREEN_WIDTH/2;loop++) {
+                  source=mpRamPointer[mLynxAddr];
+                  if(mDISPCTL_Flip) {
+                     mLynxAddr--;
+                     *((UWORD*)(bitmap_tmp))=(UWORD)mColourMap[mPalette[source&0x0f].Index];
+                     bitmap_tmp-=sizeof(UWORD);
+                     *((UWORD*)(bitmap_tmp))=(UWORD)mColourMap[mPalette[source>>4].Index];
+                     bitmap_tmp-=sizeof(UWORD);
+                  } else {
+                     mLynxAddr++;
+                     *((UWORD*)(bitmap_tmp))=(UWORD)mColourMap[mPalette[source>>4].Index];
+                     bitmap_tmp-=sizeof(UWORD);
+                     *((UWORD*)(bitmap_tmp))=(UWORD)mColourMap[mPalette[source&0x0f].Index];
+                     bitmap_tmp-=sizeof(UWORD);
+                  }
+               }
+            } else if(mDisplayFormat==MIKIE_PIXEL_FORMAT_24BPP) {
+               ULONG pixel;
+               for(loop=0;loop<SCREEN_WIDTH/2;loop++) {
+                  source=mpRamPointer[mLynxAddr];
+                  if(mDISPCTL_Flip) {
+                     mLynxAddr--;
+                     pixel=mColourMap[mPalette[source&0x0f].Index];
+                     *bitmap_tmp--=(UBYTE)pixel;
+                     pixel>>=8;
+                     *bitmap_tmp--=(UBYTE)pixel;
+                     pixel>>=8;
+                     *bitmap_tmp--=(UBYTE)pixel;
+                     pixel=mColourMap[mPalette[source>>4].Index];
+                     *bitmap_tmp--=(UBYTE)pixel;
+                     pixel>>=8;
+                     *bitmap_tmp--=(UBYTE)pixel;
+                     pixel>>=8;
+                     *bitmap_tmp--=(UBYTE)pixel;
+                  } else {
+                     mLynxAddr++;
+                     pixel=mColourMap[mPalette[source>>4].Index];
+                     *bitmap_tmp--=(UBYTE)pixel;
+                     pixel>>=8;
+                     *bitmap_tmp--=(UBYTE)pixel;
+                     pixel>>=8;
+                     *bitmap_tmp--=(UBYTE)pixel;
+                     pixel=mColourMap[mPalette[source&0x0f].Index];
+                     *bitmap_tmp--=(UBYTE)pixel;
+                     pixel>>=8;
+                     *bitmap_tmp--=(UBYTE)pixel;
+                     pixel>>=8;
+                     *bitmap_tmp--=(UBYTE)pixel;
+                  }
+               }
+            } else if(mDisplayFormat==MIKIE_PIXEL_FORMAT_32BPP) {
+               for(loop=0;loop<SCREEN_WIDTH/2;loop++) {
+                  source=mpRamPointer[mLynxAddr];
+                  if(mDISPCTL_Flip) {
+                     mLynxAddr--;
+                     *((ULONG*)(bitmap_tmp))=mColourMap[mPalette[source&0x0f].Index];
+                     bitmap_tmp-=sizeof(ULONG);
+                     *((ULONG*)(bitmap_tmp))=mColourMap[mPalette[source>>4].Index];
+                     bitmap_tmp-=sizeof(ULONG);
+                  } else {
+                     mLynxAddr++;
+                     *((ULONG*)(bitmap_tmp))=mColourMap[mPalette[source>>4].Index];
+                     bitmap_tmp-=sizeof(ULONG);
+                     *((ULONG*)(bitmap_tmp))=mColourMap[mPalette[source&0x0f].Index];
+                     bitmap_tmp-=sizeof(ULONG);
+                  }
+               }
+            }
+            mpDisplayCurrent-=mDisplayPitch;
+            break;
          case MIKIE_ROTATE_R:
             if(mDisplayFormat==MIKIE_PIXEL_FORMAT_8BPP) {
                for(loop=0;loop<SCREEN_WIDTH/2;loop++) {
@@ -1288,6 +1377,27 @@ ULONG CMikie::DisplayEndOfFrame(void)
                break;
             case MIKIE_PIXEL_FORMAT_32BPP:
                mpDisplayCurrent+=4*(HANDY_SCREEN_HEIGHT-1);
+               break;
+            default:
+               break;
+         }
+         break;
+      case MIKIE_ROTATE_B:
+         mpDisplayCurrent=mpDisplayBits;
+         switch(mDisplayFormat) {
+            case MIKIE_PIXEL_FORMAT_8BPP:
+               mpDisplayCurrent+=1*(HANDY_SCREEN_HEIGHT*HANDY_SCREEN_WIDTH-1);
+               break;
+            case MIKIE_PIXEL_FORMAT_16BPP_BGR555:
+            case MIKIE_PIXEL_FORMAT_16BPP_555:
+            case MIKIE_PIXEL_FORMAT_16BPP_565:
+               mpDisplayCurrent+=2*(HANDY_SCREEN_HEIGHT*HANDY_SCREEN_WIDTH-1);
+               break;
+            case MIKIE_PIXEL_FORMAT_24BPP:
+               mpDisplayCurrent+=3*(HANDY_SCREEN_HEIGHT*HANDY_SCREEN_WIDTH-1);
+               break;
+            case MIKIE_PIXEL_FORMAT_32BPP:
+               mpDisplayCurrent+=4*(HANDY_SCREEN_HEIGHT*HANDY_SCREEN_WIDTH-1);
                break;
             default:
                break;

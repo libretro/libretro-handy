@@ -214,6 +214,18 @@ class CSystem : public CSystemBase
             gSystemCycleCount=gNextTimerEvent;
       }
 
+      inline void Overclock(void)
+      {
+         if(gSystemCPUSleep) return;
+
+         ULONG temp = gSystemCycleCount;
+
+         // Step the processor through 1 instruction
+         mCpu->Update();
+
+         gSystemCycleCount = temp;
+      }
+
       inline void FetchAudioSamples(void)
       {
          mMikie->AudioEndOfFrame();

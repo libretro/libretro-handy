@@ -26,6 +26,8 @@ static int16_t *soundBuffer = NULL;
 #define RETRO_LYNX_WIDTH  160
 #define RETRO_LYNX_HEIGHT 102
 
+#define RETRO_LYNX_ROTATE_AUTO 255
+
 /* Note: Set 75Hz here to reflect the nominal
  * maximum of the Lynx hardware; actual 'core
  * options' default is 60Hz */
@@ -35,7 +37,7 @@ static ULONG retro_cycles_per_frame = (HANDY_SYSTEM_FREQ / 75);
 static bool retro_refresh_rate_updated = false;
 
 // core options
-static uint8_t lynx_rot         = MIKIE_NO_ROTATE;
+static uint8_t lynx_rot         = RETRO_LYNX_ROTATE_AUTO;
 static uint8_t lynx_width       = RETRO_LYNX_WIDTH;
 static uint8_t lynx_height      = RETRO_LYNX_HEIGHT;
 static uint8_t lynx_width_next  = RETRO_LYNX_WIDTH;
@@ -90,6 +92,18 @@ static map btn_map_rot_270[] = {
    { RETRO_DEVICE_ID_JOYPAD_START, BUTTON_PAUSE },
 };
 
+static map btn_map_rot_180[] = {
+   { RETRO_DEVICE_ID_JOYPAD_A, BUTTON_A },
+   { RETRO_DEVICE_ID_JOYPAD_B, BUTTON_B },
+   { RETRO_DEVICE_ID_JOYPAD_RIGHT, BUTTON_LEFT },
+   { RETRO_DEVICE_ID_JOYPAD_LEFT, BUTTON_RIGHT },
+   { RETRO_DEVICE_ID_JOYPAD_UP, BUTTON_DOWN },
+   { RETRO_DEVICE_ID_JOYPAD_DOWN, BUTTON_UP },
+   { RETRO_DEVICE_ID_JOYPAD_L, BUTTON_OPT1 },
+   { RETRO_DEVICE_ID_JOYPAD_R, BUTTON_OPT2 },
+   { RETRO_DEVICE_ID_JOYPAD_START, BUTTON_PAUSE },
+};
+
 static map btn_map_rot_90[] = {
    { RETRO_DEVICE_ID_JOYPAD_A, BUTTON_A },
    { RETRO_DEVICE_ID_JOYPAD_B, BUTTON_B },
@@ -124,6 +138,8 @@ static unsigned audio_latency              = 0;
 static bool update_audio_latency           = false;
 
 static bool libretro_supports_option_categories = false;
+
+static unsigned retro_overclock = 1;
 
 static void retro_audio_buff_status_cb(
       bool active, unsigned occupancy, bool underrun_likely)
@@ -213,7 +229,7 @@ static lynx_lcd_ghosting_t lynx_lcd_ghosting = LCD_GHOSTING_NONE;
    typename_t *video_b = (typename_t*)framebuffer_history_1; \
    size_t i; \
 \
-   for (i = 0; i < HANDY_SCREEN_WIDTH * HANDY_SCREEN_HEIGHT; i++) \
+   for (i = 0; i < HANDY_SCREEN_WIDTH * HANDY_SCREEN_WIDTH; i++) \
    { \
       typename_t color_a   = *video_a; \
       typename_t color_b   = *video_b; \
@@ -233,7 +249,7 @@ static lynx_lcd_ghosting_t lynx_lcd_ghosting = LCD_GHOSTING_NONE;
    typename_t *video_c = (typename_t*)framebuffer_history_2; \
    size_t i; \
 \
-   for (i = 0; i < HANDY_SCREEN_WIDTH * HANDY_SCREEN_HEIGHT; i++) \
+   for (i = 0; i < HANDY_SCREEN_WIDTH * HANDY_SCREEN_WIDTH; i++) \
    { \
       typename_t color_a   = *video_a; \
       typename_t color_b   = *video_b; \
@@ -258,7 +274,7 @@ static lynx_lcd_ghosting_t lynx_lcd_ghosting = LCD_GHOSTING_NONE;
    typename_t *video_d = (typename_t*)framebuffer_history_3; \
    size_t i; \
 \
-   for (i = 0; i < HANDY_SCREEN_WIDTH * HANDY_SCREEN_HEIGHT; i++) \
+   for (i = 0; i < HANDY_SCREEN_WIDTH * HANDY_SCREEN_WIDTH; i++) \
    { \
       typename_t color_a   = *video_a; \
       typename_t color_b   = *video_b; \
@@ -636,6 +652,16 @@ static void lynx_rotate(void)
    if (!lynx)
       return;
 
+   if (lynx_rot == RETRO_LYNX_ROTATE_AUTO)
+   {
+      switch (lynx->CartGetRotate())
+      {
+         case CART_ROTATE_LEFT: lynx_rot = MIKIE_ROTATE_L; break;
+         case CART_ROTATE_RIGHT: lynx_rot = MIKIE_ROTATE_R; break;
+         default: lynx_rot = MIKIE_NO_ROTATE; break;
+      }
+   }
+
    switch (lynx_rot)
    {
       default:
@@ -652,6 +678,12 @@ static void lynx_rotate(void)
          lynx_width_next  = RETRO_LYNX_HEIGHT;
          lynx_height_next = RETRO_LYNX_WIDTH;
          btn_map          = btn_map_rot_90;
+         break;
+
+      case MIKIE_ROTATE_B:
+         lynx_width_next  = RETRO_LYNX_WIDTH;
+         lynx_height_next = RETRO_LYNX_HEIGHT;
+         btn_map          = btn_map_rot_180;
          break;
 
       case MIKIE_ROTATE_L:
@@ -708,7 +740,7 @@ static void check_variables(void)
    lynx_lcd_ghosting_t old_lynx_lcd_ghosting;
 
    old_lynx_rot = lynx_rot;
-   lynx_rot     = MIKIE_NO_ROTATE;
+   lynx_rot     = RETRO_LYNX_ROTATE_AUTO;
    var.key      = "handy_rot";
    var.value    = NULL;
 
@@ -718,8 +750,12 @@ static void check_variables(void)
          lynx_rot = MIKIE_NO_ROTATE;
       else if (strcmp(var.value, "90") == 0)
          lynx_rot = MIKIE_ROTATE_R; 
+      else if (strcmp(var.value, "180") == 0)
+         lynx_rot = MIKIE_ROTATE_B; 
       else if (strcmp(var.value, "270") == 0)
          lynx_rot = MIKIE_ROTATE_L;
+      else if (strcmp(var.value, "Auto") == 0)
+         lynx_rot = RETRO_LYNX_ROTATE_AUTO;
 
       if (initialized &&
           (lynx_rot != old_lynx_rot))
@@ -807,6 +843,13 @@ static void check_variables(void)
    if (initialized &&
        (lynx_lcd_ghosting != old_lynx_lcd_ghosting))
       lcd_ghosting_init();
+
+   var.key               = "handy_overclock";
+   var.value             = NULL;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
+      retro_overclock = atoi(var.value);
+   }
 }
 
 void retro_init(void)
@@ -864,7 +907,7 @@ void retro_deinit(void)
    libretro_supports_input_bitmasks = false;
    lynx_rotation_pending            = ROTATION_PENDING_NONE;
    lynx_rotation_button_down        = false;
-   lynx_rot                         = MIKIE_NO_ROTATE;
+   lynx_rot                         = RETRO_LYNX_ROTATE_AUTO;
    lynx_width                       = RETRO_LYNX_WIDTH;
    lynx_height                      = RETRO_LYNX_HEIGHT;
    lynx_width_next                  = RETRO_LYNX_WIDTH;
@@ -878,7 +921,7 @@ void retro_set_environment(retro_environment_t cb)
    struct retro_vfs_interface_info vfs_iface_info;
    static const struct retro_system_content_info_override content_overrides[] = {
       {
-         "lnx|o", /* extensions */
+         "lnx|lyx|o", /* extensions */
          false,   /* need_fullpath */
          false    /* persistent_data */
       },
@@ -1037,8 +1080,12 @@ void retro_run(void)
    gLastRunCycleCount = gSystemCycleCount;
    frame_available = false;
 
-   while (gSystemCycleCount - gLastRunCycleCount < retro_cycles_per_frame)
+   while (gSystemCycleCount - gLastRunCycleCount < retro_cycles_per_frame) {
       lynx->Update();
+
+      for (int lcv = 1; lcv < retro_overclock; lcv++)
+         lynx->Overclock();
+   }
 
    /* If no end of frame event was produced on this
     * run, upload NULL */

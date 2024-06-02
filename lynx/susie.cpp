@@ -746,9 +746,8 @@ ULONG CSusie::PaintSprites(void)
                         mTILTACUM.Byte.High=0;
                         hoff=(int)((int16_t)mHPOSSTRT.Word)-screen_h_start;
 
-                        // Zero/Force the horizontal scaling accumulator
-                        if(hsign==1) mHSIZACUM.Word=mHSIZOFF.Word;
-                        else mHSIZACUM.Word=0;
+                        // Force the horizontal scaling accumulator (Alpine Games protection)
+                        mHSIZACUM.Word=mHSIZOFF.Word;
 
                         // Take the sign of the first quad (0) as the basic
                         // sign, all other quads drawing in the other direction
