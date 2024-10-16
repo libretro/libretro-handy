@@ -119,6 +119,9 @@ else ifeq ($(platform), tvos-arm64)
 	LIBS :=
 	CC = cc -arch arm64 -isysroot $(IOSSDK)
 	CXX = c++ -arch arm64 -isysroot $(IOSSDK)
+	SHARED += -mappletvos-version-min=11.0
+	CC +=  -mappletvos-version-min=11.0
+	CXX +=  -mappletvos-version-min=11.0
 
 # Theos iOS
 else ifeq ($(platform), theos_ios)
