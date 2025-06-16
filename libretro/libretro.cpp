@@ -976,8 +976,8 @@ void retro_get_system_info(struct retro_system_info *info)
 #define GIT_VERSION ""
 #endif
    info->library_version  = HANDYVER GIT_VERSION;
-   info->need_fullpath    = true;
-   info->valid_extensions = "lnx|o";
+   info->need_fullpath    = false;
+   info->valid_extensions = "lnx|lyx|o";
    info->block_extract = 0;
 }
 
