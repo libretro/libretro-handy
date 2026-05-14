@@ -16,6 +16,6 @@ LOCAL_MODULE    := retro
 LOCAL_SRC_FILES := $(SOURCES_CXX) $(SOURCES_C)
 LOCAL_CXXFLAGS  := $(COREFLAGS)
 LOCAL_CFLAGS    := $(COREFLAGS)
-LOCAL_LDFLAGS   := -Wl,-version-script=$(CORE_DIR)/libretro/link.T
+LOCAL_LDFLAGS   := -Wl,-version-script=$(CORE_DIR)/libretro/link.T,-z,max-page-size=16384
 LOCAL_LDLIBS    := -lz
 include $(BUILD_SHARED_LIBRARY)
